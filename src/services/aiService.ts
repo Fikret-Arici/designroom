@@ -1,5 +1,5 @@
-// AI Service for handling different AI agent operations
-// Bu dosya gerçek implementasyonda OpenAI, Google Vision, Amazon Product API entegrasyonlarını içerecek
+// AI Service for handling different AI agent operations using Gemini API
+import { apiService } from './apiService';
 
 export interface Product {
   id: string;
@@ -8,8 +8,16 @@ export interface Product {
   rating: number;
   image: string;
   link: string;
-  source: 'Amazon' | 'Google Shopping' | 'Etsy';
+  source: 'Trendyol' | 'Amazon' | 'Google Shopping' | 'Etsy';
   description: string;
+  colors: string[];
+  discount?: number;
+  reviewCount: number;
+  brand: string;
+  shipping: string;
+  score: number;
+  recommendation: string;
+  compatibility: number;
 }
 
 export interface RoomAnalysis {
@@ -20,6 +28,9 @@ export interface RoomAnalysis {
   suggestions: string[];
   placementAreas: { x: number; y: number; width: number; height: number }[];
   confidence: number;
+  furniture: string[];
+  atmosphere: string;
+  decorationStyle: string;
 }
 
 export interface PlacementResult {
@@ -32,6 +43,8 @@ export interface PlacementResult {
     rotation: number;
     lighting: string;
   };
+  error?: string;
+  message?: string;
 }
 
 class AIService {
@@ -51,177 +64,154 @@ class AIService {
     this.apiKey = apiKey;
   }
 
-  // Agent 1: Ürün Arama Ajanı
-  async searchProducts(query: string, roomStyle?: string): Promise<Product[]> {
-    // Gerçek implementasyon:
-    // 1. OpenAI ile query'yi optimize et
-    // 2. Amazon Product API'den arama yap
-    // 3. Google Shopping API'den arama yap
-    // 4. Etsy API'den arama yap
-    // 5. Sonuçları birleştir ve filtrele
-    
-    const optimizedQuery = await this.optimizeSearchQuery(query, roomStyle);
-    
-    // Mock implementation
-    const mockProducts: Product[] = [
-      {
-        id: '1',
-        name: 'Modern Soyut Mavi Tablo',
-        price: '₺289',
-        rating: 4.8,
-        image: '/placeholder.svg',
-        link: 'https://amazon.com/product/1',
-        source: 'Amazon',
-        description: 'Yatak odası için mükemmel boyut, mavi tonlarda soyut sanat'
-      },
-      {
-        id: '2',
-        name: 'Doğa Manzarası Canvas',
-        price: '₺445',
-        rating: 4.9,
-        image: '/placeholder.svg',
-        link: 'https://etsy.com/product/2',
-        source: 'Etsy',
-        description: 'Huzur veren doğa manzarası, oda dekorasyonu için ideal'
+  // Agent 1: Ürün Arama Ajanı - Gemini API ile
+  async searchProducts(query: string, roomStyle?: string, roomColors?: string[]): Promise<Product[]> {
+    try {
+      console.log('🔍 Agent 1: Gemini ile ürün arama başlatılıyor...');
+      
+      const response = await apiService.searchProducts(query, roomStyle, roomColors);
+      
+      if (response.success && response.products) {
+        console.log(`✅ ${response.products.length} ürün bulundu`);
+        return response.products;
+      } else {
+        console.error('❌ Ürün arama başarısız:', response);
+        return this.getFallbackProducts();
       }
-    ];
-
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockProducts), 2000);
-    });
+    } catch (error) {
+      console.error('❌ Ürün arama hatası:', error);
+      return this.getFallbackProducts();
+    }
   }
 
-  // Agent 2: Oda Görsel Analiz Ajanı
+  // Agent 2: Oda Görsel Analiz Ajanı - Gemini Vision API ile
   async analyzeRoom(imageBase64: string): Promise<RoomAnalysis> {
-    // Gerçek implementasyon:
-    // 1. GPT-4 Vision API ile görsel analiz
-    // 2. Renk paleti çıkarma
-    // 3. Mekan tarzı belirleme
-    // 4. Yerleştirme alanları tespit etme
-    
-    const prompt = `
-    Bu oda fotoğrafını analiz et ve şu bilgileri ver:
-    1. Oda stili (Modern, Klasik, Minimalist vb.)
-    2. Baskın renkler
-    3. Işık durumu
-    4. Oda boyutu
-    5. Tablo yerleştirmek için en uygun alanlar
-    6. Dekorasyon önerileri
-    
-    Sonucu JSON formatında döndür.
-    `;
-
-    // Mock implementation
-    const mockAnalysis: RoomAnalysis = {
-      style: 'Modern Minimalist',
-      dominantColors: ['Mavi', 'Beyaz', 'Gri'],
-      lightingType: 'Doğal Işık (Gündüz)',
-      roomSize: 'Orta Boy Yatak Odası',
-      suggestions: [
-        'Yatak başı duvarı en uygun yerleştirme alanı',
-        'Mavi tonlarda ürünler oda rengiyle uyumlu olacak',
-        'Orta boy (60x40cm) tablolar ideal boyut',
-        'Soyut sanat bu oda tarzıyla çok uyumlu'
-      ],
-      placementAreas: [
-        { x: 30, y: 20, width: 40, height: 30 },
-        { x: 70, y: 40, width: 25, height: 20 }
-      ],
-      confidence: 0.92
-    };
-
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockAnalysis), 3000);
-    });
+    try {
+      console.log('👁️ Agent 2: Gemini Vision ile oda analizi başlatılıyor...');
+      
+      const response = await apiService.analyzeRoom(imageBase64);
+      
+      if (response.success && response.analysis) {
+        console.log('✅ Oda analizi tamamlandı:', response.analysis);
+        return response.analysis;
+      } else {
+        console.error('❌ Oda analizi başarısız:', response);
+        return this.getFallbackRoomAnalysis();
+      }
+    } catch (error) {
+      console.error('❌ Oda analizi hatası:', error);
+      return this.getFallbackRoomAnalysis();
+    }
   }
 
-  // Agent 3: Yerleştirme Ajanı
+  // Agent 3: Yerleştirme Ajanı - Gemini ile
   async placeProductInRoom(
     roomImageBase64: string,
     productImageBase64: string,
     placementArea: { x: number; y: number; width: number; height: number },
     roomAnalysis: RoomAnalysis
   ): Promise<PlacementResult> {
-    // Gerçek implementasyon:
-    // 1. DALL·E Edit API ile ürünü odaya yerleştir
-    // 2. ControlNet ile perspektif ve lighting ayarla
-    // 3. Stable Diffusion ile final rendering
-    // 4. Kalite kontrolü yap
-    
-    const placementPrompt = `
-    Bu odaya tabloyu doğal şekilde yerleştir:
-    - Perspektifi koru
-    - Işık koşullarını dikkate al
-    - Gölgeleri doğru hesapla
-    - Oda tarzıyla uyumlu hale getir
-    - Yerleştirme koordinatları: ${JSON.stringify(placementArea)}
-    `;
+    try {
+      console.log('🎨 Agent 3: Gemini ile ürün yerleştirme başlatılıyor...');
+      
+      const placementData = {
+        area: placementArea,
+        analysis: roomAnalysis
+      };
+      
+      const response = await apiService.placeProduct(roomImageBase64, productImageBase64, placementData);
+      
+      if (response.success && response.result) {
+        console.log('✅ Ürün yerleştirme tamamlandı');
+        return response.result;
+      } else {
+        console.error('❌ Ürün yerleştirme başarısız:', response);
+        return this.getFallbackPlacementResult();
+      }
+    } catch (error) {
+      console.error('❌ Ürün yerleştirme hatası:', error);
+      return this.getFallbackPlacementResult();
+    }
+  }
 
-    // Mock implementation
-    const mockResult: PlacementResult = {
-      success: true,
-      imageUrl: '/placeholder.svg', // Gerçekte DALL·E tarafından oluşturulan görsel
-      confidence: 0.88,
+  // Fallback methods for error cases
+  private getFallbackProducts(): Product[] {
+    return [
+      {
+        id: 'fallback_1',
+        name: 'Modern Soyut Tablo',
+        price: '₺299',
+        rating: 4.5,
+        image: 'https://via.placeholder.com/300x400/4F46E5/FFFFFF?text=Modern+Tablo',
+        link: '#',
+        source: 'Trendyol',
+        description: 'Modern oda dekorasyonu için ideal soyut sanat eseri',
+        colors: ['Mavi', 'Beyaz'],
+        reviewCount: 50,
+        brand: 'ArtDecor',
+        shipping: 'Ücretsiz Kargo',
+        score: 85,
+        recommendation: 'Modern tarzla uyumlu',
+        compatibility: 0.9
+      },
+      {
+        id: 'fallback_2',
+        name: 'Doğa Manzarası Canvas',
+        price: '₺445',
+        rating: 4.8,
+        image: 'https://via.placeholder.com/300x400/10B981/FFFFFF?text=Doğa+Canvas',
+        link: '#',
+        source: 'Amazon',
+        description: 'Huzur veren doğa manzarası, her oda için uygun',
+        colors: ['Yeşil', 'Kahverengi'],
+        reviewCount: 120,
+        brand: 'NatureArt',
+        shipping: 'Ücretsiz Kargo',
+        score: 92,
+        recommendation: 'Yüksek kalite ve müşteri memnuniyeti',
+        compatibility: 0.85
+      }
+    ];
+  }
+
+  private getFallbackRoomAnalysis(): RoomAnalysis {
+    return {
+      style: 'Modern Minimalist',
+      dominantColors: ['Beyaz', 'Gri', 'Mavi'],
+      lightingType: 'Doğal Işık (Gündüz)',
+      roomSize: 'Orta Boy Yatak Odası',
+      suggestions: [
+        'Yatak başı duvarı en uygun yerleştirme alanı',
+        'Açık renk tonları oda ile uyumlu',
+        'Orta boy (60x40cm) tablolar ideal boyut',
+        'Minimalist tarzla uyumlu sade çerçeveler tercih edin'
+      ],
+      placementAreas: [
+        { x: 30, y: 20, width: 40, height: 30 },
+        { x: 70, y: 40, width: 25, height: 20 }
+      ],
+      confidence: 0.75,
+      furniture: ['Yatak', 'Komodin', 'Dolap'],
+      atmosphere: 'Sakin ve huzurlu',
+      decorationStyle: 'Minimalist'
+    };
+  }
+
+  private getFallbackPlacementResult(): PlacementResult {
+    return {
+      success: false,
+      imageUrl: '',
+      confidence: 0,
       placementInfo: {
-        position: { x: placementArea.x, y: placementArea.y },
+        position: { x: 0, y: 0 },
         scale: 1.0,
         rotation: 0,
-        lighting: 'Doğal ışığa uygun gölgelendirme'
-      }
+        lighting: 'Varsayılan'
+      },
+      error: 'Gemini API ile bağlantı kurulamadı',
+      message: 'Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin'
     };
-
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockResult), 4000);
-    });
-  }
-
-  private async optimizeSearchQuery(query: string, roomStyle?: string): Promise<string> {
-    // OpenAI ile search query'yi optimize et
-    const prompt = `
-    Kullanıcının arama terimi: "${query}"
-    ${roomStyle ? `Oda stili: ${roomStyle}` : ''}
-    
-    Bu bilgilere göre e-ticaret sitelerinde arama yapmak için optimize edilmiş anahtar kelimeler üret.
-    Türkçe ve İngilizce alternatifler sun.
-    `;
-
-    // Mock implementation
-    return `${query} canvas tablo dekorasyon ${roomStyle || ''}`.trim();
   }
 }
-
-// Backend API Endpoints (Express.js örneği)
-export const apiEndpoints = {
-  // POST /api/upload-room
-  uploadRoom: async (formData: FormData) => {
-    // Multer ile file upload
-    // Dosyayı cloud storage'a kaydet
-    // Base64'e çevir
-    return { success: true, imageId: 'room_123', base64: 'data:image/jpeg;base64,...' };
-  },
-
-  // POST /api/search-products
-  searchProducts: async (query: string, roomStyle?: string) => {
-    const aiService = AIService.getInstance();
-    return await aiService.searchProducts(query, roomStyle);
-  },
-
-  // POST /api/analyze-room
-  analyzeRoom: async (imageId: string) => {
-    const aiService = AIService.getInstance();
-    // imageId'den base64 al
-    const imageBase64 = 'data:image/jpeg;base64,...'; // Cloud storage'dan al
-    return await aiService.analyzeRoom(imageBase64);
-  },
-
-  // POST /api/place-product
-  placeProduct: async (roomImageId: string, productImageId: string, placementData: any) => {
-    const aiService = AIService.getInstance();
-    // Her iki görsel için base64 al
-    const roomBase64 = 'data:image/jpeg;base64,...';
-    const productBase64 = 'data:image/jpeg;base64,...';
-    return await aiService.placeProductInRoom(roomBase64, productBase64, placementData.area, placementData.analysis);
-  }
-};
 
 export default AIService;

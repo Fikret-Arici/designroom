@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Share2, RotateCcw, Wand2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ApiService from '@/services/apiService';
-import demoResult from '@/assets/demo-result.jpg';
 
 interface Product {
   id: string;
@@ -18,6 +17,36 @@ interface Product {
   description: string;
 }
 
+interface PlacementData {
+  success: boolean;
+  imageUrl: string;
+  productImageUrl: string;
+  overlayData: {
+    position: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    rotation: number;
+    perspective: string;
+    lighting: string;
+    shadow: {
+      blur: number;
+      opacity: number;
+      offsetX: number;
+      offsetY: number;
+      color?: string;
+    };
+    frameStyle: string;
+    integration: string;
+    backgroundRemoved: boolean;
+  };
+  confidence: number;
+  message: string;
+  processingSteps?: string[];
+}
+
 interface PlacementResultProps {
   originalRoom: string;
   selectedProduct: Product;
@@ -26,7 +55,7 @@ interface PlacementResultProps {
 
 export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: PlacementResultProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [placementData, setPlacementData] = useState<PlacementData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const apiService = ApiService.getInstance();
@@ -36,221 +65,322 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
     setError(null);
     
     try {
-      console.log('AI yerleştirme başlatılıyor...');
-      
-      // Ürün görselini base64'e çevir
-      const productImageBase64 = selectedProduct.image;
+      console.log('🎨 AI yerleştirme başlatılıyor...');
       
       // Yerleştirme verilerini hazırla
-      const placementData = {
-        area: { x: 30, y: 20, width: 40, height: 30 }, // Varsayılan yerleştirme alanı
+      const placementRequestData = {
+        area: { x: 35, y: 25, width: 30, height: 25 },
         analysis: {
           style: 'Modern Minimalist',
           dominantColors: ['Mavi', 'Beyaz', 'Gri'],
           lightingType: 'Doğal Işık (Gündüz)'
         }
       };
-      
-      const response = await apiService.placeProductInRoom(
+
+      const response = await apiService.placeProduct(
         originalRoom,
-        productImageBase64,
-        placementData
+        selectedProduct.image,
+        placementRequestData
       );
       
-      // Backend'den gelen imageUrl'i kontrol et
-      if (response.result && response.result.imageUrl) {
-        // Gerçek AI yerleştirme sonucu
-        setResultImage(response.result.imageUrl);
-      } else if (response.result && response.result.success === false) {
-        // AI yerleştirme başarısız oldu
-        throw new Error(response.result.error || 'AI yerleştirme başarısız oldu');
+      if (response.success && response.result) {
+        setPlacementData(response.result);
+        toast({
+          title: "✅ Yerleştirme Tamamlandı!",
+          description: response.result.message || "AI tabloyu mükemmel şekilde yerleştirdi!"
+        });
       } else {
-        // Demo görselini kullan
-        setResultImage(demoResult);
+        throw new Error('Yerleştirme başarısız');
       }
       
-      setIsGenerating(false);
-      
-      toast({
-        title: "Yerleştirme Tamamlandı!",
-        description: response.message || "AI tabloyu odanıza başarıyla yerleştirdi.",
-      });
     } catch (error) {
       console.error('Yerleştirme hatası:', error);
-      setError('Yerleştirme sırasında bir hata oluştu');
-      
-      // Hata durumunda da demo görselini göster
-      setResultImage(demoResult);
-      setIsGenerating(false);
-      
+      setError('AI yerleştirme sırasında hata oluştu');
       toast({
-        title: "AI Yerleştirme Hatası",
-        description: error.message || "AI yerleştirme sırasında bir hata oluştu.",
-        variant: "destructive",
+        title: "❌ Yerleştirme Hatası",
+        description: "Lütfen tekrar deneyin.",
+        variant: "destructive"
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
+  // Component mount olduğunda otomatik yerleştirme başlat
   useEffect(() => {
-    if (originalRoom && selectedProduct && !resultImage && !isGenerating) {
-      generatePlacement();
-    }
+    generatePlacement();
   }, [originalRoom, selectedProduct]);
 
-  const handleDownload = () => {
-    if (resultImage) {
-      const link = document.createElement('a');
-      link.href = resultImage;
-      link.download = 'ai-dekorasyon-sonucu.jpg';
-      link.click();
-      toast({
-        title: "İndiriliyor",
-        description: "Görsel cihazınıza kaydediliyor.",
-      });
-    }
+  const downloadResult = () => {
+    if (!placementData) return;
+
+    // Canvas oluştur ve composite image oluştur
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const roomImg = new Image();
+    roomImg.crossOrigin = 'anonymous';
+    roomImg.onload = () => {
+      canvas.width = roomImg.width;
+      canvas.height = roomImg.height;
+      
+      // Oda görselini çiz
+      ctx.drawImage(roomImg, 0, 0);
+      
+      // Tablo görselini overlay olarak çiz
+      const productImg = new Image();
+      productImg.crossOrigin = 'anonymous';
+      productImg.onload = () => {
+        const overlay = placementData.overlayData;
+        const x = (overlay.position.x / 100) * canvas.width;
+        const y = (overlay.position.y / 100) * canvas.height;
+        const width = (overlay.position.width / 100) * canvas.width;
+        const height = (overlay.position.height / 100) * canvas.height;
+        
+        // Gölge efekti
+        ctx.shadowColor = 'rgba(0, 0, 0, ' + overlay.shadow.opacity + ')';
+        ctx.shadowBlur = overlay.shadow.blur;
+        ctx.shadowOffsetX = overlay.shadow.offsetX;
+        ctx.shadowOffsetY = overlay.shadow.offsetY;
+        
+        // Tabloyu çiz
+        ctx.drawImage(productImg, x, y, width, height);
+        
+        // Download link oluştur
+        const link = document.createElement('a');
+        link.download = 'ai-decor-result.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      };
+      productImg.src = selectedProduct.image;
+    };
+    roomImg.src = originalRoom;
+
+    toast({
+      title: "📥 İndiriliyor",
+      description: "Sonuç görseli indiriliyor..."
+    });
   };
 
-  const handleShare = async () => {
-    if (navigator.share && resultImage) {
+  const shareResult = async () => {
+    if (navigator.share) {
       try {
-        const response = await fetch(resultImage);
-        const blob = await response.blob();
-        const file = new File([blob], 'ai-dekorasyon.jpg', { type: 'image/jpeg' });
-        
         await navigator.share({
           title: 'AI Dekorasyon Sonucum',
-          text: 'AI ile tasarladığım oda dekorasyonu',
-          files: [file]
+          text: `${selectedProduct.name} tablom ile oda dekorasyonum!`,
+          url: window.location.href
         });
       } catch (error) {
-        toast({
-          title: "Paylaşım başarısız",
-          description: "Görseli manuel olarak indirip paylaşabilirsiniz.",
-          variant: "destructive",
-        });
+        console.log('Paylaşım hatası:', error);
       }
     } else {
-      // Fallback: copy link to clipboard
       navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Link kopyalandı",
-        description: "Paylaşım linki panoya kopyalandı.",
+        title: "🔗 Link Kopyalandı",
+        description: "Sonuç linkini paylaşabilirsiniz"
       });
     }
   };
 
   return (
-    <Card className="p-6">
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Wand2 className={`w-5 h-5 ${isGenerating ? 'text-ai animate-pulse' : 'text-green-500'}`} />
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Yerleştirme Sonucu
-          </h3>
-          {isGenerating ? (
-            <Badge variant="secondary" className="animate-pulse">
-              Oluşturuluyor...
-            </Badge>
-          ) : resultImage ? (
-            <Badge className="bg-green-500">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Tamamlandı
-            </Badge>
-          ) : null}
-        </div>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-white mb-2">🎨 AI Yerleştirme Sonucu</h2>
+        <p className="text-gray-300">
+          Yapay zeka tabloyu odanıza mükemmel şekilde yerleştirdi
+        </p>
+      </div>
 
-        {selectedProduct && (
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <img
-              src={selectedProduct.image || '/placeholder.svg'}
-              alt={selectedProduct.name}
-              className="w-12 h-12 object-cover rounded"
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Orijinal Oda */}
+        <Card className="bg-gray-900/50 border-gray-700 p-4">
+          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+            📷 Orijinal Oda
+          </h3>
+          <div className="relative rounded-lg overflow-hidden">
+            <img 
+              src={originalRoom} 
+              alt="Orijinal Oda" 
+              className="w-full h-64 object-cover"
             />
-            <div>
-              <p className="font-semibold text-sm">{selectedProduct.name}</p>
-              <p className="text-xs text-muted-foreground">{selectedProduct.price}</p>
+          </div>
+        </Card>
+
+        {/* AI Yerleştirme Sonucu */}
+        <Card className="bg-gray-900/50 border-gray-700 p-4">
+          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+            <Wand2 className="h-5 w-5 text-purple-400" />
+            AI Yerleştirme Sonucu
+            {placementData && (
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Tamamlandı
+              </Badge>
+            )}
+          </h3>
+          
+          <div className="relative rounded-lg overflow-hidden bg-gray-800">
+            {isGenerating ? (
+              <div className="w-full h-64 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <p className="text-white font-semibold">🎨 Professional AI Yerleştirme</p>
+                  <div className="mt-3 space-y-1 text-sm text-gray-300">
+                    <p className="animate-pulse">🔄 1/3: Hugging Face ile arka plan kaldırılıyor...</p>
+                    <p className="animate-pulse">🔄 2/3: AI optimal pozisyon hesaplıyor...</p>
+                    <p className="animate-pulse">🔄 3/3: Professional overlay hazırlanıyor...</p>
+                  </div>
+                  <div className="mt-4 text-xs text-gray-400">
+                    Bu süreç 10-15 saniye sürebilir
+                  </div>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="w-full h-64 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-red-400 mb-2">❌ {error}</p>
+                  <Button onClick={generatePlacement} variant="outline" size="sm">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Tekrar Dene
+                  </Button>
+                </div>
+              </div>
+            ) : placementData ? (
+              <div className="relative w-full h-64">
+                {/* Oda Arka Plan */}
+                <img 
+                  src={placementData.imageUrl} 
+                  alt="Oda" 
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Tablo Overlay */}
+                <div
+                  className="absolute"
+                  style={{
+                    left: `${placementData.overlayData.position.x}%`,
+                    top: `${placementData.overlayData.position.y}%`,
+                    width: `${placementData.overlayData.position.width}%`,
+                    height: `${placementData.overlayData.position.height}%`,
+                    transform: `rotate(${placementData.overlayData.rotation}deg)`,
+                    filter: `drop-shadow(${placementData.overlayData.shadow.offsetX}px ${placementData.overlayData.shadow.offsetY}px ${placementData.overlayData.shadow.blur}px rgba(0,0,0,${placementData.overlayData.shadow.opacity}))`,
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <img 
+                    src={selectedProduct.image} 
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover rounded-sm"
+                    style={{
+                      transform: placementData.overlayData.perspective === 'slight-right' ? 'perspective(500px) rotateY(-2deg)' : 'none'
+                    }}
+                  />
+                  
+                  {/* Çerçeve efekti */}
+                  <div 
+                    className="absolute inset-0 border-2 border-gray-700/50 rounded-sm"
+                    style={{
+                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)'
+                    }}
+                  />
+                </div>
+                
+                {/* Güven skoru */}
+                <div className="absolute top-2 right-2">
+                  <Badge className="bg-green-500/90 text-white">
+                    {Math.round(placementData.confidence * 100)}% Uyum
+                  </Badge>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </Card>
+      </div>
+
+      {/* Sonuç Bilgileri */}
+      {placementData && (
+        <Card className="bg-gray-900/50 border-gray-700 p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">📊 Yerleştirme Detayları</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-400">{Math.round(placementData.confidence * 100)}%</div>
+              <div className="text-gray-400">Uyum Skoru</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-400">{placementData.overlayData.position.x}%, {placementData.overlayData.position.y}%</div>
+              <div className="text-gray-400">Konum</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-400">{placementData.overlayData.position.width}×{placementData.overlayData.position.height}%</div>
+              <div className="text-gray-400">Boyut</div>
             </div>
           </div>
-        )}
 
-        <div className="relative">
-          {isGenerating ? (
-            <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="animate-scan w-64 h-2 bg-gradient-ai rounded-full mx-auto"></div>
-                <div className="space-y-2">
-                  <p className="font-semibold text-foreground">AI Yerleştirme Ajanı Çalışıyor</p>
-                  <p className="text-sm text-muted-foreground">
-                    • Oda perspektifini analiz ediyor
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • Işık koşullarını hesaplıyor
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • Tabloyu doğal şekilde yerleştiriyor
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • Gölge ve yansımaları optimize ediyor
-                  </p>
-                </div>
-              </div>
+          {/* Background Removal Status */}
+          <div className="mb-4 p-4 rounded-lg bg-gray-800/50">
+            <div className="flex items-center gap-2 mb-2">
+              {placementData.overlayData.backgroundRemoved ? (
+                <>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-green-400 font-semibold">🎯 Professional Yerleştirme</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span className="text-yellow-400 font-semibold">⚡ Hızlı Yerleştirme</span>
+                </>
+              )}
             </div>
-          ) : resultImage ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm mb-2">Orijinal Oda</h4>
-                  <img
-                    src={originalRoom}
-                    alt="Orijinal oda"
-                    className="w-full h-48 object-cover rounded-lg border"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-2">AI Yerleştirme Sonucu</h4>
-                  <img
-                    src={resultImage}
-                    alt="AI yerleştirme sonucu"
-                    className="w-full h-48 object-cover rounded-lg border-2 border-ai animate-ai-glow"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-3 justify-center">
-                <Button onClick={handleDownload} variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  İndir
-                </Button>
-                <Button onClick={handleShare} variant="outline">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Paylaş
-                </Button>
-                <Button onClick={onReset} variant="outline">
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Yeni Deneme
-                </Button>
-              </div>
+            <div className="text-sm text-gray-300">
+              {placementData.overlayData.backgroundRemoved 
+                ? 'Hugging Face REMBG ile arka plan kaldırıldı' 
+                : 'Arka plan kaldırma işlemi atlandı'}
+            </div>
+          </div>
 
-              <Card className="p-4 bg-gradient-card border-ai/50">
-                <h4 className="font-semibold text-foreground mb-2">🎯 AI Analiz Özeti</h4>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <p>✓ Tablo yatak başı duvarına optimal konumda yerleştirildi</p>
-                  <p>✓ Oda renklerine uyumlu boyut ve açı hesaplandı</p>
-                  <p>✓ Doğal ışık koşullarına göre gölgelendirme yapıldı</p>
-                  <p>✓ Perspektif ve derinlik doğal olarak ayarlandı</p>
-                </div>
-                {error && (
-                  <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded">
-                    <p className="text-xs text-red-600">
-                      ❌ AI yerleştirme hatası: {error}
-                    </p>
+          {/* Processing Steps */}
+          {placementData.processingSteps && (
+            <div className="mb-6 p-4 rounded-lg bg-gray-800/50">
+              <h4 className="text-white font-semibold mb-3">🔄 İşlem Adımları</h4>
+              <div className="space-y-2">
+                {placementData.processingSteps.map((step, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                    <span className="text-gray-300">{step}</span>
                   </div>
-                )}
-              </Card>
+                ))}
+              </div>
             </div>
-          ) : null}
-        </div>
-      </div>
-    </Card>
+          )}
+
+          <div className="mb-6">
+            <p className="text-white text-center">{placementData.message}</p>
+          </div>
+
+          {/* Aksiyon Butonları */}
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button onClick={downloadResult} className="bg-blue-600 hover:bg-blue-700">
+              <Download className="h-4 w-4 mr-2" />
+              İndir
+            </Button>
+            
+            <Button onClick={shareResult} variant="outline">
+              <Share2 className="h-4 w-4 mr-2" />
+              Paylaş
+            </Button>
+            
+            <Button onClick={generatePlacement} variant="outline">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Yeni Deneme
+            </Button>
+            
+            <Button onClick={onReset} variant="outline">
+              Yeni Oda
+            </Button>
+          </div>
+        </Card>
+      )}
+    </div>
   );
 };

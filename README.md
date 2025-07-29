@@ -112,13 +112,46 @@ VITE_API_URL=http://localhost:5000/api
 
 **Backend (`backend/.env`):**
 ```env
-OPENAI_API_KEY=your-openai-api-key-here
-TRENDYOL_API_KEY=your-trendyol-api-key
+# AI API Keys
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# Google Custom Search API
+GOOGLE_SEARCH_API_KEY=your-google-search-api-key-here
+GOOGLE_SEARCH_ENGINE_ID=your-google-search-engine-id-here
+
+# Server Configuration
 PORT=5000
 NODE_ENV=development
 ```
 
-> ⚠️ **Önemli:** OpenAI API anahtarınızı [OpenAI Platform](https://platform.openai.com/api-keys) üzerinden alabilirsiniz.
+> ⚠️ **Önemli:** 
+> - **Gemini API Key**: [Google AI Studio](https://makersuite.google.com/app/apikey) üzerinden ücretsiz alabilirsiniz
+> - **Google Search API Key**: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) üzerinden alabilirsiniz
+> - **Google Search Engine ID**: [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) üzerinden oluşturabilirsiniz
+
+#### 🔧 Google Custom Search Engine Kurulumu
+
+1. **Search Engine Oluşturma:**
+   - [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) adresine gidin
+   - "Create a search engine" butonuna tıklayın
+   - Sites to search kısmına şu siteleri ekleyin:
+     ```
+     trendyol.com
+     hepsiburada.com
+     n11.com
+     amazon.com.tr
+     gittigidiyor.com
+     ```
+   - "Create" butonuna tıklayın
+
+2. **Search Engine ID Alma:**
+   - Oluşturulan search engine'de "Setup" sekmesine gidin
+   - "Search engine ID" değerini kopyalayın (cx parametresi)
+
+3. **API Key Alma:**
+   - [Google Cloud Console](https://console.cloud.google.com/apis/credentials) adresine gidin
+   - "Custom Search API" servisini etkinleştirin
+   - "Create Credentials" > "API Key" ile yeni anahtar oluşturun
 
 ---
 
@@ -201,10 +234,42 @@ npm run lint         # 🔍 Kod kontrolü
 | Method | Endpoint | Açıklama | Yanıt Süresi |
 |--------|----------|----------|--------------|
 | `POST` | `/api/upload-room` | 📤 Oda fotoğrafı yükleme | ~2s |
-| `POST` | `/api/search-products` | 🔍 AI destekli ürün arama | ~5s |
-| `POST` | `/api/analyze-room` | 👁️ Oda görsel analizi | ~8s |
-| `POST` | `/api/place-product` | 🎨 Ürün yerleştirme | ~15s |
+| `POST` | `/api/search-products` | 🔍 Google Custom Search API ile ürün arama | ~5s |
+| `POST` | `/api/analyze-room` | 👁️ Gemini Vision ile oda analizi | ~8s |
+| `POST` | `/api/place-product` | 🎨 Hugging Face REMBG + AI yerleştirme | ~15s |
 | `GET` | `/api/health` | ❤️ API durum kontrolü | ~100ms |
+
+### 🔍 Google Custom Search API Entegrasyonu
+
+Proje artık **Google Custom Search API** kullanarak gerçek ürün arama yapıyor:
+
+```javascript
+// Google Custom Search API çağrısı
+const searchResults = await axios.get('https://www.googleapis.com/customsearch/v1', {
+  params: {
+    key: GOOGLE_SEARCH_API_KEY,
+    cx: GOOGLE_SEARCH_ENGINE_ID,
+    q: optimizedQuery,
+    searchType: 'image',
+    num: 10,
+    imgType: 'photo',
+    imgSize: 'medium'
+  }
+});
+```
+
+**Desteklenen E-ticaret Siteleri:**
+- 🛍️ **Trendyol** - site:trendyol.com
+- 🛍️ **Hepsiburada** - site:hepsiburada.com  
+- 🛍️ **N11** - site:n11.com
+- 🛍️ **Amazon Türkiye** - site:amazon.com.tr
+- 🛍️ **GittiGidiyor** - site:gittigidiyor.com
+
+**AI Özellikleri:**
+- 🤖 **Gemini Vision** - Ürün görsel analizi
+- 🎯 **Smart Filtering** - Oda stili ve renk uyumu
+- 📊 **AI Scoring** - Ürün uyumluluk skoru
+- 💡 **Smart Recommendations** - Akıllı öneriler
 
 ### 📝 API Yanıt Örnekleri
 

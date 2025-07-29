@@ -40,10 +40,7 @@ class ApiService {
   }
 
   // Upload room image
-  async uploadRoomImage(file: File): Promise<UploadResponse> {
-    const formData = new FormData();
-    formData.append('room_image', file);
-
+  async uploadRoom(formData: FormData): Promise<UploadResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/upload-room`, {
         method: 'POST',
@@ -56,14 +53,16 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error('Oda yükleme hatası:', error);
-      throw new Error('Oda fotoğrafı yüklenirken hata oluştu');
+      console.error('Dosya yükleme hatası:', error);
+      throw new Error('Dosya yükleme sırasında hata oluştu');
     }
   }
 
   // Search products
   async searchProducts(query: string, roomStyle?: string, roomColors?: string[]): Promise<ProductSearchResponse> {
     try {
+      console.log('🔍 API: Ürün arama isteği gönderiliyor...', { query, roomStyle, roomColors });
+      
       const response = await fetch(`${API_BASE_URL}/search-products`, {
         method: 'POST',
         headers: {
@@ -80,9 +79,11 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ API: Ürün arama yanıtı alındı');
+      return result;
     } catch (error) {
-      console.error('Ürün arama hatası:', error);
+      console.error('❌ API: Ürün arama hatası:', error);
       throw new Error('Ürün arama sırasında hata oluştu');
     }
   }
@@ -90,6 +91,8 @@ class ApiService {
   // Analyze room
   async analyzeRoom(imageBase64: string): Promise<RoomAnalysisResponse> {
     try {
+      console.log('👁️ API: Oda analizi isteği gönderiliyor...');
+      
       const response = await fetch(`${API_BASE_URL}/analyze-room`, {
         method: 'POST',
         headers: {
@@ -104,20 +107,20 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ API: Oda analizi yanıtı alındı');
+      return result;
     } catch (error) {
-      console.error('Oda analizi hatası:', error);
+      console.error('❌ API: Oda analizi hatası:', error);
       throw new Error('Oda analizi sırasında hata oluştu');
     }
   }
 
   // Place product in room
-  async placeProductInRoom(
-    roomImageBase64: string,
-    productImageBase64: string,
-    placementData: any
-  ): Promise<PlacementResponse> {
+  async placeProduct(roomImageBase64: string, productImageBase64: string, placementData: any): Promise<PlacementResponse> {
     try {
+      console.log('🎨 API: Ürün yerleştirme isteği gönderiliyor...');
+      
       const response = await fetch(`${API_BASE_URL}/place-product`, {
         method: 'POST',
         headers: {
@@ -134,15 +137,17 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ API: Ürün yerleştirme yanıtı alındı');
+      return result;
     } catch (error) {
-      console.error('Ürün yerleştirme hatası:', error);
+      console.error('❌ API: Ürün yerleştirme hatası:', error);
       throw new Error('Ürün yerleştirme sırasında hata oluştu');
     }
   }
 
   // Health check
-  async healthCheck(): Promise<{ status: string; timestamp: string; message: string }> {
+  async healthCheck(): Promise<any> {
     try {
       const response = await fetch(`${API_BASE_URL}/health`);
       
@@ -153,9 +158,10 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Health check hatası:', error);
-      throw new Error('API bağlantısı kontrol edilemedi');
+      throw new Error('Sunucu bağlantısı kontrol edilemedi');
     }
   }
 }
 
+export const apiService = ApiService.getInstance();
 export default ApiService; 
