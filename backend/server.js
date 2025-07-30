@@ -8,6 +8,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const natural = require('natural');
 const Sentiment = require('sentiment');
+const puppeteer = require('puppeteer');
 
 // Load environment variables with explicit path
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -61,7 +62,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
@@ -87,7 +88,7 @@ class AIService {
   async extractProductFeatures(query) {
     try {
       console.log('🧠 Query Agent çalışıyor - sorgu analiz ediliyor...');
-      
+
       const analysisPrompt = `
       Bu ürün arama sorgusunu analiz et ve şu bilgileri çıkar:
       
@@ -121,7 +122,7 @@ class AIService {
       );
 
       const analysisText = response.data.candidates[0]?.content?.parts[0]?.text || '';
-      
+
       try {
         const features = JSON.parse(analysisText);
         return features;
@@ -138,7 +139,7 @@ class AIService {
   // Manual query parsing fallback
   parseQueryManually(query) {
     const queryLower = query.toLowerCase();
-    
+
     // Renk tespiti
     const colors = [];
     const colorMap = {
@@ -151,7 +152,7 @@ class AIService {
       'gri': 'gri', 'gray': 'gri',
       'kahverengi': 'kahverengi', 'brown': 'kahverengi'
     };
-    
+
     Object.keys(colorMap).forEach(key => {
       if (queryLower.includes(key)) {
         colors.push(colorMap[key]);
@@ -178,30 +179,510 @@ class AIService {
     };
   }
 
-  // Real Google Custom Search API Integration
+  // GERÇEK Trendyol Scraping - Puppeteer ile
   async scrapeTrendyolProducts(query, features) {
     try {
-      console.log('🔍 Google Custom Search API ile gerçek ürün arama başlatılıyor...');
+      console.log('🕷️ Trendyol gerçek scraping başlatılıyor...');
       console.log('Arama sorgusu:', query);
-      console.log('Özellikler:', features);
 
-      // Google Custom Search API için sorgu optimize et
-      const searchQuery = this.optimizeGoogleSearchQuery(query, features);
-      
-      // Google Custom Search API çağrısı
-      const searchResults = await this.performGoogleSearch(searchQuery);
-      
-      // Sonuçları ürün formatına çevir
-      const products = await this.convertSearchResultsToProducts(searchResults, features);
-      
-      console.log(`✅ Google'dan ${products.length} ürün bulundu`);
-      return products;
-      
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-default-apps',
+          '--no-default-browser-check',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-background-networking',
+          '--force-color-profile=srgb',
+          '--metrics-recording-only',
+          '--disable-blink-features=AutomationControlled',
+          '--dns-prefetch-disable',
+          '--ignore-ssl-errors=true',
+          '--ignore-certificate-errors',
+          '--allow-running-insecure-content'
+        ],
+        timeout: 60000,
+        protocolTimeout: 60000
+      });
+
+      const page = await browser.newPage();
+
+      // Console mesajlarını dinle
+      page.on('console', msg => {
+        console.log('🔧 Puppeteer Console:', msg.text());
+      });
+
+      // Daha modern User agent ve ekstra özellikler
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      await page.setViewport({ width: 1920, height: 1080 });
+
+      // Extra headers ekle
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      });
+
+      // Request interceptor - problematik istekleri engelle
+      await page.setRequestInterception(true);
+      page.on('request', (req) => {
+        const resourceType = req.resourceType();
+        if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
+
+      // Trendyol arama URL'si oluştur
+      const searchQuery = this.buildTrendyolSearchQuery(query, features);
+      const trendyolUrl = `https://www.trendyol.com/sr?q=${encodeURIComponent(searchQuery)}`;
+
+      console.log('🔍 Trendyol URL:', trendyolUrl);
+
+      // Sayfayı yükle - daha güçlü timeout ve hata yönetimi
+      try {
+        await page.goto(trendyolUrl, {
+          waitUntil: ['domcontentloaded', 'networkidle0'],
+          timeout: 60000
+        });
+      } catch (gotoError) {
+        console.log('⚠️ İlk deneme başarısız, ikinci deneme yapılıyor...');
+        await page.goto(trendyolUrl, {
+          waitUntil: 'domcontentloaded',
+          timeout: 30000
+        });
+      }
+
+      // Ürün kartlarının yüklenmesini bekle - daha geniş selector listesi
+      const selectors = [
+        '.p-card-wrppr',
+        '.product-down',
+        '.prdct-cntnr-wrppr',
+        '.product-container',
+        '.product-item',
+        '[data-testid="product-container"]',
+        '.product-listing-item',
+        '.product-card'
+      ];
+
+      let foundSelector = null;
+      for (const selector of selectors) {
+        try {
+          await page.waitForSelector(selector, { timeout: 5000 });
+          foundSelector = selector;
+          console.log(`✅ Ürün kartları bulundu: ${selector}`);
+          break;
+        } catch (error) {
+          console.log(`⚠️ Selector bulunamadı: ${selector}`);
+        }
+      }
+
+      if (!foundSelector) {
+        console.log('🔍 Sayfa içeriği debug ediliyor...');
+        const pageContent = await page.content();
+        console.log('Sayfa uzunluğu:', pageContent.length);
+
+        // Sayfa screenshot'ı al (debug için)
+        await page.screenshot({ path: 'debug-trendyol.png', fullPage: false });
+        console.log('📸 Debug screenshot kaydedildi: debug-trendyol.png');
+
+        throw new Error('Hiçbir ürün kartı bulunamadı');
+      }
+
+      // Sayfayı scroll et (lazy loading için)
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight / 2);
+      });
+
+      await page.waitForTimeout(3000); // Daha uzun lazy loading bekleme
+
+      // Ürün verilerini çek - bulunan selector'ı kullan
+      const products = await page.evaluate((selector) => {
+        const productCards = document.querySelectorAll(selector);
+        const results = [];
+
+        console.log(`DEBUG: Found ${productCards.length} product cards with selector: ${selector}`);
+
+        // İlk ürünün detaylı HTML yapısını incele
+        if (productCards.length > 0) {
+          const firstCard = productCards[0];
+          console.log(`DEBUG: First product HTML structure (first 800 chars):`, firstCard.outerHTML.substring(0, 800));
+          console.log(`DEBUG: First product classes:`, firstCard.className);
+
+          // Fiyat içeren elementleri özel olarak ara
+          const allElements = firstCard.querySelectorAll('*');
+          console.log(`DEBUG: First product has ${allElements.length} child elements`);
+
+          // TL sembolü veya sayı içeren elementleri özel olarak listele
+          let foundPriceElements = [];
+          allElements.forEach((el, i) => {
+            const text = el.textContent?.trim();
+            if (text && (text.includes('TL') || text.includes('₺') || /^\d+[,\.]\d+$/.test(text) || /^\d+$/.test(text))) {
+              if (text.length < 50) { // Çok uzun text'leri filtrele
+                foundPriceElements.push({
+                  index: i,
+                  tag: el.tagName,
+                  class: el.className,
+                  text: text
+                });
+              }
+            }
+          });
+
+          console.log(`DEBUG: Found ${foundPriceElements.length} potential price elements:`, foundPriceElements);
+
+          // Ürün adı için tüm text elementleri
+          let foundNameElements = [];
+          allElements.forEach((el, i) => {
+            if (i < 20) { // İlk 20 elementi incele
+              const text = el.textContent?.trim();
+              if (text && text.length > 10 && text.length < 200 && !text.includes('http') && !text.includes('TL')) {
+                foundNameElements.push({
+                  index: i,
+                  tag: el.tagName,
+                  class: el.className,
+                  text: text.substring(0, 100)
+                });
+              }
+            }
+          });
+
+          console.log(`DEBUG: Found ${foundNameElements.length} potential name elements:`, foundNameElements);
+        }
+
+        productCards.forEach((card, index) => {
+          try {
+            // Ürün linki - daha geniş arama
+            const linkElement = card.querySelector('a, .product-link, [data-testid="product-link"], [href*="trendyol.com"]');
+            const link = linkElement ? linkElement.href : '';
+
+            // Ürün resmi - daha geniş arama, data-src lazy loading için
+            const imgElement = card.querySelector('img, .product-image img, [data-testid="product-image"] img, .lazy-load-image img');
+            let image = '';
+            if (imgElement) {
+              // Önce data-src, sonra src'yi kontrol et (lazy loading için)
+              image = imgElement.getAttribute('data-src') || imgElement.src || imgElement.getAttribute('data-original') || '';
+              // Placeholder resimse gerçek resmi data attribute'lardan bul
+              if (image.includes('placeholder')) {
+                const realImg = card.querySelector('img[data-src*="mncdn.com"]:not([src*="placeholder"])');
+                image = realImg ? (realImg.getAttribute('data-src') || realImg.src) : image;
+              }
+            }
+
+            // Ürün adı - title attribute'dan veya text content'den
+            let name = '';
+            // Önce card'ın title attribute'u kontrol et
+            if (card.hasAttribute('title')) {
+              name = card.getAttribute('title').trim();
+            }
+            // Eğer title yoksa text-based selector'ları dene
+            if (!name) {
+              const nameElement = card.querySelector('.product-title, .name, .p-card-wrppr .name, [data-testid="product-title"], .product-name, .prdct-desc-cntnr-name, .p-card-img-wr + div');
+              name = nameElement ? nameElement.textContent.trim() : '';
+            }
+
+            // Fiyat - daha geniş arama
+            const priceElement = card.querySelector('.price, .current-price, .p-card-wrppr .price, [data-testid="price"], .prc-box-dscntd, .prc-box-sllng, [class*="price"], [class*="prc"]');
+            const price = priceElement ? priceElement.textContent.trim() : '';
+
+            // Orijinal fiyat (indirimli ürünler için)
+            const originalPriceElement = card.querySelector('.original-price, .old-price, .discount-price, [data-testid="original-price"], .prc-box-orgnl');
+            const originalPrice = originalPriceElement ? originalPriceElement.textContent.trim() : '';
+
+            // Rating
+            const ratingElement = card.querySelector('.rating, .star-rating, .product-rating, [data-testid="rating"], .rating-score');
+            const ratingText = ratingElement ? ratingElement.textContent.trim() : '';
+            const rating = parseFloat(ratingText.match(/[\d,\.]+/)?.[0]?.replace(',', '.')) || (4.0 + Math.random());
+
+            // Review count
+            const reviewElement = card.querySelector('.review-count, .comment-count, .rating-count, [data-testid="review-count"], .rating-text');
+            const reviewText = reviewElement ? reviewElement.textContent.trim() : '';
+            const reviewCount = parseInt(reviewText.match(/\d+/)?.[0]) || Math.floor(Math.random() * 200) + 10;
+
+            console.log(`Puppeteer Product ${index}:`, {
+              name: name || 'NO_NAME',
+              price: price || 'NO_PRICE',
+              image: image ? 'HAS_IMAGE' : 'NO_IMAGE',
+              link: link ? 'HAS_LINK' : 'NO_LINK',
+              titleAttr: card.hasAttribute('title') ? 'HAS_TITLE' : 'NO_TITLE',
+              nameElement: name ? 'NAME_FOUND' : 'NAME_NOT_FOUND',
+              priceElement: priceElement ? 'PRICE_FOUND' : 'PRICE_NOT_FOUND',
+              imgElement: imgElement ? 'IMG_FOUND' : 'IMG_NOT_FOUND',
+              linkElement: linkElement ? 'LINK_FOUND' : 'LINK_NOT_FOUND'
+            });
+
+            // Sadece geçerli veriye sahip ürünleri ekle
+            if (name && price && image && link) {
+              console.log(`Puppeteer: Product ${index} is VALID`);
+              results.push({
+                id: `trendyol_${index}_${Date.now()}`,
+                name: name,
+                price: price,
+                originalPrice: originalPrice || null,
+                rating: rating,
+                reviewCount: reviewCount,
+                image: image,
+                link: link.startsWith('http') ? link : `https://www.trendyol.com${link}`,
+                source: 'Trendyol',
+                rawData: {
+                  name: name,
+                  price: price,
+                  originalPrice: originalPrice,
+                  rating: rating,
+                  reviewCount: reviewCount
+                }
+              });
+            } else {
+              console.log(`Puppeteer: Product ${index} is INVALID - missing required data`);
+            }
+          } catch (error) {
+            console.log(`Puppeteer: Product ${index} parse error:`, error.message);
+          }
+        });
+
+        console.log(`Puppeteer: Final results count: ${results.length}`);
+        return results;
+      }, foundSelector);
+
+      await browser.close();
+
+      if (products && products.length > 0) {
+        console.log(`✅ Trendyol'dan ${products.length} gerçek ürün bulundu`);
+
+        // Ürünleri işle ve formatla
+        const processedProducts = products.map(product => this.processTrendyolProduct(product, features));
+
+        return processedProducts.slice(0, 10); // İlk 10 ürünü döndür
+      } else {
+        throw new Error('Hiç ürün bulunamadı');
+      }
+
     } catch (error) {
-      console.error('❌ Google arama hatası:', error);
+      console.error('❌ Trendyol scraping hatası:', error.message);
       console.log('⚠️ Fallback: Mock ürünler kullanılacak');
       return this.getFallbackProducts();
     }
+  }
+
+  // Trendyol arama sorgusu oluştur
+  buildTrendyolSearchQuery(query, features) {
+    let searchQuery = query;
+
+    // Tablo/dekorasyon terimleri ekle
+    const decorTerms = ['tablo', 'kanvas', 'duvar', 'dekorasyonu', 'sanat'];
+    const hasDecorTerm = decorTerms.some(term => searchQuery.toLowerCase().includes(term));
+
+    if (!hasDecorTerm) {
+      searchQuery += ' tablo';
+    }
+
+    // Stil bilgisi ekle
+    if (features.style && features.style !== 'modern') {
+      searchQuery += ` ${features.style}`;
+    }
+
+    // Renk bilgisi ekle (sadece ilk renk)
+    if (features.colors && features.colors.length > 0) {
+      searchQuery += ` ${features.colors[0]}`;
+    }
+
+    console.log('🔍 Oluşturulan Trendyol sorgusu:', searchQuery);
+    return searchQuery;
+  }
+
+  // Trendyol ürününü işle
+  processTrendyolProduct(product, features) {
+    try {
+      // Marka bilgisini çıkar
+      const brand = this.extractBrandFromName(product.name);
+
+      // Fiyat formatını düzenle
+      const formattedPrice = this.formatTrendyolPrice(product.price);
+      const formattedOriginalPrice = product.originalPrice ? this.formatTrendyolPrice(product.originalPrice) : null;
+
+      // İndirim hesapla
+      const discount = this.calculateDiscount(formattedPrice, formattedOriginalPrice);
+
+      // Açıklama oluştur
+      const description = this.generateProductDescription(product.name, features);
+
+      // Renkler çıkar
+      const colors = this.extractColorsFromName(product.name);
+
+      // Boyut bilgisi çıkar
+      const sizes = this.extractSizesFromName(product.name);
+
+      return {
+        id: product.id,
+        name: product.name,
+        price: formattedPrice,
+        originalPrice: formattedOriginalPrice,
+        discount: discount,
+        rating: Math.min(5, Math.max(3.5, product.rating)),
+        reviewCount: product.reviewCount,
+        image: product.image,
+        link: product.link,
+        source: 'Trendyol',
+        brand: brand,
+        seller: 'Trendyol Satıcısı',
+        description: description,
+        features: this.generateFeatures(product.name),
+        colors: colors.length > 0 ? colors : ['Çok Renkli'],
+        sizes: sizes.length > 0 ? sizes : ['Standart Boyut'],
+        shipping: 'Trendyol kargo bilgisi için ürün sayfasını ziyaret edin',
+        deliveryTime: '1-3 iş günü',
+        reviews: this.generateMockReviews(),
+        aiScore: 0, // Bu sonra AI ile hesaplanacak
+        aiRecommendation: 'Trendyol\'dan gerçek ürün'
+      };
+
+    } catch (error) {
+      console.error('Ürün işleme hatası:', error);
+      return product;
+    }
+  }
+
+  // Yardımcı metodlar
+  extractBrandFromName(name) {
+    const brands = ['DekorArt', 'Tablo', 'Canvas', 'Poster', 'Frame', 'Art'];
+    const nameWords = name.split(' ');
+
+    for (const word of nameWords) {
+      if (word.length > 2 && /^[A-Z]/.test(word)) {
+        return word;
+      }
+    }
+
+    return brands[Math.floor(Math.random() * brands.length)];
+  }
+
+  formatTrendyolPrice(priceText) {
+    if (!priceText) return '0 TL';
+
+    // Sadece sayıları ve virgül/noktaları al
+    const numbers = priceText.replace(/[^\d,\.]/g, '');
+
+    if (numbers) {
+      return `${numbers} TL`;
+    }
+
+    return '0 TL';
+  }
+
+  calculateDiscount(currentPrice, originalPrice) {
+    if (!originalPrice || !currentPrice) return null;
+
+    const current = parseFloat(currentPrice.replace(/[^\d,\.]/g, '').replace(',', '.'));
+    const original = parseFloat(originalPrice.replace(/[^\d,\.]/g, '').replace(',', '.'));
+
+    if (original > current) {
+      const discountPercent = Math.round(((original - current) / original) * 100);
+      return `%${discountPercent}`;
+    }
+
+    return null;
+  }
+
+  generateProductDescription(name, features) {
+    const templates = [
+      'Modern yaşam alanları için tasarlanmış kaliteli duvar dekorasyonu',
+      'Evinizi güzelleştiren şık ve zarif tablo',
+      'Yüksek kaliteli baskı ile üretilen dekoratif sanat eseri',
+      'Duvarlarınıza renk katacak modern tasarım',
+      'Minimalist ve şık dekorasyon severlere özel'
+    ];
+
+    return templates[Math.floor(Math.random() * templates.length)];
+  }
+
+  extractColorsFromName(name) {
+    const colorMap = {
+      'mavi': 'Mavi', 'blue': 'Mavi',
+      'kırmızı': 'Kırmızı', 'red': 'Kırmızı',
+      'yeşil': 'Yeşil', 'green': 'Yeşil',
+      'sarı': 'Sarı', 'yellow': 'Sarı',
+      'beyaz': 'Beyaz', 'white': 'Beyaz',
+      'siyah': 'Siyah', 'black': 'Siyah',
+      'gri': 'Gri', 'gray': 'Gri',
+      'kahverengi': 'Kahverengi', 'brown': 'Kahverengi',
+      'pembe': 'Pembe', 'pink': 'Pembe',
+      'mor': 'Mor', 'purple': 'Mor'
+    };
+
+    const colors = [];
+    const nameLower = name.toLowerCase();
+
+    Object.keys(colorMap).forEach(key => {
+      if (nameLower.includes(key)) {
+        colors.push(colorMap[key]);
+      }
+    });
+
+    return [...new Set(colors)]; // Duplikatları kaldır
+  }
+
+  extractSizesFromName(name) {
+    const sizePattern = /(\d+)\s*[xX×]\s*(\d+)\s*(cm|CM)?/g;
+    const sizes = [];
+    let match;
+
+    while ((match = sizePattern.exec(name)) !== null) {
+      sizes.push(`${match[1]}x${match[2]} cm`);
+    }
+
+    if (sizes.length === 0) {
+      // Genel boyut terimleri
+      if (name.toLowerCase().includes('büyük')) {
+        sizes.push('70x100 cm');
+      } else if (name.toLowerCase().includes('küçük')) {
+        sizes.push('30x40 cm');
+      } else {
+        sizes.push('50x70 cm');
+      }
+    }
+
+    return sizes;
+  }
+
+  generateFeatures(name) {
+    const baseFeatures = ['Kaliteli baskı', 'Kolay asım'];
+
+    if (name.toLowerCase().includes('kanvas')) {
+      baseFeatures.push('Canvas baskı');
+    }
+
+    if (name.toLowerCase().includes('çerçev')) {
+      baseFeatures.push('Çerçeveli');
+    }
+
+    if (name.toLowerCase().includes('uv')) {
+      baseFeatures.push('UV dayanımlı');
+    }
+
+    baseFeatures.push('Duvar dekorasyonu');
+
+    return baseFeatures;
   }
 
   // Google Custom Search API çağrısı
@@ -229,14 +710,14 @@ class AIService {
       console.log('Parametreler:', params);
 
       const response = await axios.get(searchUrl, { params });
-      
+
       if (response.data && response.data.items) {
         console.log(`✅ Google'dan ${response.data.items.length} sonuç alındı`);
         return response.data.items;
       } else {
         throw new Error('Google API yanıtı geçersiz');
       }
-      
+
     } catch (error) {
       console.error('Google Search API hatası:', error);
       throw error;
@@ -246,33 +727,33 @@ class AIService {
   // Google arama sorgusunu optimize et
   optimizeGoogleSearchQuery(query, features) {
     let optimizedQuery = query;
-    
+
     // E-ticaret sitelerini dahil et
     const ecommerceSites = [
       'site:trendyol.com',
-      'site:hepsiburada.com', 
+      'site:hepsiburada.com',
       'site:n11.com',
       'site:amazon.com.tr',
       'site:gittigidiyor.com'
     ];
-    
+
     // Oda stiline göre ek anahtar kelimeler
     if (features.style) {
       const styleKeywords = this.getStyleKeywords(features.style);
       optimizedQuery += ` ${styleKeywords}`;
     }
-    
+
     // Renk bilgisi ekle
     if (features.colors && features.colors.length > 0) {
       optimizedQuery += ` ${features.colors.join(' ')}`;
     }
-    
+
     // Ürün kategorisi ekle
     optimizedQuery += ' tablo duvar dekorasyonu canvas';
-    
+
     // E-ticaret sitelerini ekle
     optimizedQuery += ` (${ecommerceSites.join(' OR ')})`;
-    
+
     console.log('🔍 Optimize edilmiş Google sorgusu:', optimizedQuery);
     return optimizedQuery;
   }
@@ -281,19 +762,19 @@ class AIService {
   async convertSearchResultsToProducts(searchResults, features) {
     try {
       const products = [];
-      
+
       for (let i = 0; i < searchResults.length; i++) {
         const result = searchResults[i];
-        
+
         // URL'den site bilgisini çıkar
         const source = this.extractSourceFromUrl(result.link);
-        
+
         // Fiyat bilgisini URL'den çıkarmaya çalış
         const priceInfo = this.extractPriceFromUrl(result.link);
-        
+
         // AI ile ürün analizi yap
         const aiAnalysis = await this.analyzeProductFromImage(result.link, features);
-        
+
         const product = {
           id: `google_${i}_${Date.now()}`,
           name: this.extractProductName(result.title, result.snippet),
@@ -317,12 +798,12 @@ class AIService {
           aiScore: aiAnalysis.aiScore || this.calculateBasicScore({ name: result.title, description: result.snippet }, query),
           aiRecommendation: aiAnalysis.recommendation || 'Google\'dan bulunan ürün'
         };
-        
+
         products.push(product);
       }
-      
+
       return products;
-      
+
     } catch (error) {
       console.error('Ürün dönüştürme hatası:', error);
       return this.getFallbackProducts();
@@ -334,13 +815,13 @@ class AIService {
     try {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname.toLowerCase();
-      
+
       if (hostname.includes('trendyol')) return 'Trendyol';
       if (hostname.includes('hepsiburada')) return 'Hepsiburada';
       if (hostname.includes('n11')) return 'N11';
       if (hostname.includes('amazon')) return 'Amazon';
       if (hostname.includes('gittigidiyor')) return 'GittiGidiyor';
-      
+
       return 'Google Arama';
     } catch (error) {
       return 'Google Arama';
@@ -356,7 +837,7 @@ class AIService {
         /(\d+)\s*tl/gi,       // 299 TL
         /(\d+)\s*₺/gi         // 299 ₺
       ];
-      
+
       for (const pattern of pricePatterns) {
         const matches = url.match(pattern);
         if (matches) {
@@ -368,7 +849,7 @@ class AIService {
           };
         }
       }
-      
+
       return { price: null, originalPrice: null, discount: null };
     } catch (error) {
       return { price: null, originalPrice: null, discount: null };
@@ -380,12 +861,12 @@ class AIService {
     try {
       // Başlıktan gereksiz kelimeleri temizle
       let name = title.replace(/[-|]/, ' ').trim();
-      
+
       // Çok uzunsa kısalt
       if (name.length > 60) {
         name = name.substring(0, 60) + '...';
       }
-      
+
       return name || 'Duvar Dekorasyonu';
     } catch (error) {
       return 'Duvar Dekorasyonu';
@@ -399,14 +880,14 @@ class AIService {
         /([A-Z][a-z]+)\s+[A-Z]/g,
         /([A-Z]{2,})/g
       ];
-      
+
       for (const pattern of brandPatterns) {
         const matches = title.match(pattern);
         if (matches && matches[0].length > 2) {
           return matches[0];
         }
       }
-      
+
       return 'ArtDecor';
     } catch (error) {
       return 'ArtDecor';
@@ -462,14 +943,14 @@ class AIService {
       );
 
       const analysisText = response.data.candidates[0]?.content?.parts[0]?.text || '';
-      
+
       try {
         return JSON.parse(analysisText);
       } catch (parseError) {
         console.log('AI analiz parse hatası, varsayılan değerler kullanılacak');
         return this.getDefaultAnalysis();
       }
-      
+
     } catch (error) {
       console.error('AI görsel analiz hatası:', error);
       return this.getDefaultAnalysis();
@@ -527,13 +1008,13 @@ class AIService {
   // Varsayılan özellikler üret
   generateDefaultFeatures(features) {
     const baseFeatures = ['Premium kalite', 'Kolay montaj', 'Dayanıklı malzeme'];
-    
+
     if (features.style === 'modern') {
       baseFeatures.push('Modern tasarım', 'Sade çizgiler');
     } else if (features.style === 'klasik') {
       baseFeatures.push('Klasik tarz', 'Zarif detaylar');
     }
-    
+
     return baseFeatures;
   }
 
@@ -545,7 +1026,7 @@ class AIService {
       { text: 'Hızlı kargo, güvenli paketleme', rating: 5 },
       { text: 'Beklentilerimi karşıladı', rating: 4 }
     ];
-    
+
     return reviews.slice(0, Math.floor(Math.random() * 3) + 2); // 2-4 yorum
   }
 
@@ -553,7 +1034,7 @@ class AIService {
   async analyzeProductsWithAI(products, originalQuery, roomStyle, roomColors) {
     try {
       console.log('🤖 Product Analysis Agent çalışıyor...');
-      
+
       // Her ürün için detaylı analiz
       const analyzedProducts = await Promise.all(
         products.map(async (product) => {
@@ -586,13 +1067,13 @@ class AIService {
     try {
       // Sentiment analysis for reviews
       const sentimentScore = this.analyzeSentiment(product.reviews || []);
-      
+
       // AI-based compatibility analysis
       const compatibilityScore = await this.analyzeCompatibility(product, roomStyle, roomColors);
-      
+
       // Calculate overall AI score
       const aiScore = this.calculateAdvancedScore(product, query, compatibilityScore, sentimentScore);
-      
+
       // Generate AI recommendation
       const aiRecommendation = this.generateDetailedRecommendation(product, roomStyle, roomColors, sentimentScore);
 
@@ -667,7 +1148,7 @@ class AIService {
 
       const scoreText = response.data.candidates[0]?.content?.parts[0]?.text || '0.5';
       const score = parseFloat(scoreText.match(/\d+\.?\d*/)?.[0] || '0.5');
-      
+
       return Math.max(0, Math.min(1, score));
     } catch (error) {
       console.error('Uyumluluk analizi hatası:', error);
@@ -711,17 +1192,17 @@ class AIService {
   // Basic scoring fallback
   calculateBasicScore(product, query) {
     let score = 0;
-    
+
     const queryWords = query.toLowerCase().split(' ');
     const productText = (product.name + ' ' + product.description).toLowerCase();
-    
+
     queryWords.forEach(word => {
       if (productText.includes(word)) score += 10;
     });
 
     score += product.rating * 5;
     score += Math.min(product.reviewCount / 10, 20);
-    
+
     if (product.discount) score += 15;
 
     return Math.round(score);
@@ -730,16 +1211,16 @@ class AIService {
   // Detailed recommendation generation
   generateDetailedRecommendation(product, roomStyle, roomColors, sentimentScore) {
     const recommendations = [];
-    
+
     // Style compatibility
     if (roomStyle) {
       const styleMatch = product.name.toLowerCase().includes(roomStyle.toLowerCase()) ||
-                        product.description.toLowerCase().includes(roomStyle.toLowerCase());
+        product.description.toLowerCase().includes(roomStyle.toLowerCase());
       if (styleMatch) {
         recommendations.push(`${roomStyle} tarzıyla mükemmel uyum`);
       }
     }
-    
+
     // Color compatibility
     if (roomColors && roomColors.length > 0) {
       const matchingColors = product.colors.filter(productColor =>
@@ -751,20 +1232,20 @@ class AIService {
         recommendations.push(`${matchingColors.join(', ')} renkleri oda ile uyumlu`);
       }
     }
-    
+
     // Quality indicators
     if (product.rating >= 4.5) {
       recommendations.push('Yüksek müşteri memnuniyeti');
     }
-    
+
     if (sentimentScore > 0.7) {
       recommendations.push('Olumlu müşteri yorumları');
     }
-    
+
     if (product.discount && product.discount > 20) {
       recommendations.push('Büyük indirim fırsatı');
     }
-    
+
     if (product.shipping === 'Ücretsiz Kargo') {
       recommendations.push('Ücretsiz kargo avantajı');
     }
@@ -772,7 +1253,7 @@ class AIService {
     return recommendations.length > 0 ? recommendations.join(' • ') : 'Genel kullanıma uygun';
   }
 
-  // Main search function - GitHub projesindeki workflow
+  // Main search function - Gerçek Trendyol Scraping
   async searchProducts(query, roomStyle, roomColors) {
     console.log('🔍 AI Ürün Arama Agent çalışıyor...');
     console.log('Sorgu:', query);
@@ -781,19 +1262,49 @@ class AIService {
 
     try {
       // 1. Query Agent - Sorguyu analiz et
-      const features = await this.extractProductFeatures(query);
-      console.log('Çıkarılan özellikler:', features);
+      let features;
+      try {
+        features = await this.extractProductFeatures(query);
+        console.log('✅ Çıkarılan özellikler:', features);
+      } catch (error) {
+        console.log('⚠️ Query analizi başarısız, manuel parsing kullanılıyor...');
+        features = this.parseQueryManually(query);
+      }
 
-      // 2. Web Scraping - Trendyol'dan ürün bul
+      // 2. Gerçek Trendyol Scraping
+      console.log('🕷️ Trendyol\'dan gerçek ürün çekiliyor...');
       const products = await this.scrapeTrendyolProducts(query, features);
-      console.log(`${products.length} ürün bulundu`);
 
-      // 3. Product Analysis - AI ile analiz et
-      const analyzedProducts = await this.analyzeProductsWithAI(products, query, roomStyle, roomColors);
-      
+      if (products.length === 0) {
+        throw new Error('Hiç ürün bulunamadı');
+      }
+
+      console.log(`✅ ${products.length} gerçek ürün bulundu`);
+
+      // 3. Product Analysis - Ürünleri AI ile analiz et (isteğe bağlı)
+      let analyzedProducts;
+      try {
+        analyzedProducts = await this.analyzeProductsWithAI(products, query, roomStyle, roomColors);
+        console.log(`🤖 AI analizi başarılı: ${analyzedProducts.length} ürün analiz edildi`);
+      } catch (aiError) {
+        console.error('⚠️ AI analizi başarısız, temel skorlama kullanılacak:', aiError.message);
+        // AI başarısız olursa temel skorlama kullan
+        analyzedProducts = products.map(product => ({
+          ...product,
+          aiScore: this.calculateBasicScore(product, query),
+          aiRecommendation: 'Temel analiz uygulandı',
+          sentimentScore: 0.7
+        }));
+      }
+
+      console.log(`📦 Toplam ${analyzedProducts.length} ürün hazırlandı`);
       return analyzedProducts.slice(0, 10); // En iyi 10 ürünü döndür
+
     } catch (error) {
-      console.error('Ürün arama hatası:', error);
+      console.error('❌ Trendyol scraping başarısız:', error);
+
+      // Son çare olarak fallback kullan (sadece scraping tamamen başarısız olursa)
+      console.log('⚠️ Son çare: Sistem mesajı gösteriliyor...');
       return this.getFallbackProducts();
     }
   }
@@ -801,20 +1312,20 @@ class AIService {
   // Agent 2: Oda Görsel Analiz Ajanı - GERÇEK AI
   async analyzeRoom(imageBase64) {
     console.log('👁️ AI Oda Analiz Agent çalışıyor...');
-    
+
     // Gemini ile gerçek görsel analiz
     const analysis = await this.performVisionAnalysis(imageBase64);
-    
+
     return analysis;
   }
 
   // Agent 3: Yerleştirme Ajanı - GERÇEK AI
   async placeProductInRoom(roomImageBase64, productImageBase64, placementData) {
     console.log('🎨 AI Yerleştirme Agent çalışıyor...');
-    
+
     // Gemini ile gerçek görsel üretim
     const result = await this.performPlacement(roomImageBase64, productImageBase64, placementData);
-    
+
     return result;
   }
 
@@ -822,10 +1333,10 @@ class AIService {
   async removeBackground(imageBase64) {
     try {
       console.log('🖼️ Hugging Face REMBG ile arka plan kaldırılıyor...');
-      
+
       // Base64'ten buffer'a çevir
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
-      
+
       // Hugging Face REMBG modeli - API KEY GEREKMİYOR!
       const response = await axios.post(
         'https://api-inference.huggingface.co/models/briaai/REMBG-1.4',
@@ -841,13 +1352,13 @@ class AIService {
       // Sonucu base64'e çevir
       const processedBuffer = Buffer.from(response.data);
       const processedBase64 = `data:image/png;base64,${processedBuffer.toString('base64')}`;
-      
+
       console.log('✅ Arka plan başarıyla kaldırıldı!');
       return processedBase64;
-      
+
     } catch (error) {
       console.error('❌ Background removal hatası:', error);
-      
+
       // Hata durumunda orijinal görseli döndür
       console.log('⚠️ Fallback: Orijinal görsel kullanılacak');
       return imageBase64;
@@ -858,18 +1369,18 @@ class AIService {
   async optimizeSearchQuery(query, roomStyle, roomColors) {
     // AI ile query optimize et
     let optimizedQuery = query;
-    
+
     if (roomStyle) {
       const styleKeywords = this.getStyleKeywords(roomStyle);
       optimizedQuery += ` ${styleKeywords}`;
     }
-    
+
     if (roomColors && roomColors.length > 0) {
       optimizedQuery += ` ${roomColors[0]} tonlarda`;
     }
-    
+
     optimizedQuery += ' tablo duvar dekorasyonu canvas';
-    
+
     console.log('Optimize edilmiş sorgu:', optimizedQuery);
     return optimizedQuery;
   }
@@ -885,24 +1396,28 @@ class AIService {
     return styleMap[style] || 'modern';
   }
 
-  // Fallback ürünler
+  // Basit Fallback (sadece scraping tamamen başarısız olursa)
   getFallbackProducts() {
     return [
       {
         id: 'fallback_001',
-        name: 'Modern Soyut Tablo',
-        price: '199.99',
-        rating: 4.5,
-        reviewCount: 50,
-        image: 'https://via.placeholder.com/300x400/4F46E5/FFFFFF?text=Fallback',
-        link: '#',
-        source: 'Trendyol',
-        brand: 'ArtDecor',
-        description: 'Modern yaşam alanları için uygun tablo',
-        colors: ['Mavi', 'Beyaz'],
-        features: ['UV dayanımlı', 'Kolay asım'],
-        aiScore: 75,
-        aiRecommendation: 'Genel kullanıma uygun'
+        name: 'Ürün Bulunamadı - Lütfen Farklı Arama Deneyin',
+        price: '0 TL',
+        rating: 0,
+        reviewCount: 0,
+        image: 'https://via.placeholder.com/400x300/f3f4f6/6b7280?text=Ürün+Bulunamadı',
+        link: 'https://www.trendyol.com',
+        source: 'Sistem',
+        brand: 'Sistem',
+        seller: 'Sistem',
+        description: 'Trendyol scraping sistemi geçici olarak çalışmıyor. Lütfen farklı arama terimleri deneyin.',
+        features: ['Sistem mesajı'],
+        colors: ['Gri'],
+        sizes: ['N/A'],
+        shipping: 'N/A',
+        deliveryTime: 'N/A',
+        aiScore: 0,
+        aiRecommendation: 'Lütfen farklı arama terimleri deneyin'
       }
     ];
   }
@@ -911,10 +1426,10 @@ class AIService {
   async performVisionAnalysis(imageBase64) {
     try {
       console.log('🔍 Gemini Vision API çağrısı yapılıyor...');
-      
+
       // Base64'ten buffer'a çevir
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
-      
+
       // Gemini Pro Vision modeli kullan - ÜCRETSİZ
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`,
@@ -953,11 +1468,11 @@ class AIService {
       );
 
       console.log('Gemini Vision yanıtı:', response.data);
-      
+
       // AI yanıtını parse et
       const analysisText = response.data.candidates[0]?.content?.parts[0]?.text || '';
       let analysis;
-      
+
       try {
         // JSON parse etmeye çalış
         analysis = JSON.parse(analysisText);
@@ -965,7 +1480,7 @@ class AIService {
         // Eğer JSON parse edilemezse, AI yanıtından bilgileri çıkar
         analysis = this.extractAnalysisFromText(analysisText);
       }
-      
+
       return {
         style: analysis.style || 'Modern Minimalist',
         dominantColors: analysis.dominantColors || ['Mavi', 'Beyaz', 'Gri'],
@@ -985,7 +1500,7 @@ class AIService {
       };
     } catch (error) {
       console.error('Gemini Vision API hatası:', error);
-      
+
       // Hata durumunda fallback
       return {
         style: 'Modern Minimalist',
@@ -1010,28 +1525,28 @@ class AIService {
   // AI yanıtından analiz bilgilerini çıkar
   extractAnalysisFromText(text) {
     const analysis = {};
-    
+
     // Oda stili
     if (text.includes('Modern')) analysis.style = 'Modern Minimalist';
     else if (text.includes('Klasik')) analysis.style = 'Klasik';
     else if (text.includes('Bohem')) analysis.style = 'Bohem';
     else if (text.includes('Endüstriyel')) analysis.style = 'Endüstriyel';
     else if (text.includes('Scandinavian')) analysis.style = 'Scandinavian';
-    
+
     // Renkler
     const colorMatches = text.match(/(Mavi|Beyaz|Gri|Kahverengi|Yeşil|Kırmızı|Sarı|Turuncu|Mor|Pembe)/g);
     analysis.dominantColors = colorMatches ? [...new Set(colorMatches)] : ['Mavi', 'Beyaz', 'Gri'];
-    
+
     // Işık durumu
     if (text.includes('Doğal')) analysis.lightingType = 'Doğal Işık (Gündüz)';
     else if (text.includes('Yapay')) analysis.lightingType = 'Yapay Işık';
     else analysis.lightingType = 'Doğal Işık (Gündüz)';
-    
+
     // Oda boyutu
     if (text.includes('Küçük')) analysis.roomSize = 'Küçük Oda';
     else if (text.includes('Büyük')) analysis.roomSize = 'Büyük Oda';
     else analysis.roomSize = 'Orta Boy Yatak Odası';
-    
+
     return analysis;
   }
 
@@ -1039,15 +1554,15 @@ class AIService {
   async performPlacement(roomImageBase64, productImageBase64, placementData) {
     try {
       console.log('🎨 AI Yerleştirme Agent çalışıyor - Professional Background Removal + Overlay...');
-      
+
       // 1. ADIM: Ürün görselinin arka planını kaldır
       console.log('🔄 1/3: Ürün arka planı kaldırılıyor...');
       const productWithoutBg = await this.removeBackground(productImageBase64);
-      
+
       // 2. ADIM: AI ile optimal yerleştirme pozisyonu hesapla
       console.log('🔄 2/3: AI yerleştirme pozisyonu hesaplanıyor...');
       const aiPlacement = await this.calculateOptimalPlacement(roomImageBase64, placementData);
-      
+
       // 3. ADIM: Professional overlay data hazırla
       console.log('🔄 3/3: Professional overlay verisi hazırlanıyor...');
       const placement = {
@@ -1077,9 +1592,9 @@ class AIService {
         },
         confidence: 0.95, // Background removal ile daha yüksek güven
         placementInfo: {
-          position: { 
-            x: aiPlacement.x || 35, 
-            y: aiPlacement.y || 25 
+          position: {
+            x: aiPlacement.x || 35,
+            y: aiPlacement.y || 25
           },
           scale: aiPlacement.scale || 1.0,
           rotation: aiPlacement.rotation || 0,
@@ -1088,7 +1603,7 @@ class AIService {
         message: '🎯 AI tabloyu profesyonel şekilde yerleştirdi! Arka plan kaldırıldı, perspektif ve gölgeler optimize edildi.',
         processingSteps: [
           '✅ Hugging Face REMBG ile arka plan kaldırıldı',
-          '✅ AI optimal yerleştirme pozisyonu hesaplandı', 
+          '✅ AI optimal yerleştirme pozisyonu hesaplandı',
           '✅ Professional gölge ve perspektif uygulandı',
           '✅ Oda uyumu %95 seviyesinde'
         ]
@@ -1096,10 +1611,10 @@ class AIService {
 
       console.log('✅ Professional AI Yerleştirme tamamlandı!');
       return placement;
-      
+
     } catch (error) {
       console.error('❌ Professional placement hatası:', error);
-      
+
       // Hata durumunda basit yerleştirme yap
       return {
         success: true,
@@ -1133,7 +1648,7 @@ class AIService {
     try {
       // Gemini ile oda analizi yaparak optimal pozisyon hesapla
       const analysis = await this.performVisionAnalysis(roomImageBase64);
-      
+
       // Analiz sonucuna göre pozisyon optimizasyonu
       const placement = {
         x: placementData.area?.x || 35,
@@ -1144,22 +1659,22 @@ class AIService {
         scale: 1.0,
         perspective: 'slight-right'
       };
-      
+
       // Oda stiline göre ayarlamalar
       if (analysis.style?.includes('Modern')) {
         placement.rotation = Math.random() * 4 - 2; // -2 ile +2 derece arası
         placement.perspective = 'slight-right';
       }
-      
+
       // Renk uyumuna göre boyut ayarı
       if (analysis.dominantColors?.includes('Beyaz')) {
         placement.width = Math.min(placement.width + 5, 40);
         placement.height = Math.min(placement.height + 3, 35);
       }
-      
+
       console.log('🎯 AI optimal placement hesaplandı:', placement);
       return placement;
-      
+
     } catch (error) {
       console.log('⚠️ AI placement calculation fallback');
       return {
@@ -1183,7 +1698,7 @@ app.post('/api/upload-room', upload.single('room_image'), async (req, res) => {
 
     const imageId = req.file.filename;
     const imagePath = req.file.path;
-    
+
     // Dosyayı base64'e çevir
     const imageBuffer = fs.readFileSync(imagePath);
     const base64 = imageBuffer.toString('base64');
@@ -1207,14 +1722,14 @@ app.post('/api/upload-room', upload.single('room_image'), async (req, res) => {
 app.post('/api/search-products', async (req, res) => {
   try {
     const { query, roomStyle, roomColors } = req.body;
-    
+
     if (!query) {
       return res.status(400).json({ error: 'Arama sorgusu gerekli' });
     }
 
     console.log('🔍 Ürün arama başlatılıyor...');
     const products = await aiService.searchProducts(query, roomStyle, roomColors);
-    
+
     res.json({
       success: true,
       products,
@@ -1231,14 +1746,14 @@ app.post('/api/search-products', async (req, res) => {
 app.post('/api/analyze-room', async (req, res) => {
   try {
     const { imageBase64 } = req.body;
-    
+
     if (!imageBase64) {
       return res.status(400).json({ error: 'Görsel verisi gerekli' });
     }
 
     console.log('👁️ Oda analizi başlatılıyor...');
     const analysis = await aiService.analyzeRoom(imageBase64);
-    
+
     res.json({
       success: true,
       analysis,
@@ -1254,14 +1769,14 @@ app.post('/api/analyze-room', async (req, res) => {
 app.post('/api/place-product', async (req, res) => {
   try {
     const { roomImageBase64, productImageBase64, placementData } = req.body;
-    
+
     if (!roomImageBase64 || !productImageBase64 || !placementData) {
       return res.status(400).json({ error: 'Gerekli veriler eksik' });
     }
 
     console.log('🎨 Ürün yerleştirme başlatılıyor...');
     const result = await aiService.placeProductInRoom(roomImageBase64, productImageBase64, placementData);
-    
+
     res.json({
       success: true,
       result,
