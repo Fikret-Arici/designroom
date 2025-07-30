@@ -243,11 +243,12 @@ class AIService {
         'Upgrade-Insecure-Requests': '1'
       });
 
-      // Request interceptor - problematik istekleri engelle
+      // Request interceptor - sadece ağır kaynakları engelle, resimleri çekmek için değiştirdik
       await page.setRequestInterception(true);
       page.on('request', (req) => {
         const resourceType = req.resourceType();
-        if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
+        // Stylesheet, font ve media'yı engelle ama image'ları çek
+        if (['stylesheet', 'font', 'media'].includes(resourceType)) {
           req.abort();
         } else {
           req.continue();
@@ -310,12 +311,46 @@ class AIService {
         throw new Error('Hiçbir ürün kartı bulunamadı');
       }
 
-      // Sayfayı scroll et (lazy loading için)
+      // Trendyol'un gerçek ürün resimlerini almak için agresif strateji
+      console.log('🔄 Trendyol resim lazy loading için çok agresif bekleme başlatılıyor...');
+
+      // 1. Sayfa tamamen yüklenene kadar bekle
+      await page.waitForLoadState && await page.waitForLoadState('networkidle');
+
+      // 2. Çoklu scroll ile lazy loading'i tetikle
+      for (let i = 0; i < 3; i++) {
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+        await page.waitForTimeout(1500);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(1000);
+      }
+
+      // 3. Her ürün kartını tek tek görünür yap
       await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight / 2);
+        const productCards = document.querySelectorAll('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr');
+        productCards.forEach((card, index) => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      });
+      await page.waitForTimeout(3000);
+
+      // 4. JavaScript ile lazy loading resimlerini manuel yükle
+      await page.evaluate(() => {
+        const lazyImages = document.querySelectorAll('img[data-src], img[data-original], img[loading="lazy"]');
+        lazyImages.forEach(img => {
+          if (img.hasAttribute('data-src')) {
+            img.src = img.getAttribute('data-src');
+          }
+          if (img.hasAttribute('data-original')) {
+            img.src = img.getAttribute('data-original');
+          }
+          // Intersection Observer'ı tetikle
+          const event = new Event('scroll');
+          window.dispatchEvent(event);
+        });
       });
 
-      await page.waitForTimeout(3000); // Daha uzun lazy loading bekleme
+      await page.waitForTimeout(4000); // Uzun bekleme
 
       // Ürün verilerini çek - bulunan selector'ı kullan
       const products = await page.evaluate((selector) => {
@@ -377,18 +412,112 @@ class AIService {
             const linkElement = card.querySelector('a, .product-link, [data-testid="product-link"], [href*="trendyol.com"]');
             const link = linkElement ? linkElement.href : '';
 
-            // Ürün resmi - daha geniş arama, data-src lazy loading için
-            const imgElement = card.querySelector('img, .product-image img, [data-testid="product-image"] img, .lazy-load-image img');
-            let image = '';
-            if (imgElement) {
-              // Önce data-src, sonra src'yi kontrol et (lazy loading için)
-              image = imgElement.getAttribute('data-src') || imgElement.src || imgElement.getAttribute('data-original') || '';
-              // Placeholder resimse gerçek resmi data attribute'lardan bul
-              if (image.includes('placeholder')) {
-                const realImg = card.querySelector('img[data-src*="mncdn.com"]:not([src*="placeholder"])');
-                image = realImg ? (realImg.getAttribute('data-src') || realImg.src) : image;
+            // Ürün ID'sini çıkar (alternatif resim stratejisi için)
+            let productId = '';
+            if (card.hasAttribute('data-id')) {
+              productId = card.getAttribute('data-id');
+            } else {
+              // Link'ten ürün ID'si çıkarmaya çalış
+              const productLink = linkElement?.href || '';
+              const idMatch = productLink.match(/\/p-(\d+)/);
+              if (idMatch) {
+                productId = idMatch[1];
               }
             }
+
+            // Ürün resmi - çok kapsamlı arama ve placeholder kontrolü + ID-based fallback
+            let imgElement = card.querySelector('img, .product-image img, [data-testid="product-image"] img, .lazy-load-image img, .p-card-img img, .image img');
+            let image = '';
+
+            console.log(`DEBUG Product ${index} - Image Element:`, {
+              hasImg: !!imgElement,
+              productId: productId,
+              imgTagName: imgElement?.tagName,
+              imgClass: imgElement?.className,
+              imgSrc: imgElement?.src?.substring(0, 100),
+              imgDataSrc: imgElement?.getAttribute('data-src')?.substring(0, 100),
+              imgDataOriginal: imgElement?.getAttribute('data-original')?.substring(0, 100),
+              allImgAttrs: imgElement ? Array.from(imgElement.attributes).map(attr => `${attr.name}=${attr.value.substring(0, 50)}`) : []
+            });
+
+            if (imgElement) {
+              // Tüm olası attribute'ları sırayla dene
+              image = imgElement.getAttribute('data-src') ||
+                imgElement.getAttribute('data-original') ||
+                imgElement.getAttribute('data-lazy') ||
+                imgElement.getAttribute('data-img') ||
+                imgElement.getAttribute('data-image') ||
+                imgElement.src || '';
+
+              // Placeholder ise gerçek resmi ara
+              if (!image || image.includes('placeholder') || image.includes('data:image') || image.includes('svg') || image.length < 50) {
+                console.log(`DEBUG Product ${index} - Placeholder detected, searching for real image...`);
+
+                // Card içindeki tüm img elementlerini kontrol et
+                const allImages = card.querySelectorAll('img');
+                for (let img of allImages) {
+                  let testUrl = img.getAttribute('data-src') || img.getAttribute('data-original') || img.src || '';
+                  if (testUrl && testUrl.includes('mncdn.com') && !testUrl.includes('placeholder')) {
+                    image = testUrl;
+                    console.log(`DEBUG Product ${index} - Found real image in card:`, testUrl.substring(0, 100));
+                    break;
+                  }
+                }
+
+                // Hala placeholder ise parent element'leri ara
+                if (!image || image.includes('placeholder')) {
+                  const parentImg = card.closest('.p-card-wrppr')?.querySelector('img[src*="mncdn.com"]:not([src*="placeholder"]), img[data-src*="mncdn.com"]:not([data-src*="placeholder"])');
+                  if (parentImg) {
+                    image = parentImg.getAttribute('data-src') || parentImg.src || '';
+                    console.log(`DEBUG Product ${index} - Found real image in parent:`, image?.substring(0, 100));
+                  }
+                }
+
+                // Son çare: ürün ID'sinden resim URL'si oluştur (Trendyol CDN pattern)
+                if ((!image || image.includes('placeholder')) && productId) {
+                  // Trendyol'un farklı resim pattern'lerini dene
+                  const patterns = [
+                    `https://cdn.dsmcdn.com/mnresize/200/200/ty${productId}_1.jpg`,
+                    `https://cdn.dsmcdn.com/ty${productId}_1.jpg`,
+                    `https://cdn.dsmcdn.com/mnresize/400/400/ty${productId}_1.jpg`,
+                    `https://cdn.dsmcdn.com/product/media/images/prod/PIM/20220101/ty${productId}_1.jpg`
+                  ];
+                  image = patterns[0]; // İlk pattern'i kullan
+                  console.log(`DEBUG Product ${index} - Generated image from product ID:`, image);
+                }
+              }
+
+              // URL'yi düzelt
+              if (image && !image.startsWith('http')) {
+                if (image.startsWith('//')) {
+                  image = 'https:' + image;
+                } else if (image.startsWith('/')) {
+                  image = 'https://cdn.dsmcdn.com' + image;
+                }
+              }
+
+              // Son kontrol - hala placeholder ise güzel fallback resim kullan
+              if (!image || image.includes('placeholder') || image.includes('data:image')) {
+                // Ürün kategorisine göre estetik placeholder
+                const category = name.toLowerCase();
+                let fallbackImage = '';
+
+                if (category.includes('tablo') || category.includes('canvas') || category.includes('poster')) {
+                  fallbackImage = 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=400&fit=crop&crop=center';
+                } else if (category.includes('çerçeve') || category.includes('frame')) {
+                  fallbackImage = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=400&fit=crop&crop=center';
+                } else if (category.includes('duvar') || category.includes('dekor')) {
+                  fallbackImage = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=400&fit=crop&crop=center';
+                } else {
+                  fallbackImage = 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?w=300&h=400&fit=crop&crop=center';
+                }
+
+                image = fallbackImage;
+                console.log(`DEBUG Product ${index} - Using aesthetic placeholder for category:`, category.substring(0, 30));
+              }
+            }
+
+            console.log(`DEBUG Product ${index} - Final image URL:`, image?.substring(0, 100));
 
             // Ürün adı - title attribute'dan veya text content'den
             let name = '';
