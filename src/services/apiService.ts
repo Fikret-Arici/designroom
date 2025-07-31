@@ -38,6 +38,19 @@ export interface RoomCommentResponse {
   message: string;
 }
 
+export interface DecorSuggestionsResponse {
+  success: boolean;
+  suggestions: {
+    categories: {
+      [key: string]: string[];
+    };
+    confidence: number;
+    timestamp: string;
+    isFallback?: boolean;
+  };
+  message: string;
+}
+
 class ApiService {
   private static instance: ApiService;
 
@@ -205,6 +218,34 @@ class ApiService {
     } catch (error) {
       console.error('❌ API: Oda yorumu hatası:', error);
       throw new Error('Oda yorumu sırasında hata oluştu');
+    }
+  }
+
+  // Suggest decor products
+  async suggestDecorProducts(imageBase64: string): Promise<DecorSuggestionsResponse> {
+    try {
+      console.log('🎨 API: Dekoratif ürün önerileri isteği gönderiliyor...');
+      
+      const response = await fetch(`${API_BASE_URL}/suggest-decor-products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ API: Dekoratif ürün önerileri yanıtı alındı');
+      return result;
+    } catch (error) {
+      console.error('❌ API: Dekoratif ürün önerileri hatası:', error);
+      throw new Error('Dekoratif ürün önerileri sırasında hata oluştu');
     }
   }
 

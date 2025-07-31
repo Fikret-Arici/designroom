@@ -22,16 +22,19 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 
 ### 🤖 AI Agent Mimarisi
 - **🔍 Agent 1: Ürün Arama Ajanı** - Metin tanımından uygun ürünleri bulma
-- **👁️ Agent 2: Oda Görsel Analiz Ajanı** - GPT-4 Vision ile oda analizi
-- **🎨 Agent 3: Yerleştirme Ajanı** - DALL·E Edit ile fotorealistik yerleştirme
+- **👁️ Agent 2: Oda Görsel Analiz Ajanı** - Gemini Vision ile oda analizi
+- **🎨 Agent 3: Yerleştirme Ajanı** - Hugging Face REMBG ile arka plan kaldırma
+- **💬 Agent 4: Oda Yorum Ajanı** - AI destekli oda analiz yorumları
 
 ### ✨ Ana Özellikler
 - 📸 **Oda Fotoğrafı Yükleme** - Drag & drop ile kolay yükleme
-- 🔍 **AI Destekli Ürün Arama** - Amazon, Etsy, Trendyol entegrasyonu
+- 🔍 **AI Destekli Ürün Arama** - Google Custom Search API entegrasyonu
 - 🎨 **Otomatik Oda Analizi** - Stil ve renk paletini otomatik tespit
 - 🖼️ **Fotorealistik Yerleştirme** - Doğal görünümlü ürün entegrasyonu
+- 💬 **AI Oda Yorumları** - Detaylı oda analizi ve öneriler
 - 📱 **Responsive Tasarım** - Tüm cihazlarda mükemmel deneyim
 - ⚡ **Gerçek Zamanlı İşlem** - Hızlı AI yanıtları
+- 🎯 **Optimize Edilmiş UI** - Kompakt ve kullanışlı arayüz
 
 ---
 
@@ -48,6 +51,7 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 - **Shadcn/ui** - Hazır bileşenler
 - **React Router** - Sayfa yönlendirme
 - **React Query** - Veri yönetimi
+- **Lucide React** - Modern ikonlar
 
 </td>
 <td valign="top">
@@ -55,7 +59,10 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 ### ⚙️ Backend
 - **Node.js** + **Express.js**
 - **Multer** - Dosya yükleme
-- **OpenAI API** - GPT-4 Vision ve DALL·E
+- **Gemini API** - Google AI Vision analizi
+- **Google Custom Search API** - Ürün arama
+- **Hugging Face REMBG** - Arka plan kaldırma
+- **Puppeteer** - Web scraping
 - **CORS** - Cross-origin desteği
 
 </td>
@@ -71,7 +78,8 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 #### 🔧 Gereksinimler
 - Node.js 18+
 - npm veya yarn
-- OpenAI API anahtarı
+- Gemini API anahtarı
+
 
 #### 1️⃣ Projeyi Klonlayın
 ```bash
@@ -97,7 +105,7 @@ cd backend
 npm install
 
 # Environment dosyasını oluşturun
-cp .env.example .env
+cp env.example .env
 
 # Geliştirme sunucusunu başlatın
 npm run dev
@@ -164,13 +172,15 @@ NODE_ENV=development
 | 1️⃣ | **Oda Fotoğrafı Yükleyin** - Ana sayfada drag & drop ile oda fotoğrafınızı yükleyin | ~5 saniye |
 | 2️⃣ | **Ürün Tanımlayın** - İstediğiniz dekoratif ürünü tarif edin | ~10 saniye |
 | 3️⃣ | **AI Analizi** - Sistem odanızı otomatik olarak analiz eder | ~15 saniye |
-| 4️⃣ | **Ürün Yerleştirme** - AI ürünü odanıza doğal şekilde yerleştirir | ~20 saniye |
-| 5️⃣ | **Sonuç İndirin** - Final görseli indirin veya paylaşın | ~2 saniye |
+| 4️⃣ | **AI Oda Yorumu** - Detaylı oda analizi ve öneriler alın | ~8 saniye |
+| 5️⃣ | **Ürün Yerleştirme** - AI ürünü odanıza doğal şekilde yerleştirir | ~20 saniye |
+| 6️⃣ | **Sonuç İndirin** - Final görseli indirin veya paylaşın | ~2 saniye |
 
 ### 💡 İpuçları
 - 📷 **Yüksek kaliteli** oda fotoğrafları kullanın
 - 🌟 **Detaylı ürün tanımları** yapın  
 - 💡 **İyi aydınlatmalı** odalar daha iyi sonuç verir
+- 💬 **AI yorumlarını** okuyarak daha iyi öneriler alın
 
 ---
 
@@ -185,11 +195,11 @@ ai-decor-dream/
 │   │   ├── 🔍 ProductSearch.tsx   # Ürün arama bileşeni
 │   │   ├── 🏠 RoomAnalysis.tsx    # Oda analiz bileşeni
 │   │   ├── 🎨 PlacementResult.tsx # Sonuç gösterimi
+│   │   ├── 💬 RoomComment.tsx     # AI oda yorumları
 │   │   └── 📁 ui/                 # Shadcn/ui bileşenleri
 │   ├── 📁 services/                # API servisleri
 │   │   ├── 🔧 apiService.ts       # Backend API bağlantısı
-│   │   ├── 🤖 aiService.ts        # AI servisleri
-│   │   └── 🛒 trendyolService.ts  # E-ticaret entegrasyonu
+│   │   └── 🤖 aiService.ts        # AI servisleri
 │   ├── 📁 pages/                   # Sayfa bileşenleri
 │   │   ├── 🏠 Index.tsx           # Ana sayfa
 │   │   └── ❌ NotFound.tsx        # 404 sayfası
@@ -236,12 +246,13 @@ npm run lint         # 🔍 Kod kontrolü
 | `POST` | `/api/upload-room` | 📤 Oda fotoğrafı yükleme | ~2s |
 | `POST` | `/api/search-products` | 🔍 Google Custom Search API ile ürün arama | ~5s |
 | `POST` | `/api/analyze-room` | 👁️ Gemini Vision ile oda analizi | ~8s |
+| `POST` | `/api/comment-room` | 💬 AI oda yorumu oluşturma | ~6s |
 | `POST` | `/api/place-product` | 🎨 Hugging Face REMBG + AI yerleştirme | ~15s |
 | `GET` | `/api/health` | ❤️ API durum kontrolü | ~100ms |
 
 ### 🔍 Google Custom Search API Entegrasyonu
 
-Proje artık **Google Custom Search API** kullanarak gerçek ürün arama yapıyor:
+Proje **Google Custom Search API** kullanarak gerçek ürün arama yapıyor:
 
 ```javascript
 // Google Custom Search API çağrısı
@@ -270,6 +281,7 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 - 🎯 **Smart Filtering** - Oda stili ve renk uyumu
 - 📊 **AI Scoring** - Ürün uyumluluk skoru
 - 💡 **Smart Recommendations** - Akıllı öneriler
+- 💬 **AI Room Comments** - Detaylı oda analizi
 
 ### 📝 API Yanıt Örnekleri
 
@@ -305,6 +317,22 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 ```
 </details>
 
+<details>
+<summary>💬 Room Comment Response</summary>
+
+```json
+{
+  "success": true,
+  "comment": {
+    "text": "Bu oda modern ve minimalist bir tasarıma sahip...",
+    "confidence": 0.95,
+    "timestamp": "2024-01-15T10:30:00Z",
+    "isFallback": false
+  }
+}
+```
+</details>
+
 ---
 
 ## 🎨 UI/UX Özellikleri
@@ -314,6 +342,7 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 - 🚀 **Performans** - Hızlı yükleme ve yanıt süreleri
 - 📱 **Responsive** - Tüm cihazlarda mükemmel görünüm
 - ♿ **Erişilebilirlik** - WCAG 2.1 standartlarına uyum
+- 🎨 **Kompakt Tasarım** - Optimize edilmiş boşluk kullanımı
 
 ### 🎭 Öne Çıkan Özellikler
 - **🌈 Modern Animasyonlar** - Micro-interactions ve smooth transitions
@@ -321,6 +350,14 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 - **🎉 Toast Bildirimleri** - Kullanıcı dostu geri bildirimler
 - **🖱️ Drag & Drop** - Sürükle bırak dosya yükleme
 - **🌙 Dark Mode** - Göz yorgunluğunu azaltan karanlık tema
+- **💬 AI Yorum Sistemi** - Detaylı oda analizi ve öneriler
+- **📏 Optimize Edilmiş Layout** - Kompakt ve kullanışlı arayüz
+
+### 🎨 Son Güncellemeler
+- **📐 Genişletilmiş Oda Yorumu** - Daha büyük ve okunabilir yorum alanı
+- **🎯 Kompakt Layout** - Azaltılmış boşluklar ve daha fazla içerik alanı
+- **🔄 Temizlenmiş Kod** - Kullanılmayan dosyalar ve importlar kaldırıldı
+- **⚡ Optimize Edilmiş Performans** - Daha hızlı yükleme süreleri
 
 ---
 
@@ -330,16 +367,19 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 - [ ] 📱 **AR Desteği** - Artırılmış gerçeklik ile önizleme
 - [ ] 🎨 **Çoklu Ürün Yerleştirme** - Aynı anda birden fazla ürün
 - [ ] 💾 **Kayıt Sistemi** - Kullanıcı hesapları ve favoriler
+- [ ] 🔄 **Yorum Yenileme** - AI yorumlarını yeniden oluşturma
 
 ### 📈 Orta Vadeli (Q2-Q3 2024)
 - [ ] 🔗 **Sosyal Medya Entegrasyonu** - Instagram, Pinterest paylaşımı
 - [ ] 💳 **Premium Özellikler** - Gelişmiş AI modelleri ve özellikler
 - [ ] 🎓 **3D Oda Modelleme** - 3D ortamda ürün yerleştirme
+- [ ] 📊 **Analytics Dashboard** - Kullanım istatistikleri
 
 ### 🚀 Uzun Vadeli (Q4 2024+)
 - [ ] 📱 **Mobil Uygulama** - iOS ve Android native uygulamalar
 - [ ] 🤝 **B2B Çözümler** - İç mimar ve mobilyacılar için özel araçlar
 - [ ] 🌍 **Çoklu Dil Desteği** - Uluslararası pazara açılım
+- [ ] 🤖 **AI Chatbot** - Akıllı asistan entegrasyonu
 
 ---
 
@@ -362,6 +402,7 @@ docs: dokümantasyon güncellemesi
 style: kod formatı düzenleme
 refactor: kod yeniden düzenleme
 test: test ekleme/güncelleme
+chore: bakım işlemleri
 ```
 
 ### 🐛 Hata Bildirimi
@@ -387,11 +428,12 @@ MIT License - Özgürce kullanabilir, değiştirebilir ve dağıtabilirsiniz! �
 
 Bu projeyi mümkün kılan harika araçlara teşekkürler:
 
-- 🤖 [OpenAI](https://openai.com/) - GPT-4 Vision ve DALL·E API'leri
+- 🤖 [Google AI](https://ai.google.dev/) - Gemini Vision API
 - 🎨 [Shadcn/ui](https://ui.shadcn.com/) - Muhteşem UI bileşenleri
 - 💨 [Tailwind CSS](https://tailwindcss.com/) - Modern CSS framework
 - ⚡ [Vite](https://vitejs.dev/) - Süper hızlı build tool
 - ⚛️ [React](https://react.dev/) - Güçlü UI kütüphanesi
+- 🔍 [Google Custom Search](https://developers.google.com/custom-search) - Ürün arama API'si
 
 ---
 

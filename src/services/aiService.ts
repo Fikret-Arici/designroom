@@ -54,6 +54,15 @@ export interface RoomComment {
   isFallback?: boolean;
 }
 
+export interface DecorSuggestions {
+  categories: {
+    [key: string]: string[];
+  };
+  confidence: number;
+  timestamp: string;
+  isFallback?: boolean;
+}
+
 class AIService {
   private static instance: AIService;
   private apiKey: string = '';
@@ -161,6 +170,26 @@ class AIService {
     }
   }
 
+  // Agent 5: Dekoratif Ürün Önerileri Ajanı - Gemini ile
+  async suggestDecorProducts(imageBase64: string): Promise<DecorSuggestions> {
+    try {
+      console.log('🎨 Agent 5: Gemini ile dekoratif ürün önerileri başlatılıyor...');
+      
+      const response = await apiService.suggestDecorProducts(imageBase64);
+      
+      if (response.success && response.suggestions) {
+        console.log('✅ Dekoratif ürün önerileri tamamlandı');
+        return response.suggestions;
+      } else {
+        console.error('❌ Dekoratif ürün önerileri başarısız:', response);
+        return this.getFallbackDecorSuggestions();
+      }
+    } catch (error) {
+      console.error('❌ Dekoratif ürün önerileri hatası:', error);
+      return this.getFallbackDecorSuggestions();
+    }
+  }
+
   // Fallback methods for error cases
   private getFallbackProducts(): Product[] {
     return [
@@ -249,6 +278,43 @@ Renk paleti açık tonlarda seçilmiş, bu da odaya ferah bir hava katıyor. Iş
 Dekorasyon açısından, odanın boş duvarlarına uygun boyutlarda tablolar eklenebilir. Özellikle yatak başı duvarı veya oturma alanının karşısındaki duvar, dekoratif tablolar için ideal alanlar sunuyor. 
 
 Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekoratif eklemelerle daha da kişiselleştirilebilir.`,
+      confidence: 0.75,
+      timestamp: new Date().toISOString(),
+      isFallback: true
+    };
+  }
+
+  private getFallbackDecorSuggestions(): DecorSuggestions {
+    return {
+      categories: {
+        "Duvarlar İçin": [
+          "Modern soyut tablo",
+          "Vintage ayna",
+          "Dekoratif poster",
+          "Duvar saati"
+        ],
+        "Mobilya Üstü": [
+          "Dekoratif vazo",
+          "Mumluk seti",
+          "Küçük bitki",
+          "Dekoratif obje"
+        ],
+        "Zemin": [
+          "Modern halı",
+          "Dekoratif paspas",
+          "Yastık seti"
+        ],
+        "Aydınlatma": [
+          "LED duvar lambası",
+          "Masa lambası",
+          "Abajur"
+        ],
+        "Dokuma": [
+          "Dekoratif yastık",
+          "Battaniye",
+          "Perde dekorasyonu"
+        ]
+      },
       confidence: 0.75,
       timestamp: new Date().toISOString(),
       isFallback: true

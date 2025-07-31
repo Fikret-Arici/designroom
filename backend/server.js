@@ -1591,6 +1591,281 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
     }
   }
 
+
+
+// Dekoratif Ürün Önerileri Ajanı - Gemini ile
+async suggestDecorProducts(imageBase64) {
+  try {
+    console.log('🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor...');
+
+    // Base64'ten buffer'a çevir
+    const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
+
+    // Gemini Pro Vision modeli ile dekoratif ürün önerileri
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`,
+      {
+        contents: [{
+          parts: [
+            {
+              text: `Bu oda fotoğrafını analiz et ve odaya uygun dekoratif ürün önerileri ver. Önerilerini şu 5 kategoriye göre yaz:
+
+Duvarlar İçin:
+- tablo
+- ayna
+- saat
+
+Mobilya Üstü:
+- vazo
+- bitki
+- mumluk
+
+Zemin:
+- halı
+- paspas
+- yastık
+
+Aydınlatma:
+- masa lambası
+- LED
+- abajur
+
+Dokuma:
+- perde
+- yastık
+- battaniye
+
+Her kategoriye 2-3 öneri ver. Sadece ürün isimlerini yaz, açıklama ekleme.`
+            },
+            {
+              inline_data: {
+                mime_type: "image/jpeg",
+                data: imageBuffer.toString('base64')
+              }
+            }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.8,
+          maxOutputTokens: 800
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+
+
+
+    // Yanıtın text kısmını güvenli şekilde al
+    const parts = response.data.candidates[0]?.content?.parts || [];
+    const suggestionsText = parts.find(p => p.text)?.text || '';
+
+    if (suggestionsText.trim()) {
+      console.log('✅ AI dekoratif ürün önerileri başarılı');
+      console.log('AI Yanıtı:', suggestionsText);
+
+      // Metni kategorilere ayır
+      const categories = this.parseDecorSuggestions(suggestionsText);
+
+      return {
+        categories: categories,
+        confidence: 0.92,
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      throw new Error('AI yanıtı boş geldi.');
+    }
+
+  } catch (error) {
+    console.error('❌ AI dekoratif ürün önerileri hatası:', error);
+
+    // Fallback öneriler
+    return {
+      categories: {
+        "Duvarlar İçin": [
+          "Modern soyut tablo",
+          "Vintage ayna",
+          "Dekoratif poster",
+          "Duvar saati"
+        ],
+        "Mobilya Üstü": [
+          "Dekoratif vazo",
+          "Mumluk seti",
+          "Küçük bitki",
+          "Dekoratif obje"
+        ],
+        "Zemin": [
+          "Modern halı",
+          "Dekoratif paspas",
+          "Yastık seti"
+        ],
+        "Aydınlatma": [
+          "LED duvar lambası",
+          "Masa lambası",
+          "Abajur"
+        ],
+        "Dokuma": [
+          "Dekoratif yastık",
+          "Battaniye",
+          "Perde dekorasyonu"
+        ]
+      },
+      confidence: 0.75,
+      timestamp: new Date().toISOString(),
+      isFallback: true
+    };
+  }
+
+  // // Dekoratif önerileri kategorilere ayırma fonksiyonu
+  // parseDecorSuggestions(text) {
+  //   try {
+  //     console.log('Parsing decor suggestions from:', text);
+      
+  //     const categories = {};
+  //     const lines = text.split('\n');
+  //     let currentCategory = null;
+      
+  //     for (const line of lines) {
+  //       const trimmedLine = line.trim();
+        
+  //       // Kategori başlıklarını bul
+  //       if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
+  //         currentCategory = 'Duvarlar İçin';
+  //         categories[currentCategory] = [];
+  //       } else if (trimmedLine.includes('Mobilya Üstü:') || trimmedLine.includes('**Mobilya Üstü**:')) {
+  //         currentCategory = 'Mobilya Üstü';
+  //         categories[currentCategory] = [];
+  //       } else if (trimmedLine.includes('Zemin:') || trimmedLine.includes('**Zemin**:')) {
+  //         currentCategory = 'Zemin';
+  //         categories[currentCategory] = [];
+  //       } else if (trimmedLine.includes('Aydınlatma:') || trimmedLine.includes('**Aydınlatma**:')) {
+  //         currentCategory = 'Aydınlatma';
+  //         categories[currentCategory] = [];
+  //       } else if (trimmedLine.includes('Dokuma:') || trimmedLine.includes('**Dokuma**:')) {
+  //         currentCategory = 'Dokuma';
+  //         categories[currentCategory] = [];
+  //       }
+  //       // Öğe listelerini bul (- ile başlayan satırlar)
+  //       else if (trimmedLine.startsWith('-') && currentCategory) {
+  //         const item = trimmedLine.substring(1).trim();
+  //         if (item && !categories[currentCategory].includes(item)) {
+  //           categories[currentCategory].push(item);
+  //         }
+  //       }
+  //       // Numaralı listeleri de bul (1. 2. gibi)
+  //       else if (/^\d+\./.test(trimmedLine) && currentCategory) {
+  //         const item = trimmedLine.replace(/^\d+\.\s*/, '').trim();
+  //         if (item && !categories[currentCategory].includes(item)) {
+  //           categories[currentCategory].push(item);
+  //         }
+  //       }
+  //     }
+      
+  //     console.log('Parsed categories:', categories);
+      
+  //     // Eğer hiç kategori bulunamadıysa, fallback kullan
+  //     if (Object.keys(categories).length === 0) {
+  //       console.log('No categories found, using fallback');
+  //       return {
+  //         "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
+  //         "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
+  //         "Zemin": ["Halı", "Paspas", "Yastık"],
+  //         "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
+  //         "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
+  //       };
+  //     }
+      
+  //     return categories;
+  //   } catch (error) {
+  //     console.error('Parse decor suggestions error:', error);
+  //     return {
+  //       "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
+  //       "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
+  //       "Zemin": ["Halı", "Paspas", "Yastık"],
+  //       "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
+  //       "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
+  //     };
+  //   }
+  }
+
+  // Dekoratif önerileri kategorilere ayırma fonksiyonu
+  parseDecorSuggestions(text) {
+    try {
+      console.log('Parsing decor suggestions from:', text);
+      
+      const categories = {};
+      const lines = text.split('\n');
+      let currentCategory = null;
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        if (!trimmedLine) continue;
+        
+        // Kategori başlıklarını bul
+        if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
+          currentCategory = 'Duvarlar İçin';
+          categories[currentCategory] = [];
+        } else if (trimmedLine.includes('Mobilya Üstü:') || trimmedLine.includes('**Mobilya Üstü**:')) {
+          currentCategory = 'Mobilya Üstü';
+          categories[currentCategory] = [];
+        } else if (trimmedLine.includes('Zemin:') || trimmedLine.includes('**Zemin**:')) {
+          currentCategory = 'Zemin';
+          categories[currentCategory] = [];
+        } else if (trimmedLine.includes('Aydınlatma:') || trimmedLine.includes('**Aydınlatma**:')) {
+          currentCategory = 'Aydınlatma';
+          categories[currentCategory] = [];
+        } else if (trimmedLine.includes('Dokuma:') || trimmedLine.includes('**Dokuma**:')) {
+          currentCategory = 'Dokuma';
+          categories[currentCategory] = [];
+        }
+        // Öğe listelerini bul (- ile başlayan satırlar)
+        else if (trimmedLine.startsWith('-') && currentCategory) {
+          const item = trimmedLine.substring(1).trim();
+          if (item && !categories[currentCategory].includes(item)) {
+            categories[currentCategory].push(item);
+          }
+        }
+        // Numaralı listeleri de bul (1. 2. gibi)
+        else if (/^\d+\./.test(trimmedLine) && currentCategory) {
+          const item = trimmedLine.replace(/^\d+\.\s*/, '').trim();
+          if (item && !categories[currentCategory].includes(item)) {
+            categories[currentCategory].push(item);
+          }
+        }
+      }
+      
+      console.log('Parsed categories:', categories);
+      
+      // Eğer hiç kategori bulunamadıysa, fallback kullan
+      if (Object.keys(categories).length === 0) {
+        console.log('No categories found, using fallback');
+        return {
+          "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
+          "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
+          "Zemin": ["Halı", "Paspas", "Yastık"],
+          "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
+          "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
+        };
+      }
+      
+      return categories;
+    } catch (error) {
+      console.error('Parse decor suggestions error:', error);
+      return {
+        "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
+        "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
+        "Zemin": ["Halı", "Paspas", "Yastık"],
+        "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
+        "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
+      };
+    }
+  }
+
   // AI ile optimal yerleştirme pozisyonu hesaplama
   async calculateOptimalPlacement(roomImageBase64, placementData) {
     try {
@@ -1756,6 +2031,29 @@ app.post('/api/comment-room', async (req, res) => {
   } catch (error) {
     console.error('Oda yorumu hatası:', error);
     res.status(500).json({ error: 'Oda yorumu sırasında hata oluştu' });
+  }
+});
+
+// POST /api/suggest-decor-products
+app.post('/api/suggest-decor-products', async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Görsel verisi gerekli' });
+    }
+
+    console.log('🎨 Dekoratif ürün önerileri başlatılıyor...');
+    const suggestions = await aiService.suggestDecorProducts(imageBase64);
+
+    res.json({
+      success: true,
+      suggestions,
+      message: 'Dekoratif ürün önerileri tamamlandı'
+    });
+  } catch (error) {
+    console.error('Dekoratif ürün önerileri hatası:', error);
+    res.status(500).json({ error: 'Dekoratif ürün önerileri sırasında hata oluştu' });
   }
 });
 
