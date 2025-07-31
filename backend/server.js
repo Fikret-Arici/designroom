@@ -5,8 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
-const cheerio = require('cheerio');
-const natural = require('natural');
 const Sentiment = require('sentiment');
 const puppeteer = require('puppeteer');
 
@@ -1532,20 +1530,14 @@ class AIService {
           contents: [{
             parts: [
               {
-                text: `Bu oda fotoğrafını detaylı bir şekilde analiz et ve Türkçe olarak yorumla. Şu konulara odaklan:
+                text: `Bu oda fotoğrafını kısa ve öz bir şekilde analiz et. Şu konulara odaklan:
 
-1. **Genel İzlenim**: Odanın genel atmosferi ve hissi
-2. **Dekorasyon Tarzı**: Hangi dekorasyon stili kullanılmış
-3. **Renk Paleti**: Hangi renkler baskın ve nasıl kullanılmış
-4. **Mobilya Düzeni**: Mobilyaların yerleşimi ve işlevselliği
-5. **Işıklandırma**: Doğal ve yapay ışık kullanımı
-6. **Dekoratif Öğeler**: Varsa dekoratif detaylar
-7. **Güçlü Yanlar**: Odanın en iyi özellikleri
-8. **İyileştirme Önerileri**: Hangi değişiklikler yapılabilir
-9. **Tablo Yerleştirme**: Hangi duvarlara tablo asılabilir
-10. **Genel Değerlendirme**: Odanın genel kalitesi ve uyumu
+1. **Genel İzlenim**: Odanın atmosferi (2-3 cümle)
+2. **Dekorasyon Tarzı**: Hangi stil kullanılmış (1-2 cümle)
+3. **Renk Paleti**: Baskın renkler (1 cümle)
+4. **Tablo Yerleştirme**: Hangi duvarlara tablo asılabilir (1-2 cümle)
 
-Yorumu samimi ve yapıcı bir dille yaz. Teknik terimler kullan ama anlaşılır olsun. 3-4 paragraf halinde yaz.`
+Kısa, samimi ve yapıcı bir dille yaz. 2-3 paragraf halinde yaz.`
               },
               {
                 inline_data: {
@@ -1557,7 +1549,7 @@ Yorumu samimi ve yapıcı bir dille yaz. Teknik terimler kullan ama anlaşılır
           }],
           generationConfig: {
             temperature: 0.8,
-            maxOutputTokens: 1500
+            maxOutputTokens: 800
           }
         },
         {

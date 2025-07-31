@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ImageUploader } from '@/components/ImageUploader';
@@ -13,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Sparkles, Target, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import aiHeroBg from '@/assets/ai-hero-bg.jpg';
-import demoRoom from '@/assets/demo-room.jpg';
 
 interface Product {
   id: string;
@@ -117,7 +115,7 @@ const Index = () => {
         style={{ backgroundImage: `url(${aiHeroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/70"></div>
-        <div className="relative z-10 max-w-4xl mx-auto px-6">
+                 <div className="relative z-10 max-w-4xl mx-auto px-2">
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="w-12 h-12 text-ai animate-float" />
             <h1 className="text-5xl font-bold bg-gradient-ai bg-clip-text text-transparent">
@@ -146,7 +144,7 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+             <div className="max-w-7xl mx-auto px-2 py-12">
         {/* Progress Bar */}
         <Card className="p-6 mb-8 bg-gradient-card">
           <div className="flex items-center justify-between mb-4">
@@ -198,9 +196,9 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Left Column - Current Step */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {currentStep === 'upload' && (
               <ImageUploader
                 onImageUpload={handleRoomUpload}
@@ -268,18 +266,7 @@ const Index = () => {
           </div>
 
           {/* Right Column - Side Information */}
-          <div className="space-y-6">
-            {roomImage && (
-              <Card className="p-4">
-                <h4 className="font-semibold text-foreground mb-3">Yüklenen Oda</h4>
-                <img
-                  src={roomImage}
-                  alt="Yüklenen oda"
-                  className="w-full h-32 object-cover rounded-lg border"
-                />
-              </Card>
-            )}
-
+          <div className="space-y-6 w-full lg:col-span-2">
             {roomImage && (
               <RoomComment 
                 roomImage={roomImage}

@@ -82,14 +82,16 @@ export const RoomComment = ({ roomImage, onCommentComplete }: RoomCommentProps) 
   }
 
   return (
-    <Card className="p-6 bg-gradient-card border-ai/20">
-      <div className="flex items-center gap-3 mb-4">
-        <MessageSquare className="w-6 h-6 text-ai" />
-        <h3 className="text-lg font-semibold text-foreground">AI Oda Yorumu</h3>
-        <Badge variant="outline" className="text-ai border-ai">
-          <Sparkles className="w-3 h-3 mr-1" />
-          Gemini AI
-        </Badge>
+    <Card className="p-6 bg-gradient-card border-ai/20 hover:border-ai/40 transition-all duration-300 w-full">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <MessageSquare className="w-6 h-6 text-ai" />
+          <h3 className="text-lg font-semibold text-foreground">AI Oda Yorumu</h3>
+          <Badge variant="outline" className="text-ai border-ai">
+            <Sparkles className="w-3 h-3 mr-1" />
+            Gemini AI
+          </Badge>
+        </div>
       </div>
 
       {isLoading && (
@@ -134,10 +136,10 @@ export const RoomComment = ({ roomImage, onCommentComplete }: RoomCommentProps) 
             </Button>
           </div>
 
-          <div className="bg-background/50 rounded-lg p-4 border">
+          <div className="bg-background/50 rounded-lg p-6 border max-h-96 min-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:bg-background/70 transition-colors duration-200">
             <div className="prose prose-sm max-w-none">
               {comment.text.split('\n\n').map((paragraph: string, index: number) => (
-                <p key={index} className="text-foreground leading-relaxed mb-3">
+                <p key={index} className="text-foreground leading-relaxed mb-3 last:mb-0">
                   {paragraph}
                 </p>
               ))}
