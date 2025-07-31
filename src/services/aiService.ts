@@ -47,6 +47,13 @@ export interface PlacementResult {
   message?: string;
 }
 
+export interface RoomComment {
+  text: string;
+  confidence: number;
+  timestamp: string;
+  isFallback?: boolean;
+}
+
 class AIService {
   private static instance: AIService;
   private apiKey: string = '';
@@ -134,6 +141,26 @@ class AIService {
     }
   }
 
+  // Agent 4: Oda Yorumu Ajanı - Gemini ile
+  async commentRoom(imageBase64: string): Promise<RoomComment> {
+    try {
+      console.log('💬 Agent 4: Gemini ile oda yorumu başlatılıyor...');
+      
+      const response = await apiService.commentRoom(imageBase64);
+      
+      if (response.success && response.comment) {
+        console.log('✅ Oda yorumu tamamlandı');
+        return response.comment;
+      } else {
+        console.error('❌ Oda yorumu başarısız:', response);
+        return this.getFallbackRoomComment();
+      }
+    } catch (error) {
+      console.error('❌ Oda yorumu hatası:', error);
+      return this.getFallbackRoomComment();
+    }
+  }
+
   // Fallback methods for error cases
   private getFallbackProducts(): Product[] {
     return [
@@ -210,6 +237,21 @@ class AIService {
       },
       error: 'Gemini API ile bağlantı kurulamadı',
       message: 'Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin'
+    };
+  }
+
+  private getFallbackRoomComment(): RoomComment {
+    return {
+      text: `Bu oda fotoğrafı modern bir dekorasyon tarzını yansıtıyor. Genel olarak temiz ve düzenli bir görünüm sergiliyor. Mobilya yerleşimi işlevsel görünüyor ve odanın genel atmosferi rahatlatıcı bir his veriyor. 
+
+Renk paleti açık tonlarda seçilmiş, bu da odaya ferah bir hava katıyor. Işıklandırma doğal ışığı destekleyecek şekilde düzenlenmiş. 
+
+Dekorasyon açısından, odanın boş duvarlarına uygun boyutlarda tablolar eklenebilir. Özellikle yatak başı duvarı veya oturma alanının karşısındaki duvar, dekoratif tablolar için ideal alanlar sunuyor. 
+
+Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekoratif eklemelerle daha da kişiselleştirilebilir.`,
+      confidence: 0.75,
+      timestamp: new Date().toISOString(),
+      isFallback: true
     };
   }
 }

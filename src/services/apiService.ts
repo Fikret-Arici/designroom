@@ -27,6 +27,17 @@ export interface PlacementResponse {
   message: string;
 }
 
+export interface RoomCommentResponse {
+  success: boolean;
+  comment: {
+    text: string;
+    confidence: number;
+    timestamp: string;
+    isFallback?: boolean;
+  };
+  message: string;
+}
+
 class ApiService {
   private static instance: ApiService;
 
@@ -63,6 +74,9 @@ class ApiService {
     try {
       console.log('🔍 API: Ürün arama isteği gönderiliyor...', { query, roomStyle, roomColors });
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 saniye timeout
+      
       const response = await fetch(`${API_BASE_URL}/search-products`, {
         method: 'POST',
         headers: {
@@ -73,7 +87,18 @@ class ApiService {
           roomStyle,
           roomColors,
         }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 429) {
+        throw new Error('Çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.');
+      }
+
+      if (response.status === 503) {
+        throw new Error('Sunucu geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.');
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,6 +109,15 @@ class ApiService {
       return result;
     } catch (error) {
       console.error('❌ API: Ürün arama hatası:', error);
+      
+      if (error.name === 'AbortError') {
+        throw new Error('İstek zaman aşımına uğradı. Lütfen tekrar deneyin.');
+      }
+      
+      if (error.message.includes('Rate limit')) {
+        throw new Error('Çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.');
+      }
+      
       throw new Error('Ürün arama sırasında hata oluştu');
     }
   }
@@ -143,6 +177,34 @@ class ApiService {
     } catch (error) {
       console.error('❌ API: Ürün yerleştirme hatası:', error);
       throw new Error('Ürün yerleştirme sırasında hata oluştu');
+    }
+  }
+
+  // Comment room
+  async commentRoom(imageBase64: string): Promise<RoomCommentResponse> {
+    try {
+      console.log('💬 API: Oda yorumu isteği gönderiliyor...');
+      
+      const response = await fetch(`${API_BASE_URL}/comment-room`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ API: Oda yorumu yanıtı alındı');
+      return result;
+    } catch (error) {
+      console.error('❌ API: Oda yorumu hatası:', error);
+      throw new Error('Oda yorumu sırasında hata oluştu');
     }
   }
 

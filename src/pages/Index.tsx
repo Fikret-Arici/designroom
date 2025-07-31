@@ -7,6 +7,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { ProductSearch } from '@/components/ProductSearch';
 import { RoomAnalysis } from '@/components/RoomAnalysis';
 import { PlacementResult } from '@/components/PlacementResult';
+import { RoomComment } from '@/components/RoomComment';
 import { AIAgent } from '@/components/AIAgent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Sparkles, Target, ArrowRight } from 'lucide-react';
@@ -42,6 +43,7 @@ const Index = () => {
   const [roomFile, setRoomFile] = useState<File | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [roomAnalysis, setRoomAnalysis] = useState<RoomAnalysis | null>(null);
+  const [roomComment, setRoomComment] = useState<any>(null);
   const [productMethod, setProductMethod] = useState<'upload' | 'describe'>('describe');
   const { toast } = useToast();
 
@@ -59,6 +61,11 @@ const Index = () => {
     setRoomFile(file);
     setRoomImage(preview);
     setCurrentStep('product');
+    
+    // Oda yorumunu otomatik olarak başlat
+    setTimeout(() => {
+      setRoomComment({ isLoading: true });
+    }, 1000);
   };
 
   const handleProductSelect = (product: Product) => {
@@ -77,6 +84,7 @@ const Index = () => {
     setRoomFile(null);
     setSelectedProduct(null);
     setRoomAnalysis(null);
+    setRoomComment(null);
     toast({
       title: "Yeniden Başlatıldı",
       description: "Yeni bir dekorasyon deneyimi için hazırsınız!",
@@ -270,6 +278,13 @@ const Index = () => {
                   className="w-full h-32 object-cover rounded-lg border"
                 />
               </Card>
+            )}
+
+            {roomImage && (
+              <RoomComment 
+                roomImage={roomImage}
+                onCommentComplete={setRoomComment}
+              />
             )}
 
             {selectedProduct && (

@@ -58,18 +58,40 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors }: Produc
       console.log('AI ürün arama başlatılıyor...');
       const response = await apiService.searchProducts(searchQuery, roomStyle, roomColors);
       
-      setProducts(response.products);
-      toast({
-        title: "Arama Tamamlandı",
-        description: response.message,
-      });
-    } catch (error) {
+      if (response.products && response.products.length > 0) {
+        setProducts(response.products);
+        toast({
+          title: "Arama Tamamlandı",
+          description: `${response.products.length} ürün bulundu`,
+        });
+      } else {
+        setProducts([]);
+        toast({
+          title: "Ürün Bulunamadı",
+          description: "Aradığınız kriterlere uygun ürün bulunamadı. Farklı anahtar kelimeler deneyin.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
       console.error('Arama hatası:', error);
+      
+      let errorMessage = "Ürün arama sırasında bir hata oluştu.";
+      
+      if (error.message.includes('Rate limit') || error.message.includes('Çok fazla istek')) {
+        errorMessage = "Çok fazla istek gönderildi. Lütfen 1 dakika bekleyip tekrar deneyin.";
+      } else if (error.message.includes('zaman aşımı')) {
+        errorMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
+      } else if (error.message.includes('Sunucu geçici')) {
+        errorMessage = "Sunucu geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.";
+      }
+      
       toast({
         title: "Arama Hatası",
-        description: "Ürün arama sırasında bir hata oluştu.",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      setProducts([]);
     } finally {
       setIsSearching(false);
     }
