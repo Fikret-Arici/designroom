@@ -63,6 +63,12 @@ export interface DecorSuggestions {
   isFallback?: boolean;
 }
 
+export interface DecorSuggestionsError {
+  error: string;
+  message: string;
+  timestamp: string;
+}
+
 class AIService {
   private static instance: AIService;
   private apiKey: string = '';
@@ -171,22 +177,38 @@ class AIService {
   }
 
   // Agent 5: Dekoratif Ürün Önerileri Ajanı - Gemini ile
-  async suggestDecorProducts(imageBase64: string): Promise<DecorSuggestions> {
+  async suggestDecorProducts(imageBase64: string): Promise<DecorSuggestions | DecorSuggestionsError> {
     try {
       console.log('🎨 Agent 5: Gemini ile dekoratif ürün önerileri başlatılıyor...');
       
       const response = await apiService.suggestDecorProducts(imageBase64);
       
-      if (response.success && response.suggestions) {
+      if (response.success && response.suggestions && !('error' in response.suggestions)) {
         console.log('✅ Dekoratif ürün önerileri tamamlandı');
-        return response.suggestions;
+        return response.suggestions as DecorSuggestions;
+      } else if (response.suggestions && 'error' in response.suggestions) {
+        const errorResponse = response.suggestions as any;
+        console.error('❌ AI yorumu oluşturulamadı:', errorResponse.error);
+        return {
+          error: errorResponse.error as string,
+          message: errorResponse.message as string || 'AI yorumu oluşturulamadı',
+          timestamp: errorResponse.timestamp as string
+        };
       } else {
         console.error('❌ Dekoratif ürün önerileri başarısız:', response);
-        return this.getFallbackDecorSuggestions();
+        return {
+          error: 'Yorum yapılamadı',
+          message: 'Bilinmeyen bir hata oluştu',
+          timestamp: new Date().toISOString()
+        };
       }
     } catch (error) {
       console.error('❌ Dekoratif ürün önerileri hatası:', error);
-      return this.getFallbackDecorSuggestions();
+      return {
+        error: 'Yorum yapılamadı',
+        message: 'Bağlantı hatası oluştu',
+        timestamp: new Date().toISOString()
+      };
     }
   }
 

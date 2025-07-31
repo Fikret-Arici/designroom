@@ -1608,34 +1608,28 @@ async suggestDecorProducts(imageBase64) {
         contents: [{
           parts: [
             {
-              text: `Bu oda fotoğrafını analiz et ve odaya uygun dekoratif ürün önerileri ver. Önerilerini şu 5 kategoriye göre yaz:
+              text: `Bu bir oda fotoğrafıdır. Görsele göre 5 farklı kategori için dekoratif ürün önerileri ver:
 
-Duvarlar İçin:
+1. Duvarlar (örnek: tablo, ayna, saat)
+2. Mobilya Üstü (örnek: vazo, bitki, mumluk)
+3. Zemin (örnek: halı, yastık, kilim)
+4. Aydınlatma (örnek: masa lambası, LED, abajur)
+5. Dokuma (örnek: perde, yastık, battaniye)
+
+Her kategori için yalnızca 1 ürün ismi yaz. Sadece ürün adlarını kısa maddeler halinde ver, açıklama ekleme. Biçim şu şekilde olsun:
+
+**Duvarlar:**
 - tablo
 - ayna
-- saat
 
-Mobilya Üstü:
-- vazo
+**Mobilya Üstü:**
 - bitki
 - mumluk
 
-Zemin:
-- halı
-- paspas
-- yastık
+... gibi.
 
-Aydınlatma:
-- masa lambası
-- LED
-- abajur
-
-Dokuma:
-- perde
-- yastık
-- battaniye
-
-Her kategoriye 2-3 öneri ver. Sadece ürün isimlerini yaz, açıklama ekleme.`
+Sade, kısa ve maddeler halinde yaz.
+`
             },
             {
               inline_data: {
@@ -1683,113 +1677,14 @@ Her kategoriye 2-3 öneri ver. Sadece ürün isimlerini yaz, açıklama ekleme.`
   } catch (error) {
     console.error('❌ AI dekoratif ürün önerileri hatası:', error);
 
-    // Fallback öneriler
+    // Hata durumunda boş sonuç döndür
     return {
-      categories: {
-        "Duvarlar İçin": [
-          "Modern soyut tablo",
-          "Vintage ayna",
-          "Dekoratif poster",
-          "Duvar saati"
-        ],
-        "Mobilya Üstü": [
-          "Dekoratif vazo",
-          "Mumluk seti",
-          "Küçük bitki",
-          "Dekoratif obje"
-        ],
-        "Zemin": [
-          "Modern halı",
-          "Dekoratif paspas",
-          "Yastık seti"
-        ],
-        "Aydınlatma": [
-          "LED duvar lambası",
-          "Masa lambası",
-          "Abajur"
-        ],
-        "Dokuma": [
-          "Dekoratif yastık",
-          "Battaniye",
-          "Perde dekorasyonu"
-        ]
-      },
-      confidence: 0.75,
-      timestamp: new Date().toISOString(),
-      isFallback: true
+      error: 'Yorum yapılamadı',
+      message: 'AI yorumu oluşturulurken bir hata oluştu',
+      timestamp: new Date().toISOString()
     };
   }
 
-  // // Dekoratif önerileri kategorilere ayırma fonksiyonu
-  // parseDecorSuggestions(text) {
-  //   try {
-  //     console.log('Parsing decor suggestions from:', text);
-      
-  //     const categories = {};
-  //     const lines = text.split('\n');
-  //     let currentCategory = null;
-      
-  //     for (const line of lines) {
-  //       const trimmedLine = line.trim();
-        
-  //       // Kategori başlıklarını bul
-  //       if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
-  //         currentCategory = 'Duvarlar İçin';
-  //         categories[currentCategory] = [];
-  //       } else if (trimmedLine.includes('Mobilya Üstü:') || trimmedLine.includes('**Mobilya Üstü**:')) {
-  //         currentCategory = 'Mobilya Üstü';
-  //         categories[currentCategory] = [];
-  //       } else if (trimmedLine.includes('Zemin:') || trimmedLine.includes('**Zemin**:')) {
-  //         currentCategory = 'Zemin';
-  //         categories[currentCategory] = [];
-  //       } else if (trimmedLine.includes('Aydınlatma:') || trimmedLine.includes('**Aydınlatma**:')) {
-  //         currentCategory = 'Aydınlatma';
-  //         categories[currentCategory] = [];
-  //       } else if (trimmedLine.includes('Dokuma:') || trimmedLine.includes('**Dokuma**:')) {
-  //         currentCategory = 'Dokuma';
-  //         categories[currentCategory] = [];
-  //       }
-  //       // Öğe listelerini bul (- ile başlayan satırlar)
-  //       else if (trimmedLine.startsWith('-') && currentCategory) {
-  //         const item = trimmedLine.substring(1).trim();
-  //         if (item && !categories[currentCategory].includes(item)) {
-  //           categories[currentCategory].push(item);
-  //         }
-  //       }
-  //       // Numaralı listeleri de bul (1. 2. gibi)
-  //       else if (/^\d+\./.test(trimmedLine) && currentCategory) {
-  //         const item = trimmedLine.replace(/^\d+\.\s*/, '').trim();
-  //         if (item && !categories[currentCategory].includes(item)) {
-  //           categories[currentCategory].push(item);
-  //         }
-  //       }
-  //     }
-      
-  //     console.log('Parsed categories:', categories);
-      
-  //     // Eğer hiç kategori bulunamadıysa, fallback kullan
-  //     if (Object.keys(categories).length === 0) {
-  //       console.log('No categories found, using fallback');
-  //       return {
-  //         "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
-  //         "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
-  //         "Zemin": ["Halı", "Paspas", "Yastık"],
-  //         "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
-  //         "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
-  //       };
-  //     }
-      
-  //     return categories;
-  //   } catch (error) {
-  //     console.error('Parse decor suggestions error:', error);
-  //     return {
-  //       "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
-  //       "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
-  //       "Zemin": ["Halı", "Paspas", "Yastık"],
-  //       "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
-  //       "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
-  //     };
-  //   }
   }
 
   // Dekoratif önerileri kategorilere ayırma fonksiyonu
@@ -1803,8 +1698,6 @@ Her kategoriye 2-3 öneri ver. Sadece ürün isimlerini yaz, açıklama ekleme.`
       
       for (const line of lines) {
         const trimmedLine = line.trim();
-        
-        if (!trimmedLine) continue;
         
         // Kategori başlıklarını bul
         if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
@@ -1841,30 +1734,20 @@ Her kategoriye 2-3 öneri ver. Sadece ürün isimlerini yaz, açıklama ekleme.`
       
       console.log('Parsed categories:', categories);
       
-      // Eğer hiç kategori bulunamadıysa, fallback kullan
+      // Eğer hiç kategori bulunamadıysa, hata döndür
       if (Object.keys(categories).length === 0) {
-        console.log('No categories found, using fallback');
-        return {
-          "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
-          "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
-          "Zemin": ["Halı", "Paspas", "Yastık"],
-          "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
-          "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
-        };
+        console.log('No categories found in AI response');
+        throw new Error('AI yanıtında kategori bulunamadı');
       }
       
       return categories;
     } catch (error) {
       console.error('Parse decor suggestions error:', error);
-      return {
-        "Duvarlar İçin": ["Modern tablo", "Dekoratif ayna", "Duvar saati"],
-        "Mobilya Üstü": ["Vazo", "Bitki", "Mumluk"],
-        "Zemin": ["Halı", "Paspas", "Yastık"],
-        "Aydınlatma": ["Masa lambası", "LED lamba", "Abajur"],
-        "Dokuma": ["Dekoratif yastık", "Battaniye", "Perde"]
-      };
+      throw error; // Hatayı yukarı fırlat
     }
   }
+
+
 
   // AI ile optimal yerleştirme pozisyonu hesaplama
   async calculateOptimalPlacement(roomImageBase64, placementData) {

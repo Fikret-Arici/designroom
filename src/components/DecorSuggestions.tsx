@@ -4,15 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Lightbulb, Sparkles, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AIService, { DecorSuggestions as DecorSuggestionsType } from '@/services/aiService';
+import AIService, { DecorSuggestions as DecorSuggestionsType, DecorSuggestionsError } from '@/services/aiService';
 
 interface DecorSuggestionsProps {
   roomImage: string;
-  onSuggestionsComplete?: (suggestions: DecorSuggestionsType) => void;
+  onSuggestionsComplete?: (suggestions: DecorSuggestionsType | DecorSuggestionsError) => void;
 }
 
 export const DecorSuggestions = ({ roomImage, onSuggestionsComplete }: DecorSuggestionsProps) => {
-  const [suggestions, setSuggestions] = useState<DecorSuggestionsType | null>(null);
+  const [suggestions, setSuggestions] = useState<DecorSuggestionsType | DecorSuggestionsError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
@@ -118,45 +118,63 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete }: DecorSugg
 
       {suggestions && !isLoading && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              <Clock className="w-3 h-3 mr-1" />
-              {new Date(suggestions.timestamp).toLocaleTimeString('tr-TR')}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Güven: %{Math.round(suggestions.confidence * 100)}
-            </Badge>
-            {suggestions.isFallback && (
-              <Badge variant="destructive" className="text-xs">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                Fallback
-              </Badge>
-            )}
-          </div>
-
-          <div className="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {Object.entries(suggestions.categories).map(([category, products]) => (
-              <div key={category} className="bg-background/50 rounded-lg p-4 border hover:bg-background/70 transition-colors duration-200">
-                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-ai" />
-                  {category}
-                </h4>
-                <div className="space-y-2">
-                  {products.map((product, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 bg-ai rounded-full" />
-                      <span className="text-foreground">{product}</span>
-                    </div>
-                  ))}
-                </div>
+          {'error' in suggestions ? (
+            // Error case
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+              <h4 className="font-semibold text-destructive mb-2">{suggestions.error}</h4>
+              <p className="text-muted-foreground text-sm">{suggestions.message}</p>
+              <div className="mt-4">
+                <Badge variant="secondary" className="text-xs">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {new Date(suggestions.timestamp).toLocaleTimeString('tr-TR')}
+                </Badge>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            // Success case
+            <>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {new Date(suggestions.timestamp).toLocaleTimeString('tr-TR')}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  Güven: %{Math.round(suggestions.confidence * 100)}
+                </Badge>
+                {suggestions.isFallback && (
+                  <Badge variant="destructive" className="text-xs">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    Fallback
+                  </Badge>
+                )}
+              </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Lightbulb className="w-3 h-3" />
-            AI tarafından önerilen dekoratif ürünler
-          </div>
+              <div className="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {Object.entries(suggestions.categories).map(([category, products]) => (
+                  <div key={category} className="bg-background/50 rounded-lg p-4 border hover:bg-background/70 transition-colors duration-200">
+                    <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-ai" />
+                      {category}
+                    </h4>
+                    <div className="space-y-2">
+                      {products.map((product, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm">
+                          <div className="w-1.5 h-1.5 bg-ai rounded-full" />
+                          <span className="text-foreground">{product}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Lightbulb className="w-3 h-3" />
+                AI tarafından önerilen dekoratif ürünler
+              </div>
+            </>
+          )}
         </div>
       )}
 
