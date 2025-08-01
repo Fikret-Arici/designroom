@@ -241,10 +241,10 @@ class AIService {
       });
 
       const page = await browser.newPage();
-      
+
       // Basit User-Agent
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      
+
       await page.setViewport({ width: 1280, height: 720 });
 
       // Bot tespitini önle
@@ -257,7 +257,7 @@ class AIService {
       // Arama URL'si oluştur
       const searchQuery = this.buildTrendyolSearchQuery(query, features);
       const trendyolUrl = `https://www.trendyol.com/sr?q=${encodeURIComponent(searchQuery)}`;
-      
+
       console.log('🔍 Trendyol URL:', trendyolUrl);
 
       // Sayfayı yükle
@@ -267,8 +267,8 @@ class AIService {
       });
 
       // Ürün kartlarını bekle
-      await page.waitForSelector('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr', { 
-        timeout: 10000 
+      await page.waitForSelector('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr', {
+        timeout: 10000
       });
 
       // Ürünleri çek
@@ -293,13 +293,39 @@ class AIService {
             const nameElement = card.querySelector('.prdct-desc-cntnr-name, .name, .product-title');
             const name = nameElement ? nameElement.textContent.trim() : '';
 
-            // Fiyat
-            const priceElement = card.querySelector('.prc-box-dscntd, .prc-box-sllng, .price, [class*="price"]');
-            const price = priceElement ? priceElement.textContent.trim() : '';
+            // Fiyat bilgileri - Sadece discounted, yoksa new_price al
+            let price = '';
+            let originalPrice = null;
 
-            // Orijinal fiyat
-            const originalPriceElement = card.querySelector('.prc-box-orgnl, .original-price');
-            const originalPrice = originalPriceElement ? originalPriceElement.textContent.trim() : '';
+            // 1. Önce discounted fiyat ara
+            const discountedElement = card.querySelector('.discounted, .prc-box-dscntd, [class*="discounted"]');
+
+            if (discountedElement) {
+              // İndirimli fiyat bulundu
+              price = discountedElement.textContent.trim();
+
+              // Orijinal fiyat da varsa al
+              const originalElement = card.querySelector('.original, .prc-box-orgnl, [class*="original"]');
+              if (originalElement) {
+                originalPrice = originalElement.textContent.trim();
+              }
+
+              console.log(`💰 İndirimli ürün bulundu - İndirimli: ${price}, Orijinal: ${originalPrice}`);
+            } else {
+              // 2. discounted yoksa new_price ara
+              const newPriceElement = card.querySelector('.new_price, .prc-box-sllng, [class*="new_price"]');
+
+              if (newPriceElement) {
+                price = newPriceElement.textContent.trim();
+                originalPrice = null;
+                console.log(`💰 Normal fiyat bulundu - New Price: ${price}`);
+              } else {
+                // 3. Son çare: herhangi bir fiyat elementi
+                const anyPriceElement = card.querySelector('[class*="price"], [class*="prc"], [class*="TL"]');
+                price = anyPriceElement ? anyPriceElement.textContent.trim() : '';
+                console.log(`💰 Fallback fiyat bulundu - Fiyat: ${price}`);
+              }
+            }
 
             // Rating
             const ratingElement = card.querySelector('.rating-score, .rating');
@@ -352,7 +378,30 @@ class AIService {
 
     } catch (error) {
       console.error('❌ Trendyol scraping hatası:', error.message);
-      console.log('⚠️ Fallback: Mock ürünler kullanılacak');
+      console.log('⚠️ Fallback: Google Search kullanılacak...');
+      return await this.fallbackToGoogleSearch(query, features);
+    }
+  }
+
+  // Fallback: Google Search ile ürün arama
+  async fallbackToGoogleSearch(query, features) {
+    try {
+      console.log('🔄 Google Search fallback başlatılıyor...');
+
+      // Google Search kullanarak ürün ara
+      const optimizedQuery = this.optimizeGoogleSearchQuery(query, features);
+      const searchResults = await this.performGoogleSearch(optimizedQuery);
+
+      if (searchResults && searchResults.length > 0) {
+        const products = await this.convertSearchResultsToProducts(searchResults, features);
+        console.log(`✅ Google Search'ten ${products.length} ürün bulundu`);
+        return products;
+      } else {
+        throw new Error('Google Search\'te de ürün bulunamadı');
+      }
+    } catch (error) {
+      console.error('❌ Google Search fallback hatası:', error);
+      console.log('⚠️ Son çare: Sistem mesajı gösteriliyor...');
       return this.getFallbackProducts();
     }
   }
@@ -452,23 +501,69 @@ class AIService {
   formatTrendyolPrice(priceText) {
     if (!priceText) return '0 TL';
 
-    // Sadece sayıları ve virgül/noktaları al
-    const numbers = priceText.replace(/[^\d,\.]/g, '');
+    // Fiyat metni temizle - sadece rakam, virgül ve nokta bırak
+    let cleanPrice = priceText.replace(/[^\d,\.]/g, '');
 
-    if (numbers) {
-      return `${numbers} TL`;
+    if (cleanPrice) {
+      // Türk Lirası formatını doğru anlayalım:
+      // 1.050,75 TL = bin elli lira yetmiş beş kuruş
+      // 1.050 TL = bin elli lira
+      // 50,75 TL = elli lira yetmiş beş kuruş
+
+      let priceValue;
+
+      // Hem nokta hem virgül varsa: 1.050,75 formatı
+      if (cleanPrice.includes('.') && cleanPrice.includes(',')) {
+        // Noktaları kaldır (binlik ayraç), virgülü noktaya çevir (ondalık)
+        cleanPrice = cleanPrice.replace(/\./g, '').replace(',', '.');
+        priceValue = parseFloat(cleanPrice);
+      }
+      // Sadece nokta varsa: 1.050 formatı (binlik ayraç)
+      else if (cleanPrice.includes('.') && !cleanPrice.includes(',')) {
+        // Eğer nokta son 3 haneden önceyse binlik ayraçtır
+        const dotIndex = cleanPrice.lastIndexOf('.');
+        const afterDot = cleanPrice.substring(dotIndex + 1);
+
+        if (afterDot.length === 3) {
+          // Binlik ayraç: 1.050 → 1050
+          cleanPrice = cleanPrice.replace(/\./g, '');
+          priceValue = parseFloat(cleanPrice);
+        } else {
+          // Ondalık: 10.50 → 10.50
+          priceValue = parseFloat(cleanPrice);
+        }
+      }
+      // Sadece virgül varsa: 50,75 formatı (ondalık)
+      else if (cleanPrice.includes(',') && !cleanPrice.includes('.')) {
+        cleanPrice = cleanPrice.replace(',', '.');
+        priceValue = parseFloat(cleanPrice);
+      }
+      // Hiç işaret yoksa: 1050 formatı
+      else {
+        priceValue = parseFloat(cleanPrice);
+      }
+
+      if (!isNaN(priceValue)) {
+        // Türk formatında geri döndür: 1050.75 → 1.050,75 TL
+        return priceValue.toLocaleString('tr-TR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + ' TL';
+      }
     }
 
-    return '0 TL';
+    return '0,00 TL';
   }
 
   calculateDiscount(currentPrice, originalPrice) {
     if (!originalPrice || !currentPrice) return null;
 
+    // Fiyat metinlerini sayısal değerlere çevir
     const current = parseFloat(currentPrice.replace(/[^\d,\.]/g, '').replace(',', '.'));
     const original = parseFloat(originalPrice.replace(/[^\d,\.]/g, '').replace(',', '.'));
 
-    if (original > current) {
+    // Hem değerler geçerli olmalı hem de orijinal fiyat yüksek olmalı
+    if (!isNaN(current) && !isNaN(original) && original > current) {
       const discountPercent = Math.round(((original - current) / original) * 100);
       return `%${discountPercent}`;
     }
@@ -1173,11 +1268,17 @@ class AIService {
       return analyzedProducts.slice(0, 10); // En iyi 10 ürünü döndür
 
     } catch (error) {
-      console.error('❌ Trendyol scraping başarısız:', error);
+      console.error('❌ Ürün arama başarısız:', error);
 
-      // Son çare olarak fallback kullan (sadece scraping tamamen başarısız olursa)
-      console.log('⚠️ Son çare: Sistem mesajı gösteriliyor...');
-      return this.getFallbackProducts();
+      // Fallback olarak Google Search kullan
+      try {
+        console.log('🔄 Google Search fallback çalışıyor...');
+        return await this.fallbackToGoogleSearch(query, features || this.parseQueryManually(query));
+      } catch (fallbackError) {
+        console.error('❌ Google Search fallback da başarısız:', fallbackError);
+        console.log('⚠️ Son çare: Sistem mesajı gösteriliyor...');
+        return this.getFallbackProducts();
+      }
     }
   }
 
@@ -1574,7 +1675,7 @@ Kısa, samimi ve yapıcı bir dille yaz. 2-3 paragraf halinde yaz.`
 
     } catch (error) {
       console.error('❌ AI oda yorumu hatası:', error);
-      
+
       // Fallback yorum
       return {
         text: `Bu oda fotoğrafı modern bir dekorasyon tarzını yansıtıyor. Genel olarak temiz ve düzenli bir görünüm sergiliyor. Mobilya yerleşimi işlevsel görünüyor ve odanın genel atmosferi rahatlatıcı bir his veriyor. 
@@ -1593,22 +1694,22 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
 
 
 
-// Dekoratif Ürün Önerileri Ajanı - Gemini ile
-async suggestDecorProducts(imageBase64) {
-  try {
-    console.log('🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor...');
+  // Dekoratif Ürün Önerileri Ajanı - Gemini ile
+  async suggestDecorProducts(imageBase64) {
+    try {
+      console.log('🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor...');
 
-    // Base64'ten buffer'a çevir
-    const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
+      // Base64'ten buffer'a çevir
+      const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
 
-    // Gemini Pro Vision modeli ile dekoratif ürün önerileri
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`,
-      {
-        contents: [{
-          parts: [
-            {
-              text: `Bu bir oda fotoğrafıdır. Görsele göre 5 farklı kategori için dekoratif ürün önerileri ver:
+      // Gemini Pro Vision modeli ile dekoratif ürün önerileri
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`,
+        {
+          contents: [{
+            parts: [
+              {
+                text: `Bu bir oda fotoğrafıdır. Görsele göre 5 farklı kategori için dekoratif ürün önerileri ver:
 
 1. Duvarlar (örnek: tablo, ayna, saat)
 2. Mobilya Üstü (örnek: vazo, bitki, mumluk)
@@ -1630,60 +1731,60 @@ Her kategori için yalnızca 1 ürün ismi yaz. Sadece ürün adlarını kısa m
 
 Sade, kısa ve maddeler halinde yaz.
 `
-            },
-            {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: imageBuffer.toString('base64')
+              },
+              {
+                inline_data: {
+                  mime_type: "image/jpeg",
+                  data: imageBuffer.toString('base64')
+                }
               }
-            }
-          ]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 800
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 800
+          }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      );
+
+
+
+
+      // Yanıtın text kısmını güvenli şekilde al
+      const parts = response.data.candidates[0]?.content?.parts || [];
+      const suggestionsText = parts.find(p => p.text)?.text || '';
+
+      if (suggestionsText.trim()) {
+        console.log('✅ AI dekoratif ürün önerileri başarılı');
+        console.log('AI Yanıtı:', suggestionsText);
+
+        // Metni kategorilere ayır
+        const categories = this.parseDecorSuggestions(suggestionsText);
+
+        return {
+          categories: categories,
+          confidence: 0.92,
+          timestamp: new Date().toISOString()
+        };
+      } else {
+        throw new Error('AI yanıtı boş geldi.');
       }
-    );
 
+    } catch (error) {
+      console.error('❌ AI dekoratif ürün önerileri hatası:', error);
 
-
-
-    // Yanıtın text kısmını güvenli şekilde al
-    const parts = response.data.candidates[0]?.content?.parts || [];
-    const suggestionsText = parts.find(p => p.text)?.text || '';
-
-    if (suggestionsText.trim()) {
-      console.log('✅ AI dekoratif ürün önerileri başarılı');
-      console.log('AI Yanıtı:', suggestionsText);
-
-      // Metni kategorilere ayır
-      const categories = this.parseDecorSuggestions(suggestionsText);
-
+      // Hata durumunda boş sonuç döndür
       return {
-        categories: categories,
-        confidence: 0.92,
+        error: 'Yorum yapılamadı',
+        message: 'AI yorumu oluşturulurken bir hata oluştu',
         timestamp: new Date().toISOString()
       };
-    } else {
-      throw new Error('AI yanıtı boş geldi.');
     }
-
-  } catch (error) {
-    console.error('❌ AI dekoratif ürün önerileri hatası:', error);
-
-    // Hata durumunda boş sonuç döndür
-    return {
-      error: 'Yorum yapılamadı',
-      message: 'AI yorumu oluşturulurken bir hata oluştu',
-      timestamp: new Date().toISOString()
-    };
-  }
 
   }
 
@@ -1691,14 +1792,14 @@ Sade, kısa ve maddeler halinde yaz.
   parseDecorSuggestions(text) {
     try {
       console.log('Parsing decor suggestions from:', text);
-      
+
       const categories = {};
       const lines = text.split('\n');
       let currentCategory = null;
-      
+
       for (const line of lines) {
         const trimmedLine = line.trim();
-        
+
         // Kategori başlıklarını bul
         if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
           currentCategory = 'Duvarlar İçin';
@@ -1731,15 +1832,15 @@ Sade, kısa ve maddeler halinde yaz.
           }
         }
       }
-      
+
       console.log('Parsed categories:', categories);
-      
+
       // Eğer hiç kategori bulunamadıysa, hata döndür
       if (Object.keys(categories).length === 0) {
         console.log('No categories found in AI response');
         throw new Error('AI yanıtında kategori bulunamadı');
       }
-      
+
       return categories;
     } catch (error) {
       console.error('Parse decor suggestions error:', error);
