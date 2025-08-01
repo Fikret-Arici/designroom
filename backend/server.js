@@ -289,9 +289,21 @@ class AIService {
               image = imgElement.getAttribute('data-src') || imgElement.getAttribute('data-original') || imgElement.src || '';
             }
 
-            // Ürün adı
+            // Ürün adı ve detay bilgileri
             const nameElement = card.querySelector('.prdct-desc-cntnr-name, .name, .product-title');
             const name = nameElement ? nameElement.textContent.trim() : '';
+
+            // Marka bilgisini ayrı çek
+            const brandElement = card.querySelector('.prdct-desc-cntnr-name a, .brand-name, .product-brand');
+            const brand = brandElement ? brandElement.textContent.trim() : '';
+
+            // Ürün açıklama metnini çek (eğer varsa)
+            const descElement = card.querySelector('.prdct-desc-cntnr-ttl, .product-desc, .product-description');
+            const description = descElement ? descElement.textContent.trim() : '';
+
+            // Öne çıkan özellikler (eğer varsa)
+            const featuresElements = card.querySelectorAll('.prdct-features li, .product-features li, .highlighted-features li');
+            const features = Array.from(featuresElements).map(el => el.textContent.trim()).filter(f => f.length > 0);
 
             // Fiyat bilgileri - Sadece discounted, yoksa new_price al
             let price = '';
@@ -349,12 +361,19 @@ class AIService {
                 image: image,
                 link: link.startsWith('http') ? link : `https://www.trendyol.com${link}`,
                 source: 'Trendyol',
+                // Yeni alanlar
+                extractedBrand: brand || null,
+                extractedDescription: description || null,
+                extractedFeatures: features || [],
                 rawData: {
                   name: name,
                   price: price,
                   originalPrice: originalPrice,
                   rating: rating,
-                  reviewCount: reviewCount
+                  reviewCount: reviewCount,
+                  brand: brand,
+                  description: description,
+                  features: features
                 }
               });
             }
@@ -435,8 +454,8 @@ class AIService {
   // Trendyol ürününü işle
   processTrendyolProduct(product, features) {
     try {
-      // Marka bilgisini çıkar
-      const brand = this.extractBrandFromName(product.name);
+      // Marka bilgisini önce çekilen veriden al, yoksa isimden çıkar
+      const brand = product.extractedBrand || this.extractBrandFromName(product.name);
 
       // Fiyat formatını düzenle
       const formattedPrice = this.formatTrendyolPrice(product.price);
@@ -445,14 +464,19 @@ class AIService {
       // İndirim hesapla
       const discount = this.calculateDiscount(formattedPrice, formattedOriginalPrice);
 
-      // Açıklama oluştur
-      const description = this.generateProductDescription(product.name, features);
+      // Açıklama: Çekilen açıklamayı kullan, yoksa ürün adını kullan
+      const description = product.extractedDescription || product.name || 'Trendyol ürünü';
 
       // Renkler çıkar
       const colors = this.extractColorsFromName(product.name);
 
       // Boyut bilgisi çıkar
       const sizes = this.extractSizesFromName(product.name);
+
+      // Özellikler: Çekilen özellikleri kullan, yoksa varsayılan özellikler
+      const productFeatures = product.extractedFeatures && product.extractedFeatures.length > 0
+        ? product.extractedFeatures
+        : this.generateFeatures(product.name);
 
       return {
         id: product.id,
@@ -468,7 +492,7 @@ class AIService {
         brand: brand,
         seller: 'Trendyol Satıcısı',
         description: description,
-        features: this.generateFeatures(product.name),
+        features: productFeatures,
         colors: colors.length > 0 ? colors : ['Çok Renkli'],
         sizes: sizes.length > 0 ? sizes : ['Standart Boyut'],
         shipping: 'Trendyol kargo bilgisi için ürün sayfasını ziyaret edin',
