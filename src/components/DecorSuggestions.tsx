@@ -17,7 +17,7 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
-  
+
   const aiService = AIService.getInstance();
 
   useEffect(() => {
@@ -45,12 +45,12 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
       }, 200);
 
       const result = await aiService.suggestDecorProducts(roomImage);
-      
+
       clearInterval(progressInterval);
       setProgress(100);
-      
+
       setSuggestions(result);
-      
+
       if (onSuggestionsComplete) {
         onSuggestionsComplete(result);
       }
@@ -166,8 +166,8 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
                     </h4>
                     <div className="space-y-2">
                       {products.map((product, index) => (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className="flex items-center gap-2 text-sm cursor-pointer hover:bg-ai/10 p-2 rounded-md transition-colors duration-200 group"
                           onClick={() => handleProductClick(product)}
                           title="Bu ürünü ara"

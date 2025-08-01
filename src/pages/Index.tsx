@@ -62,7 +62,7 @@ const Index = () => {
     setRoomFile(file);
     setRoomImage(preview);
     setCurrentStep('product');
-    
+
     // Oda yorumunu otomatik olarak başlat
     setTimeout(() => {
       setRoomComment({ isLoading: true });
@@ -86,7 +86,7 @@ const Index = () => {
     setProductSearchQuery(productName);
     // Product seçim adımına geç
     setCurrentStep('product');
-    
+
     toast({
       title: "Ürün Seçildi",
       description: `"${productName}" ürünü arama kutusuna eklendi`,
@@ -129,12 +129,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div 
+      <div
         className="relative h-96 flex items-center justify-center text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${aiHeroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/70"></div>
-                 <div className="relative z-10 max-w-4xl mx-auto px-2">
+        <div className="relative z-10 max-w-4xl mx-auto px-2">
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="w-12 h-12 text-ai animate-float" />
             <h1 className="text-5xl font-bold bg-gradient-ai bg-clip-text text-transparent">
@@ -143,7 +143,7 @@ const Index = () => {
             <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
           </div>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Odanızın fotoğrafını yükleyin, istediğiniz tabloyu tarif edin. 
+            Odanızın fotoğrafını yükleyin, istediğiniz tabloyu tarif edin.
             AI ajanlarımız size mükemmel yerleştirme önerisi sunsun.
           </p>
           <div className="flex items-center justify-center gap-4">
@@ -163,7 +163,7 @@ const Index = () => {
         </div>
       </div>
 
-             <div className="max-w-7xl mx-auto px-2 py-12">
+      <div className="max-w-7xl mx-auto px-2 py-12">
         {/* Progress Bar */}
         <Card className="p-6 mb-8 bg-gradient-card">
           <div className="flex items-center justify-between mb-4">
@@ -175,17 +175,15 @@ const Index = () => {
           <Progress value={progress} className="mb-4" />
           <div className="flex justify-between text-sm">
             {steps.map((step, index) => (
-              <div 
+              <div
                 key={step.id}
-                className={`flex items-center gap-2 ${
-                  getStepIndex(currentStep) >= index 
-                    ? 'text-ai font-semibold' 
+                className={`flex items-center gap-2 ${getStepIndex(currentStep) >= index
+                    ? 'text-ai font-semibold'
                     : 'text-muted-foreground'
-                }`}
+                  }`}
               >
-                <div className={`w-2 h-2 rounded-full ${
-                  getStepIndex(currentStep) >= index ? 'bg-ai' : 'bg-muted'
-                }`} />
+                <div className={`w-2 h-2 rounded-full ${getStepIndex(currentStep) >= index ? 'bg-ai' : 'bg-muted'
+                  }`} />
                 {step.title}
                 {index < steps.length - 1 && (
                   <ArrowRight className="w-3 h-3 ml-2 text-muted-foreground" />
@@ -197,18 +195,18 @@ const Index = () => {
 
         {/* AI Agents Status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <AIAgent 
-            type="search" 
+          <AIAgent
+            type="search"
             isActive={getActiveAgent() === 'search'}
             isCompleted={getCompletedAgents().includes('search')}
           />
-          <AIAgent 
-            type="analysis" 
+          <AIAgent
+            type="analysis"
             isActive={getActiveAgent() === 'analysis'}
             isCompleted={getCompletedAgents().includes('analysis')}
           />
-          <AIAgent 
-            type="placement" 
+          <AIAgent
+            type="placement"
             isActive={getActiveAgent() === 'placement'}
             isCompleted={getCompletedAgents().includes('placement')}
           />
@@ -238,7 +236,7 @@ const Index = () => {
                       <TabsTrigger value="upload">Tablo Yükle</TabsTrigger>
                     </TabsList>
                     <TabsContent value="describe" className="mt-4">
-                      <ProductSearch 
+                      <ProductSearch
                         onProductSelect={handleProductSelect}
                         roomStyle={roomAnalysis?.style}
                         roomColors={roomAnalysis?.dominantColors}
@@ -289,14 +287,14 @@ const Index = () => {
           {/* Right Column - Side Information */}
           <div className="space-y-6 w-full lg:col-span-2">
             {roomImage && (
-              <RoomComment 
+              <RoomComment
                 roomImage={roomImage}
                 onCommentComplete={setRoomComment}
               />
             )}
 
             {roomImage && (
-              <DecorSuggestions 
+              <DecorSuggestions
                 roomImage={roomImage}
                 onSuggestionsComplete={setDecorSuggestions}
                 onProductSelect={handleDecorProductSelect}
@@ -315,9 +313,9 @@ const Index = () => {
                   <div>
                     <p className="font-semibold text-sm">{selectedProduct.name}</p>
                     <p className="text-sm text-muted-foreground">{selectedProduct.price}</p>
-                                            <Badge variant="outline" className="text-xs mt-1">
-                          {selectedProduct.source}
-                        </Badge>
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {selectedProduct.source}
+                    </Badge>
                   </div>
                 </div>
               </Card>

@@ -66,11 +66,11 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
     }
 
     setIsSearching(true);
-    
+
     try {
       console.log('AI ürün arama başlatılıyor...');
       const response = await apiService.searchProducts(query, roomStyle, roomColors);
-      
+
       if (response.products && response.products.length > 0) {
         setProducts(response.products);
         toast({
@@ -87,9 +87,9 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
       }
     } catch (error: any) {
       console.error('Arama hatası:', error);
-      
+
       let errorMessage = "Ürün arama sırasında bir hata oluştu.";
-      
+
       if (error.message.includes('Rate limit') || error.message.includes('Çok fazla istek')) {
         errorMessage = "Çok fazla istek gönderildi. Lütfen 1 dakika bekleyip tekrar deneyin.";
       } else if (error.message.includes('zaman aşımı')) {
@@ -97,13 +97,13 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
       } else if (error.message.includes('Sunucu geçici')) {
         errorMessage = "Sunucu geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.";
       }
-      
+
       toast({
         title: "Arama Hatası",
         description: errorMessage,
         variant: "destructive",
       });
-      
+
       setProducts([]);
     } finally {
       setIsSearching(false);
@@ -158,8 +158,8 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             }}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <Button 
-            onClick={handleSearch} 
+          <Button
+            onClick={handleSearch}
             disabled={isSearching}
             className="bg-gradient-button"
           >
@@ -205,9 +205,9 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                             </Badge>
                           )}
                         </div>
-                        
+
                         <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
-                        
+
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="outline" className="text-xs">{product.source}</Badge>
                           <Badge variant="outline" className="text-xs">{product.brand}</Badge>
@@ -240,7 +240,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="text-right ml-4">
                         <div className="mb-2">
                           {product.originalPrice && (
@@ -257,14 +257,14 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                             </Badge>
                           )}
                         </div>
-                        
+
                         {product.shipping && (
                           <div className="flex items-center gap-1 mb-2">
                             <Truck className="w-3 h-3 text-green-500" />
                             <span className="text-xs text-green-500">{product.shipping}</span>
                           </div>
                         )}
-                        
+
                         <Button
                           size="sm"
                           onClick={() => handleProductSelect(product)}
@@ -275,7 +275,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                       </div>
                     </div>
                   </div>
-                  
+
                   <Button variant="ghost" size="sm" asChild>
                     <a href={product.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-4 h-4" />
