@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, ExternalLink, Star, TrendingUp, Truck, Sparkles, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ApiService from '@/services/apiService';
+import { CommentAnalysis } from './CommentAnalysis';
 
 interface Product {
   id: string;
@@ -41,6 +42,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProductForAnalysis, setSelectedProductForAnalysis] = useState<Product | null>(null);
   const { toast } = useToast();
   const apiService = ApiService.getInstance();
 
@@ -265,13 +267,31 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                           </div>
                         )}
 
-                        <Button
-                          size="sm"
-                          onClick={() => handleProductSelect(product)}
-                          className="w-full"
-                        >
-                          Seç
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleProductSelect(product)}
+                            className="flex-1"
+                          >
+                            Seç
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              console.log('Yorum analizi butonu tıklandı:', product);
+                              // Eğer aynı ürün zaten seçiliyse kapat, değilse aç
+                              if (selectedProductForAnalysis?.id === product.id) {
+                                setSelectedProductForAnalysis(null);
+                              } else {
+                                setSelectedProductForAnalysis(product);
+                              }
+                            }}
+                            className="flex-1"
+                          >
+                            {selectedProductForAnalysis?.id === product.id ? 'Analizi Kapat' : 'Yorumları Analiz Et'}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -282,6 +302,14 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                     </a>
                   </Button>
                 </div>
+
+                {/* Seçilen ürün için yorum analizi */}
+                {selectedProductForAnalysis?.id === product.id && (
+                  <CommentAnalysis
+                    productUrl={selectedProductForAnalysis.link}
+                    productName={selectedProductForAnalysis.name}
+                  />
+                )}
               </Card>
             ))}
           </div>

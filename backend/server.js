@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const Sentiment = require('sentiment');
 const puppeteer = require('puppeteer');
+const { spawn } = require('child_process');
 
 // Load environment variables with explicit path
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -2066,6 +2067,209 @@ app.post('/api/suggest-decor-products', async (req, res) => {
 });
 
 // GET /api/health
+// Product comment analysis endpoint
+app.post('/api/analyze-comments', rateLimit, async (req, res) => {
+  try {
+    const { productUrl } = req.body;
+
+    if (!productUrl) {
+      return res.status(400).json({
+        error: 'Product URL is required',
+        message: 'Ürün URL\'si gereklidir'
+      });
+    }
+
+    console.log('🔍 Yorum analizi başlatılıyor:', productUrl);
+
+    // Python scriptini çalıştır
+    const scriptPath = path.join(__dirname, 's2.py');
+
+    return new Promise((resolve, reject) => {
+      const pythonProcess = spawn('C:/btk_proje/.venv/Scripts/python.exe', [scriptPath, productUrl], {
+        env: {
+          ...process.env,
+          PYTHONIOENCODING: 'utf-8',
+          PYTHONUTF8: '1'
+        },
+        stdio: ['pipe', 'pipe', 'pipe'],
+        encoding: 'utf8'
+      });
+      let comments = '';
+      let errorOutput = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        comments += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      pythonProcess.on('close', async (code) => {
+        if (code !== 0) {
+          console.error('Python script hatası:', errorOutput);
+          return res.status(500).json({
+            error: 'Comment scraping failed',
+            message: 'Yorumlar alınırken hata oluştu: ' + errorOutput
+          });
+        }
+
+        try {
+          // Parse comments from Python script output
+          let commentsArray = [];
+          try {
+            commentsArray = JSON.parse(comments);
+          } catch (parseError) {
+            console.error('JSON parse hatası:', parseError);
+            return res.status(500).json({
+              error: 'Comment parsing failed',
+              message: 'Yorumlar işlenirken hata oluştu'
+            });
+          }
+
+          if (!commentsArray || commentsArray.length === 0) {
+            return res.json({
+              analysis: {
+                summary: 'Bu ürün için henüz yorum bulunamadı.',
+                quality: 'Veri yok',
+                problems: 'Henüz yorum bulunmuyor',
+                shipping: 'Veri yok',
+                positives: 'Henüz yorum bulunmuyor',
+                recommendation: 'Bu ürün için yeterli yorum verisi bulunmuyor. Satın almadan önce diğer kaynaklardan bilgi alınması önerilir.'
+              },
+              comments: [],
+              totalComments: 0
+            });
+          }
+
+          console.log(`📊 ${commentsArray.length} yorum bulundu, Gemini AI analizi başlatılıyor...`);
+
+          // Prepare prompt for Gemini AI
+          const prompt = `Aşağıda bir ürün hakkında müşterilerin yaptığı yorumlar yer almaktadır. 
+
+Lütfen bu yorumları analiz et ve şu bilgileri bana açık, öz ve anlaşılır şekilde ver:
+
+1. Ürün kalitesi ve dayanıklılığı hakkında genel görüşler nedir?  
+2. Ürünle ilgili sıkça belirtilen olası sorunlar, şikayetler veya eksiklikler nelerdir?  
+3. Kargo, teslimat süresi ve paketleme ile ilgili deneyimler nasıl?  
+4. Ürünün hangi yönleri müşteriler tarafından özellikle beğenilmiş?  
+5. Ürün hakkında genel bir değerlendirme yap ve olası tavsiyelerde bulun.
+
+İşte yorumlar:
+
+${JSON.stringify(commentsArray, null, 2)}
+
+---
+
+Lütfen yorumlara dayalı olarak yukarıdaki bilgileri detaylandır. Cevabını JSON formatında ver:
+{
+  "quality": "ürün kalitesi hakkında özet",
+  "problems": "sıkça belirtilen sorunlar",
+  "shipping": "kargo ve teslimat deneyimleri",
+  "positives": "özellikle beğenilen yönler",
+  "recommendation": "genel değerlendirme ve tavsiyeler"
+}`;
+
+          // Call Gemini AI for analysis
+          let analysis;
+
+          if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your-gemini-api-key-here') {
+            // Test mode - return mock data
+            analysis = {
+              quality: 'Test modunda çalışıyor - gerçek analiz için Gemini API key gerekli',
+              problems: 'API key yapılandırma gerekli',
+              shipping: 'Test modu',
+              positives: 'API yapılandırması tamamlandığında gerçek analiz yapılacak',
+              recommendation: 'Lütfen .env dosyasında GEMINI_API_KEY\'i yapılandırın'
+            };
+          } else {
+            try {
+              const response = await axios.post(
+                `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+                {
+                  contents: [{
+                    parts: [{
+                      text: prompt
+                    }]
+                  }]
+                },
+                {
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  timeout: 30000
+                }
+              );
+
+              const aiResponse = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+              if (aiResponse) {
+                // Try to extract JSON from AI response
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                  try {
+                    analysis = JSON.parse(jsonMatch[0]);
+                  } catch (e) {
+                    console.error('AI JSON parse hatası:', e);
+                    analysis = {
+                      quality: 'AI analizi tamamlandı ancak format hatası oluştu',
+                      problems: aiResponse.substring(0, 500),
+                      shipping: 'Detaylar için ham AI cevabına bakın',
+                      positives: 'AI cevabı işlenirken hata oluştu',
+                      recommendation: 'Lütfen geliştiriciye başvurun'
+                    };
+                  }
+                } else {
+                  // If no JSON found, create structured response from text
+                  analysis = {
+                    quality: aiResponse.substring(0, 200),
+                    problems: 'AI tam strukturlu cevap vermedi',
+                    shipping: 'Ham AI cevabında detaylar mevcut',
+                    positives: 'AI cevabı JSON formatında değil',
+                    recommendation: aiResponse.substring(200, 500)
+                  };
+                }
+              } else {
+                throw new Error('AI\'dan yanıt alınamadı');
+              }
+            } catch (error) {
+              console.error('Gemini AI hatası:', error);
+              analysis = {
+                quality: 'AI analizi sırasında hata oluştu',
+                problems: error.message,
+                shipping: 'Hata nedeniyle analiz tamamlanamadı',
+                positives: 'AI servisine erişim sorunu',
+                recommendation: 'Lütfen daha sonra tekrar deneyin'
+              };
+            }
+          }
+
+          res.json({
+            analysis,
+            comments: commentsArray,
+            totalComments: commentsArray.length,
+            productUrl
+          });
+
+        } catch (error) {
+          console.error('Yorum analizi hatası:', error);
+          res.status(500).json({
+            error: 'Analysis failed',
+            message: 'Analiz sırasında hata oluştu: ' + error.message
+          });
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('Genel yorum analizi hatası:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Sunucu hatası: ' + error.message
+    });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
