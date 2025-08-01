@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,17 +33,30 @@ interface ProductSearchProps {
   onProductSelect: (product: Product) => void;
   roomStyle?: string;
   roomColors?: string[];
+  initialSearchQuery?: string;
+  onSearchQueryChange?: (query: string) => void;
 }
 
-export const ProductSearch = ({ onProductSelect, roomStyle, roomColors }: ProductSearchProps) => {
+export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialSearchQuery, onSearchQueryChange }: ProductSearchProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
   const apiService = ApiService.getInstance();
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  // initialSearchQuery değiştiğinde searchQuery'yi güncelle ve otomatik arama yap
+  useEffect(() => {
+    if (initialSearchQuery && initialSearchQuery !== searchQuery) {
+      setSearchQuery(initialSearchQuery);
+      // Küçük bir delay ile otomatik arama yap
+      setTimeout(() => {
+        handleSearchWithQuery(initialSearchQuery);
+      }, 500);
+    }
+  }, [initialSearchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearchWithQuery = async (query: string) => {
+    if (!query.trim()) {
       toast({
         title: "Hata",
         description: "Lütfen aramak istediğiniz ürünü tanımlayın.",
@@ -56,7 +69,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors }: Produc
     
     try {
       console.log('AI ürün arama başlatılıyor...');
-      const response = await apiService.searchProducts(searchQuery, roomStyle, roomColors);
+      const response = await apiService.searchProducts(query, roomStyle, roomColors);
       
       if (response.products && response.products.length > 0) {
         setProducts(response.products);
@@ -97,6 +110,10 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors }: Produc
     }
   };
 
+  const handleSearch = async () => {
+    await handleSearchWithQuery(searchQuery);
+  };
+
   const handleProductSelect = (product: Product) => {
     onProductSelect(product);
     toast({
@@ -133,7 +150,12 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors }: Produc
           <Input
             placeholder="Örn: mavi tonlarda soyut tablo, küçük boyut"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (onSearchQueryChange) {
+                onSearchQueryChange(e.target.value);
+              }
+            }}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
           <Button 

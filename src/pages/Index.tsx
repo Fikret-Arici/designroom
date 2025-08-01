@@ -45,6 +45,7 @@ const Index = () => {
   const [roomComment, setRoomComment] = useState<any>(null);
   const [decorSuggestions, setDecorSuggestions] = useState<any>(null);
   const [productMethod, setProductMethod] = useState<'upload' | 'describe'>('describe');
+  const [productSearchQuery, setProductSearchQuery] = useState<string>('');
   const { toast } = useToast();
 
   const steps = [
@@ -78,6 +79,20 @@ const Index = () => {
     setCurrentStep('result');
   };
 
+  const handleDecorProductSelect = (productName: string) => {
+    // Önce "Metinle Tarif Et" sekmesine geç
+    setProductMethod('describe');
+    // Ürün adını search query'ye set et
+    setProductSearchQuery(productName);
+    // Product seçim adımına geç
+    setCurrentStep('product');
+    
+    toast({
+      title: "Ürün Seçildi",
+      description: `"${productName}" ürünü arama kutusuna eklendi`,
+    });
+  };
+
   const handleReset = () => {
     setCurrentStep('upload');
     setRoomImage('');
@@ -86,6 +101,7 @@ const Index = () => {
     setRoomAnalysis(null);
     setRoomComment(null);
     setDecorSuggestions(null);
+    setProductSearchQuery('');
     toast({
       title: "Yeniden Başlatıldı",
       description: "Yeni bir dekorasyon deneyimi için hazırsınız!",
@@ -226,6 +242,8 @@ const Index = () => {
                         onProductSelect={handleProductSelect}
                         roomStyle={roomAnalysis?.style}
                         roomColors={roomAnalysis?.dominantColors}
+                        initialSearchQuery={productSearchQuery}
+                        onSearchQueryChange={setProductSearchQuery}
                       />
                     </TabsContent>
                     <TabsContent value="upload" className="mt-4">
@@ -281,6 +299,7 @@ const Index = () => {
               <DecorSuggestions 
                 roomImage={roomImage}
                 onSuggestionsComplete={setDecorSuggestions}
+                onProductSelect={handleDecorProductSelect}
               />
             )}
 

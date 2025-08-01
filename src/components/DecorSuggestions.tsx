@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Lightbulb, Sparkles, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Lightbulb, Sparkles, Clock, AlertCircle, CheckCircle, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AIService, { DecorSuggestions as DecorSuggestionsType, DecorSuggestionsError } from '@/services/aiService';
 
 interface DecorSuggestionsProps {
   roomImage: string;
   onSuggestionsComplete?: (suggestions: DecorSuggestionsType | DecorSuggestionsError) => void;
+  onProductSelect?: (productName: string) => void;
 }
 
-export const DecorSuggestions = ({ roomImage, onSuggestionsComplete }: DecorSuggestionsProps) => {
+export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSelect }: DecorSuggestionsProps) => {
   const [suggestions, setSuggestions] = useState<DecorSuggestionsType | DecorSuggestionsError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -68,6 +69,12 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete }: DecorSugg
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProductClick = (productName: string) => {
+    if (onProductSelect) {
+      onProductSelect(productName);
     }
   };
 
@@ -159,9 +166,15 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete }: DecorSugg
                     </h4>
                     <div className="space-y-2">
                       {products.map((product, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <div className="w-1.5 h-1.5 bg-ai rounded-full" />
-                          <span className="text-foreground">{product}</span>
+                        <div 
+                          key={index} 
+                          className="flex items-center gap-2 text-sm cursor-pointer hover:bg-ai/10 p-2 rounded-md transition-colors duration-200 group"
+                          onClick={() => handleProductClick(product)}
+                          title="Bu ürünü ara"
+                        >
+                          <div className="w-1.5 h-1.5 bg-ai rounded-full group-hover:bg-ai-secondary transition-colors" />
+                          <span className="text-foreground group-hover:text-ai transition-colors font-medium">{product}</span>
+                          <Search className="w-3 h-3 text-muted-foreground group-hover:text-ai transition-colors opacity-0 group-hover:opacity-100" />
                         </div>
                       ))}
                     </div>
