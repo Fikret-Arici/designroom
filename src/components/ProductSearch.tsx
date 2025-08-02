@@ -164,7 +164,13 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             className="bg-gradient-button"
           >
             {isSearching ? (
-              <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <div className="w-4 h-4 border-2 border-white/30 rounded-full"></div>
+                  <div className="absolute top-0 left-0 w-4 h-4 border-2 border-transparent border-t-white rounded-full animate-spin"></div>
+                </div>
+                <span className="text-xs">Aranıyor</span>
+              </div>
             ) : (
               <Search className="w-4 h-4" />
             )}
@@ -172,13 +178,46 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
         </div>
 
         {isSearching && (
-          <Card className="p-4 border-ai animate-pulse">
-            <div className="flex items-center gap-3">
-              <div className="animate-scan w-full h-1 bg-gradient-ai rounded-full"></div>
+          <Card className="p-6 border-ai/30 bg-gradient-card">
+            <div className="flex flex-col items-center space-y-4">
+              {/* Modern Loading Animation */}
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-ai/20 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-ai rounded-full animate-spin"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-8 h-8 bg-gradient-ai rounded-full animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Loading Text with Typing Effect */}
+              <div className="text-center space-y-2">
+                <h4 className="font-semibold text-ai">AI Ajanı Çalışıyor</h4>
+                <div className="flex items-center justify-center space-x-1">
+                  <span className="text-sm text-muted-foreground">Trendyol'da ürün arıyor</span>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress Steps */}
+              <div className="w-full max-w-xs space-y-2">
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-muted-foreground">AI sorgusu analiz ediliyor</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-ai rounded-full animate-pulse"></div>
+                  <span className="text-ai">Trendyol API'sine bağlanılıyor</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">Ürünler filtreleniyor</span>
+                </div>
+              </div>
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              AI ajanı Trendyol'da ürün arıyor...
-            </p>
           </Card>
         )}
 
