@@ -56,7 +56,7 @@ const Index = () => {
   ];
 
   const getStepIndex = (step: Step) => steps.findIndex(s => s.id === step);
-  const progress = ((getStepIndex(currentStep) + 1) / steps.length) * 100;
+  const progress = (getStepIndex(currentStep) / (steps.length - 1)) * 100;
 
   const handleRoomUpload = (file: File, preview: string) => {
     setRoomFile(file);
