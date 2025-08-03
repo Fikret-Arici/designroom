@@ -32,9 +32,11 @@
     "natural": "^6.5.0",
     "puppeteer": "^21.5.2",
     "redis": "^4.6.10",
+    "selenium-webdriver": "^4.34.0",
     "sentiment": "^5.0.2",
     "sharp": "^0.32.6",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "webdriver-manager": "^12.1.9"
   },
   "devDependencies": {
     "jest": "^29.7.0",

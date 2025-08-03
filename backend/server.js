@@ -76,7 +76,7 @@ const upload = multer({
 // Rate limiting için basit in-memory store
 const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 dakika
-const MAX_REQUESTS_PER_WINDOW = 20; // 1 dakikada maksimum 20 istek (artırıldı)
+const MAX_REQUESTS_PER_WINDOW = 50; // 1 dakikada maksimum 50 istek (artırıldı)
 
 // Rate limiting middleware
 const rateLimit = (req, res, next) => {
@@ -1109,6 +1109,9 @@ class AIService {
   // AI Compatibility Analysis
   async analyzeCompatibility(product, roomStyle, roomColors) {
     try {
+      // Rate limiting için bekle
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const compatibilityPrompt = `
       Bu ürünün oda stiliyle uyumluluğunu analiz et:
       
@@ -1134,7 +1137,8 @@ class AIService {
           }
         },
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000
         }
       );
 
@@ -2448,7 +2452,7 @@ app.post('/api/analyze-comments', rateLimit, async (req, res) => {
     const scriptPath = path.join(__dirname, 's2.py');
 
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn('C:/btk_proje/.venv/Scripts/python.exe', [scriptPath, productUrl], {
+      const pythonProcess = spawn('python', [scriptPath, productUrl], {
         env: {
           ...process.env,
           PYTHONIOENCODING: 'utf-8',
