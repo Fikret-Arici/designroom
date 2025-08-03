@@ -236,9 +236,11 @@ class AIService {
           '--disable-backgrounding-occluded-windows',
           '--disable-renderer-backgrounding',
           '--disable-features=VizDisplayCompositor',
-          '--disable-blink-features=AutomationControlled'
+          '--disable-blink-features=AutomationControlled',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
         ],
-        timeout: 30000
+        timeout: 60000
       });
 
       const page = await browser.newPage();
@@ -264,12 +266,12 @@ class AIService {
       // Sayfayı yükle
       await page.goto(trendyolUrl, {
         waitUntil: 'domcontentloaded',
-        timeout: 30000
+        timeout: 60000
       });
 
       // Ürün kartlarını bekle
       await page.waitForSelector('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr', {
-        timeout: 10000
+        timeout: 30000
       });
 
       // Ürünleri çek
@@ -1109,8 +1111,8 @@ class AIService {
   // AI Compatibility Analysis
   async analyzeCompatibility(product, roomStyle, roomColors) {
     try {
-      // Rate limiting için bekle
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Rate limiting için daha uzun bekle
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const compatibilityPrompt = `
       Bu ürünün oda stiliyle uyumluluğunu analiz et:
@@ -1148,6 +1150,11 @@ class AIService {
       return Math.max(0, Math.min(1, score));
     } catch (error) {
       console.error('Uyumluluk analizi hatası:', error);
+      // Rate limit hatası durumunda daha uzun bekle
+      if (error.response && error.response.status === 429) {
+        console.log('⚠️ Rate limit hatası, 5 saniye bekleniyor...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
       return 0.5;
     }
   }
@@ -1267,12 +1274,35 @@ class AIService {
         features = this.parseQueryManually(query);
       }
 
-      // 2. Gerçek Trendyol Scraping
+      // 2. Gerçek Trendyol Scraping - 3 deneme
       console.log('🕷️ Trendyol\'dan gerçek ürün çekiliyor...');
-      const products = await this.scrapeTrendyolProducts(query, features);
+      let products = [];
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`🔄 Deneme ${attempt}/3...`);
+          products = await this.scrapeTrendyolProducts(query, features);
+          
+          if (products && products.length > 0) {
+            console.log(`✅ ${products.length} ürün bulundu (Deneme ${attempt})`);
+            break;
+          } else {
+            throw new Error('Hiç ürün bulunamadı');
+          }
+        } catch (error) {
+          lastError = error;
+          console.log(`❌ Deneme ${attempt} başarısız:`, error.message);
+          
+          if (attempt < 3) {
+            console.log(`⏳ ${attempt * 2} saniye bekleniyor...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          }
+        }
+      }
 
       if (products.length === 0) {
-        throw new Error('Hiç ürün bulunamadı');
+        throw lastError || new Error('Hiç ürün bulunamadı');
       }
 
       console.log(`✅ ${products.length} gerçek ürün bulundu`);
@@ -2453,7 +2483,7 @@ app.post('/api/analyze-comments', rateLimit, async (req, res) => {
 
     return new Promise((resolve, reject) => {
       // Windows'ta Python launcher'ı dene, yoksa python komutunu kullan
-      const pythonCommand = process.platform === 'win32' ? 'py' : 'python';
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python';
       const pythonProcess = spawn(pythonCommand, [scriptPath, productUrl], {
         env: {
           ...process.env,
@@ -2645,6 +2675,107 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     message: 'AI Dekoratif Yerleştirme API çalışıyor'
   });
+});
+
+// GPT Image Generation Endpoint
+app.post('/api/generate-product-placement', upload.fields([
+  { name: 'roomImage', maxCount: 1 },
+  { name: 'productImage', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    if (!req.files || !req.files.roomImage || !req.files.productImage) {
+      return res.status(400).json({
+        error: 'Missing files',
+        message: 'Oda ve ürün görselleri gerekli'
+      });
+    }
+
+    const roomImage = req.files.roomImage[0];
+    const productImage = req.files.productImage[0];
+    
+    // Generate unique output filename
+    const outputFilename = `placement-${uuidv4()}.png`;
+    const outputPath = path.join(__dirname, 'uploads', outputFilename);
+    
+    // Get script path
+    const scriptPath = path.join(__dirname, 'gpt.py');
+    
+    // Use cross-platform Python command
+    const pythonCommand = process.platform === 'win32' ? 'python' : 'python';
+    
+    console.log('🤖 GPT Image Generation başlatılıyor...');
+    console.log(`📁 Oda görseli: ${roomImage.path}`);
+    console.log(`📁 Ürün görseli: ${productImage.path}`);
+    console.log(`📁 Çıktı dosyası: ${outputPath}`);
+    
+    const pythonProcess = spawn(pythonCommand, [
+      scriptPath, 
+      roomImage.path, 
+      productImage.path, 
+      outputPath
+    ], {
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+      console.log('GPT stdout:', data.toString());
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+      console.error('GPT stderr:', data.toString());
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ GPT Image Generation tamamlandı');
+        
+        // Check if output file exists
+        if (fs.existsSync(outputPath)) {
+          // Read the generated image and convert to base64
+          const imageBuffer = fs.readFileSync(outputPath);
+          const base64Image = imageBuffer.toString('base64');
+          
+          res.json({
+            success: true,
+            message: 'Ürün yerleştirme görseli başarıyla oluşturuldu',
+            image: `data:image/png;base64,${base64Image}`,
+            filename: outputFilename
+          });
+        } else {
+          res.status(500).json({
+            error: 'Output file not found',
+            message: 'Oluşturulan görsel dosyası bulunamadı'
+          });
+        }
+      } else {
+        console.error('❌ GPT Image Generation hatası:', code);
+        res.status(500).json({
+          error: 'Generation failed',
+          message: `Görsel oluşturma hatası: ${stderr || stdout}`
+        });
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      console.error('❌ Python process hatası:', error);
+      res.status(500).json({
+        error: 'Process error',
+        message: `Python işlemi hatası: ${error.message}`
+      });
+    });
+
+  } catch (error) {
+    console.error('❌ GPT Image Generation genel hatası:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: `Sunucu hatası: ${error.message}`
+    });
+  }
 });
 
 // Error handling middleware
