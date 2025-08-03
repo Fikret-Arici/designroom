@@ -1,13 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Palette, Ruler, Lightbulb } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import ApiService from '@/services/apiService';
 import { useToast } from '@/hooks/use-toast';
 
 interface RoomAnalysisProps {
   roomImage?: string;
+  selectedProduct?: Product;
   onAnalysisComplete: (analysis: RoomAnalysis) => void;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: string;
+  rating: number;
+  image: string;
+  link: string;
+  source: string;
+  description: string;
 }
 
 interface RoomAnalysis {
@@ -19,7 +31,7 @@ interface RoomAnalysis {
   placementAreas: { x: number; y: number; width: number; height: number }[];
 }
 
-export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProps) => {
+export const RoomAnalysis = ({ roomImage, selectedProduct, onAnalysisComplete }: RoomAnalysisProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<RoomAnalysis | null>(null);
   const { toast } = useToast();
@@ -32,21 +44,48 @@ export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProp
     
     try {
       console.log('AI oda analizi başlatılıyor...');
-      const response = await apiService.analyzeRoom(roomImage);
       
-      setAnalysis(response.analysis);
-      setIsAnalyzing(false);
-      onAnalysisComplete(response.analysis);
-      
-      toast({
-        title: "Analiz Tamamlandı",
-        description: response.message,
-      });
+      // Eğer seçilen ürün varsa, ürüne özel analiz yap
+      if (selectedProduct) {
+        console.log('Ürüne özel yerleştirme analizi yapılıyor:', selectedProduct.name);
+        const response = await apiService.analyzeRoomWithProduct(roomImage, selectedProduct);
+        setAnalysis(response.analysis);
+        setIsAnalyzing(false);
+        onAnalysisComplete(response.analysis);
+        
+        toast({
+          title: "Ürüne Özel Analiz Tamamlandı",
+          description: `${selectedProduct.name} için en uygun yerleştirme alanları belirlendi.`,
+        });
+      } else {
+        // Genel oda analizi
+        const response = await apiService.analyzeRoom(roomImage);
+        setAnalysis(response.analysis);
+        setIsAnalyzing(false);
+        onAnalysisComplete(response.analysis);
+        
+        toast({
+          title: "Oda Analizi Tamamlandı",
+          description: response.message,
+        });
+      }
     } catch (error) {
       console.error('Oda analizi hatası:', error);
+      
+      // Daha detaylı hata mesajı
+      let errorMessage = "Oda analizi sırasında bir hata oluştu.";
+      
+      if (error.message.includes('API anahtarı')) {
+        errorMessage = "AI servisi geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.";
+      } else if (error.message.includes('timeout')) {
+        errorMessage = "Analiz zaman aşımına uğradı. Lütfen tekrar deneyin.";
+      } else if (error.message.includes('network')) {
+        errorMessage = "Ağ bağlantısı sorunu. Lütfen internet bağlantınızı kontrol edin.";
+      }
+      
       toast({
         title: "Analiz Hatası",
-        description: "Oda analizi sırasında bir hata oluştu.",
+        description: errorMessage,
         variant: "destructive",
       });
       setIsAnalyzing(false);
@@ -54,10 +93,12 @@ export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProp
   };
 
   useEffect(() => {
-    if (roomImage && !analysis) {
+    if (roomImage) {
+      // Seçilen ürün değiştiğinde veya oda resmi değiştiğinde analizi yeniden yap
+      setAnalysis(null);
       analyzeRoom();
     }
-  }, [roomImage, analysis]);
+  }, [roomImage, selectedProduct]);
 
   if (!roomImage) {
     return (
@@ -76,11 +117,11 @@ export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProp
         <div className="flex items-center gap-3">
           <Eye className={`w-5 h-5 ${isAnalyzing ? 'text-ai animate-pulse' : 'text-foreground'}`} />
           <h3 className="text-lg font-semibold text-foreground">
-            AI Oda Analizi
+            {selectedProduct ? `${selectedProduct.name} İçin Yerleştirme Analizi` : 'AI Oda Analizi'}
           </h3>
           {isAnalyzing && (
             <Badge variant="secondary" className="animate-pulse">
-              Analiz ediliyor...
+              {selectedProduct ? 'Ürüne özel analiz ediliyor...' : 'Analiz ediliyor...'}
             </Badge>
           )}
         </div>
@@ -95,7 +136,9 @@ export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProp
             <div className="absolute inset-0 bg-ai/20 rounded-lg flex items-center justify-center">
               <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4">
                 <div className="animate-scan w-32 h-1 bg-gradient-ai rounded-full mb-2"></div>
-                <p className="text-sm text-foreground">AI Vision analiz ediyor...</p>
+                <p className="text-sm text-foreground">
+                  {selectedProduct ? `${selectedProduct.name} için en uygun yerleştirme alanları aranıyor...` : 'AI Vision analiz ediyor...'}
+                </p>
               </div>
             </div>
           )}
@@ -111,58 +154,17 @@ export const RoomAnalysis = ({ roomImage, onAnalysisComplete }: RoomAnalysisProp
               }}
             >
               <Badge className="absolute -top-2 -left-2 text-xs">
-                Yerleştirme Alanı {index + 1}
+                {selectedProduct ? `${selectedProduct.name} İçin En Uygun Alan ${index + 1}` : `Yerleştirme Alanı ${index + 1}`}
               </Badge>
             </div>
           ))}
         </div>
 
         {analysis && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-ai" />
-                  <span className="font-semibold text-sm">Oda Stili</span>
-                </div>
-                <Badge variant="outline">{analysis.style}</Badge>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Ruler className="w-4 h-4 text-ai" />
-                  <span className="font-semibold text-sm">Oda Boyutu</span>
-                </div>
-                <Badge variant="outline">{analysis.roomSize}</Badge>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-ai" />
-                <span className="font-semibold text-sm">Baskın Renkler</span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {analysis.dominantColors.map((color, index) => (
-                  <Badge key={index} variant="secondary">{color}</Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-ai" />
-                <span className="font-semibold text-sm">AI Önerileri</span>
-              </div>
-              <div className="space-y-1">
-                {analysis.suggestions.map((suggestion, index) => (
-                  <p key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="text-ai">•</span>
-                    {suggestion}
-                  </p>
-                ))}
-              </div>
-            </div>
+          <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground">
+              {selectedProduct ? `${selectedProduct.name} için ${analysis.placementAreas.length} farklı yerleştirme alanı önerildi` : `${analysis.placementAreas.length} yerleştirme alanı bulundu`}
+            </p>
           </div>
         )}
       </div>

@@ -127,13 +127,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       {/* Hero Section */}
       <div
         className="relative h-96 flex items-center justify-center text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${aiHeroBg})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/70"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background/60"></div>
         <div className="relative z-10 max-w-4xl mx-auto px-2">
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="w-12 h-12 text-ai animate-float" />
@@ -143,7 +143,7 @@ const Index = () => {
             <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
           </div>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Odanızın fotoğrafını yükleyin, istediğiniz tabloyu tarif edin.
+            Odanızın fotoğrafını yükleyin, istediğiniz dekoratif ürünü tarif edin.
             AI ajanlarımız size mükemmel yerleştirme önerisi sunsun.
           </p>
           <div className="flex items-center justify-center gap-4">
@@ -163,185 +163,209 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 py-12">
-        {/* Progress Bar */}
-        <Card className="p-6 mb-8 bg-gradient-card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">İşlem Durumu</h2>
-            <Badge variant="outline" className="text-ai border-ai">
-              {Math.round(progress)}% Tamamlandı
-            </Badge>
-          </div>
-          <Progress value={progress} className="mb-4" />
-          <div className="flex justify-between text-sm">
-            {steps.map((step, index) => (
-              <div
-                key={step.id}
-                className={`flex items-center gap-2 ${getStepIndex(currentStep) >= index
-                    ? 'text-ai font-semibold'
-                    : 'text-muted-foreground'
-                  }`}
-              >
-                <div className={`w-2 h-2 rounded-full ${getStepIndex(currentStep) >= index ? 'bg-ai' : 'bg-muted'
-                  }`} />
-                {step.title}
-                {index < steps.length - 1 && (
-                  <ArrowRight className="w-3 h-3 ml-2 text-muted-foreground" />
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
+      {/* Smooth Transition Section */}
+      <div className="relative -mt-20 h-20 bg-gradient-to-b from-transparent to-background"></div>
 
-        {/* AI Agents Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <AIAgent
-            type="search"
-            isActive={getActiveAgent() === 'search'}
-            isCompleted={getCompletedAgents().includes('search')}
-          />
-          <AIAgent
-            type="analysis"
-            isActive={getActiveAgent() === 'analysis'}
-            isCompleted={getCompletedAgents().includes('analysis')}
-          />
-          <AIAgent
-            type="placement"
-            isActive={getActiveAgent() === 'placement'}
-            isCompleted={getCompletedAgents().includes('placement')}
-          />
+      {/* Main Content with Enhanced Background */}
+      <div className="relative">
+        {/* Dynamic Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-ai/5 rounded-full blur-3xl animate-pulse-glow"></div>
+          <div className="absolute top-20 right-1/4 w-64 h-64 bg-ai-secondary/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-ai-accent/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          {/* Left Column - Current Step */}
-          <div className="lg:col-span-3 space-y-6">
-            {currentStep === 'upload' && (
-              <ImageUploader
-                onImageUpload={handleRoomUpload}
-                title="Oda Fotoğrafınızı Yükleyin"
-                description="Tablo yerleştirmek istediğiniz odanın fotoğrafını seçin"
-              />
-            )}
+        <div className="relative max-w-7xl mx-auto px-2 py-12">
+          {/* Progress Bar */}
+          <Card className="p-6 mb-8 glass-effect animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">İşlem Durumu</h2>
+              <Badge variant="outline" className="text-ai border-ai">
+                {Math.round(progress)}% Tamamlandı
+              </Badge>
+            </div>
+            <Progress value={progress} className="mb-4" />
+            <div className="flex justify-between text-sm">
+              {steps.map((step, index) => (
+                <div
+                  key={step.id}
+                  className={`flex items-center gap-2 ${getStepIndex(currentStep) >= index
+                      ? 'text-ai font-semibold'
+                      : 'text-muted-foreground'
+                    }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${getStepIndex(currentStep) >= index ? 'bg-ai' : 'bg-muted'
+                    }`} />
+                  {step.title}
+                  {index < steps.length - 1 && (
+                    <ArrowRight className="w-3 h-3 ml-2 text-muted-foreground" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
 
-            {currentStep === 'product' && (
-              <div className="space-y-6">
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
-                    Tablo Seçim Yöntemi
-                  </h3>
-                  <Tabs value={productMethod} onValueChange={(value) => setProductMethod(value as 'upload' | 'describe')}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="describe">Metinle Tarif Et</TabsTrigger>
-                      <TabsTrigger value="upload">Tablo Yükle</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="describe" className="mt-4">
-                      <ProductSearch
-                        onProductSelect={handleProductSelect}
-                        roomStyle={roomAnalysis?.style}
-                        roomColors={roomAnalysis?.dominantColors}
-                        initialSearchQuery={productSearchQuery}
-                        onSearchQueryChange={setProductSearchQuery}
-                      />
-                    </TabsContent>
-                    <TabsContent value="upload" className="mt-4">
-                      <ImageUploader
-                        onImageUpload={(file, preview) => {
-                          const mockProduct: Product = {
-                            id: 'uploaded',
-                            name: 'Yüklenen Tablo',
-                            price: 'Özel',
-                            rating: 5.0,
-                            image: preview,
-                            link: '#',
-                            source: 'Özel Tasarım',
-                            description: 'Kullanıcı tarafından yüklenen özel tablo'
-                          };
-                          handleProductSelect(mockProduct);
-                        }}
-                        title="Tablo Dosyanızı Yükleyin"
-                        description="Yerleştirmek istediğiniz tabloyu seçin"
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </Card>
-              </div>
-            )}
-
-            {(currentStep === 'analysis' || currentStep === 'result') && (
-              <RoomAnalysis
-                roomImage={roomImage}
-                onAnalysisComplete={handleAnalysisComplete}
-              />
-            )}
-
-            {currentStep === 'result' && selectedProduct && (
-              <PlacementResult
-                originalRoom={roomImage}
-                selectedProduct={selectedProduct}
-                onReset={handleReset}
-              />
-            )}
+          {/* AI Agents Status */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <AIAgent
+              type="search"
+              isActive={getActiveAgent() === 'search'}
+              isCompleted={getCompletedAgents().includes('search')}
+            />
+            <AIAgent
+              type="analysis"
+              isActive={getActiveAgent() === 'analysis'}
+              isCompleted={getCompletedAgents().includes('analysis')}
+            />
+            <AIAgent
+              type="placement"
+              isActive={getActiveAgent() === 'placement'}
+              isCompleted={getCompletedAgents().includes('placement')}
+            />
           </div>
 
-          {/* Right Column - Side Information */}
-          <div className="space-y-6 w-full lg:col-span-2">
-            {roomImage && (
-              <RoomComment
-                roomImage={roomImage}
-                onCommentComplete={setRoomComment}
-              />
-            )}
-
-            {roomImage && (
-              <DecorSuggestions
-                roomImage={roomImage}
-                onSuggestionsComplete={setDecorSuggestions}
-                onProductSelect={handleDecorProductSelect}
-              />
-            )}
-
-            {selectedProduct && (
-              <Card className="p-4">
-                <h4 className="font-semibold text-foreground mb-3">Seçilen Ürün</h4>
-                <div className="flex items-center gap-3">
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    className="w-16 h-16 object-cover rounded border"
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Left Column - Current Step */}
+            <div className="lg:col-span-3 space-y-6">
+              {currentStep === 'upload' && (
+                <div className="animate-fade-in">
+                  <ImageUploader
+                    onImageUpload={handleRoomUpload}
+                    title="Oda Fotoğrafınızı Yükleyin"
+                    description="Dekoratif ürün yerleştirmek istediğiniz odanın fotoğrafını seçin"
                   />
-                  <div>
-                    <p className="font-semibold text-sm">{selectedProduct.name}</p>
-                    <p className="text-sm text-muted-foreground">{selectedProduct.price}</p>
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {selectedProduct.source}
-                    </Badge>
+                </div>
+              )}
+
+              {currentStep === 'product' && (
+                <div className="space-y-6 animate-fade-in">
+                  <Card className="p-6 glass-effect">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
+                      Dekoratif Ürün Seçim Yöntemi
+                    </h3>
+                    <Tabs value={productMethod} onValueChange={(value) => setProductMethod(value as 'upload' | 'describe')}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="describe">Metinle Tarif Et</TabsTrigger>
+                        <TabsTrigger value="upload">Ürün Yükle</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="describe" className="mt-4">
+                        <ProductSearch
+                          onProductSelect={handleProductSelect}
+                          roomStyle={roomAnalysis?.style}
+                          roomColors={roomAnalysis?.dominantColors}
+                          initialSearchQuery={productSearchQuery}
+                          onSearchQueryChange={setProductSearchQuery}
+                        />
+                      </TabsContent>
+                      <TabsContent value="upload" className="mt-4">
+                        <ImageUploader
+                          onImageUpload={(file, preview) => {
+                            const mockProduct: Product = {
+                              id: 'uploaded',
+                              name: 'Yüklenen Dekoratif Ürün',
+                              price: 'Özel',
+                              rating: 5.0,
+                              image: preview,
+                              link: '#',
+                              source: 'Özel Tasarım',
+                              description: 'Kullanıcı tarafından yüklenen özel dekoratif ürün'
+                            };
+                            handleProductSelect(mockProduct);
+                          }}
+                          title="Dekoratif Ürün Dosyanızı Yükleyin"
+                          description="Yerleştirmek istediğiniz dekoratif ürünü seçin"
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </Card>
+                </div>
+              )}
+
+              {(currentStep === 'analysis' || currentStep === 'result') && (
+                <div className="animate-fade-in">
+                  <RoomAnalysis
+                    roomImage={roomImage}
+                    selectedProduct={selectedProduct}
+                    onAnalysisComplete={handleAnalysisComplete}
+                  />
+                </div>
+              )}
+
+              {currentStep === 'result' && selectedProduct && (
+                <div className="animate-fade-in">
+                  <PlacementResult
+                    originalRoom={roomImage}
+                    selectedProduct={selectedProduct}
+                    onReset={handleReset}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Side Information */}
+            <div className="space-y-6 w-full lg:col-span-2">
+              {roomImage && (
+                <div className="animate-fade-in">
+                  <RoomComment
+                    roomImage={roomImage}
+                    onCommentComplete={setRoomComment}
+                  />
+                </div>
+              )}
+
+              {roomImage && (
+                <div className="animate-fade-in">
+                  <DecorSuggestions
+                    roomImage={roomImage}
+                    onSuggestionsComplete={setDecorSuggestions}
+                    onProductSelect={handleDecorProductSelect}
+                  />
+                </div>
+              )}
+
+              {selectedProduct && (
+                <Card className="p-4 glass-effect animate-fade-in">
+                  <h4 className="font-semibold text-foreground mb-3">Seçilen Ürün</h4>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={selectedProduct.image}
+                      alt={selectedProduct.name}
+                      className="w-16 h-16 object-cover rounded border"
+                    />
+                    <div>
+                      <p className="font-semibold text-sm">{selectedProduct.name}</p>
+                      <p className="text-sm text-muted-foreground">{selectedProduct.price}</p>
+                      <Badge variant="outline" className="text-xs mt-1">
+                        {selectedProduct.source}
+                      </Badge>
+                    </div>
                   </div>
+                </Card>
+              )}
+
+              <Card className="p-4 glass-effect animate-fade-in">
+                <h4 className="font-semibold text-foreground mb-3">💡 Nasıl Çalışır?</h4>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p className="flex items-start gap-2">
+                    <span className="text-ai">1.</span>
+                    Oda fotoğrafınızı yükleyin
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-ai">2.</span>
+                    İstediğiniz dekoratif ürünü tarif edin veya yükleyin
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-ai">3.</span>
+                    AI ajanlar odanızı analiz eder
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-ai">4.</span>
+                    Mükemmel yerleştirme önerisi alın
+                  </p>
                 </div>
               </Card>
-            )}
-
-            <Card className="p-4 bg-gradient-card border-ai/50">
-              <h4 className="font-semibold text-foreground mb-3">💡 Nasıl Çalışır?</h4>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p className="flex items-start gap-2">
-                  <span className="text-ai">1.</span>
-                  Oda fotoğrafınızı yükleyin
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-ai">2.</span>
-                  İstediğiniz tabloyu tarif edin veya yükleyin
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-ai">3.</span>
-                  AI ajanlar odanızı analiz eder
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-ai">4.</span>
-                  Mükemmel yerleştirme önerisi alın
-                </p>
-              </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
