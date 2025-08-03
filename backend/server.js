@@ -177,6 +177,39 @@ class AIService {
   parseQueryManually(query) {
     const queryLower = query.toLowerCase();
 
+    // Kategori tespiti - AKILLI KATEGORI SİSTEMİ
+    let category = null; // Varsayılan olarak NULL - eşleşmezse hiçbir kategori yok
+
+    // Ürün kategorileri ve anahtar kelimeler
+    const categoryMap = {
+      'tablo': ['tablo', 'kanvas', 'canvas', 'poster', 'çerçeve', 'frame', 'sanat', 'art', 'resim', 'painting'],
+      'vazo': ['vazo', 'vase', 'saksı', 'pot', 'çiçeklik', 'planter'],
+      'lamba': ['lamba', 'lamp', 'aydınlatma', 'lighting', 'abajur', 'avize', 'chandelier', 'spot'],
+      'halı': ['halı', 'carpet', 'rug', 'kilim', 'mat', 'paspas'],
+      'perde': ['perde', 'curtain', 'fon', 'backdrop', 'jalezi', 'blind'],
+      'yastık': ['yastık', 'pillow', 'cushion', 'minder'],
+      'ayna': ['ayna', 'mirror', 'cam'],
+      'saat': ['saat', 'clock', 'time', 'zaman'],
+      'raf': ['raf', 'shelf', 'kitaplık', 'bookshelf', 'dolap'],
+      'bitki': ['bitki', 'plant', 'çiçek', 'flower', 'ağaç', 'tree'],
+      'mumluk': ['mumluk', 'candle', 'mum', 'kandil'],
+      'dekorasyon': ['dekorasyon', 'decoration', 'süs', 'ornament', 'aksesuar', 'accessory']
+    };
+
+    // Query'deki kelimeleri kontrol et
+    for (const [cat, keywords] of Object.entries(categoryMap)) {
+      if (keywords.some(keyword => queryLower.includes(keyword))) {
+        category = cat;
+        break; // İlk eşleşen kategoriyi kullan
+      }
+    }
+
+    if (category) {
+      console.log(`🎯 Tespit edilen kategori: "${category}" (Sorgu: "${query}")`);
+    } else {
+      console.log(`🔍 Spesifik kategori bulunamadı, direkt arama yapılacak (Sorgu: "${query}")`);
+    }
+
     // Renk tespiti
     const colors = [];
     const colorMap = {
@@ -208,7 +241,7 @@ class AIService {
     if (queryLower.includes('bohem') || queryLower.includes('bohemian')) style = 'bohem';
 
     return {
-      category: 'tablo',
+      category: category, // Artık null olabilir
       colors: colors,
       size: size,
       style: style,
@@ -263,15 +296,20 @@ class AIService {
 
       console.log('🔍 Trendyol URL:', trendyolUrl);
 
+      // Anti-bot önlemi: Rastgele gecikme (1-3 saniye)
+      const randomDelay = Math.floor(Math.random() * 2000) + 1000;
+      console.log(`⏳ Anti-bot önlemi: ${randomDelay}ms bekleniyor...`);
+      await new Promise(resolve => setTimeout(resolve, randomDelay));
+
       // Sayfayı yükle
       await page.goto(trendyolUrl, {
         waitUntil: 'domcontentloaded',
-        timeout: 60000
+        timeout: 90000
       });
 
       // Ürün kartlarını bekle
       await page.waitForSelector('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr', {
-        timeout: 30000
+        timeout: 45000
       });
 
       // Ürünleri çek
@@ -432,12 +470,38 @@ class AIService {
   buildTrendyolSearchQuery(query, features) {
     let searchQuery = query;
 
-    // Tablo/dekorasyon terimleri ekle
-    const decorTerms = ['tablo', 'kanvas', 'duvar', 'dekorasyonu', 'sanat'];
-    const hasDecorTerm = decorTerms.some(term => searchQuery.toLowerCase().includes(term));
+    // AKILLI KELİME EKLEME SİSTEMİ - Sadece kategori varsa ekleme yap
+    if (features.category) {
+      const categoryKeywords = {
+        'tablo': ['tablo', 'kanvas', 'duvar dekorasyonu'],
+        'vazo': ['vazo', 'dekoratif vazo', 'ev dekorasyonu'],
+        'lamba': ['lamba', 'aydınlatma', 'ev dekorasyonu'],
+        'halı': ['halı', 'ev tekstili', 'zemin döşeme'],
+        'perde': ['perde', 'ev tekstili', 'pencere dekorasyonu'],
+        'yastık': ['yastık', 'ev tekstili', 'dekoratif yastık'],
+        'ayna': ['ayna', 'dekoratif ayna', 'ev dekorasyonu'],
+        'saat': ['duvar saati', 'masa saati', 'ev dekorasyonu'],
+        'raf': ['dekoratif raf', 'duvar rafı', 'ev dekorasyonu'],
+        'bitki': ['yapay bitki', 'saksı', 'ev dekorasyonu'],
+        'mumluk': ['mumluk', 'dekoratif mumluk', 'ev dekorasyonu'],
+        'dekorasyon': ['ev dekorasyonu', 'dekoratif aksesuar']
+      };
 
-    if (!hasDecorTerm) {
-      searchQuery += ' tablo';
+      // Kategoriye uygun kelimeler ekle
+      const keywords = categoryKeywords[features.category];
+      if (keywords) {
+        // Query'de zaten kategori kelimesi yoksa, ilk keyword'ü ekle
+        const hasCategory = keywords.some(keyword =>
+          searchQuery.toLowerCase().includes(keyword.toLowerCase())
+        );
+
+        if (!hasCategory) {
+          searchQuery += ` ${keywords[0]}`; // İlk kategorik kelimeyi ekle
+        }
+      }
+    } else {
+      // Kategori bulunamadı - HİÇBİR EK KELİME EKLEMİYOR
+      console.log('🔍 Kategori tespit edilemedi, direkt arama yapılıyor');
     }
 
     // Stil bilgisi ekle
@@ -451,6 +515,7 @@ class AIService {
     }
 
     console.log('🔍 Oluşturulan Trendyol sorgusu:', searchQuery);
+    console.log('🎯 Kullanılan kategori:', features.category || 'Kategori yok');
     return searchQuery;
   }
 
@@ -742,13 +807,37 @@ class AIService {
       optimizedQuery += ` ${features.colors.join(' ')}`;
     }
 
-    // Ürün kategorisi ekle
-    optimizedQuery += ' tablo duvar dekorasyonu canvas';
+    // AKILLI KATEGORİ EKLEMESİ - Sadece kategori varsa ekleme yap
+    if (features.category) {
+      const categoryTerms = {
+        'tablo': 'tablo duvar dekorasyonu canvas',
+        'vazo': 'vazo dekoratif ev aksesuar',
+        'lamba': 'lamba aydınlatma ev dekorasyonu',
+        'halı': 'halı ev tekstili zemin',
+        'perde': 'perde ev tekstili pencere',
+        'yastık': 'yastık ev tekstili dekoratif',
+        'ayna': 'ayna dekoratif ev aksesuar',
+        'saat': 'saat duvar masa ev dekorasyonu',
+        'raf': 'raf dekoratif duvar ev',
+        'bitki': 'bitki yapay saksı ev dekorasyonu',
+        'mumluk': 'mumluk dekoratif ev aksesuar',
+        'dekorasyon': 'ev dekorasyonu aksesuar'
+      };
+
+      // Kategoriye göre uygun terimleri ekle
+      if (categoryTerms[features.category]) {
+        optimizedQuery += ` ${categoryTerms[features.category]}`;
+      }
+    } else {
+      // Kategori yok - sadece genel e-ticaret terimleri
+      console.log('🔍 Google Search: Kategori yok, direkt arama');
+    }
 
     // E-ticaret sitelerini ekle
     optimizedQuery += ` (${ecommerceSites.join(' OR ')})`;
 
     console.log('🔍 Optimize edilmiş Google sorgusu:', optimizedQuery);
+    console.log('🎯 Kullanılan kategori:', features.category || 'Kategori yok');
     return optimizedQuery;
   }
 
@@ -1283,7 +1372,7 @@ class AIService {
         try {
           console.log(`🔄 Deneme ${attempt}/3...`);
           products = await this.scrapeTrendyolProducts(query, features);
-          
+
           if (products && products.length > 0) {
             console.log(`✅ ${products.length} ürün bulundu (Deneme ${attempt})`);
             break;
@@ -1293,10 +1382,10 @@ class AIService {
         } catch (error) {
           lastError = error;
           console.log(`❌ Deneme ${attempt} başarısız:`, error.message);
-          
+
           if (attempt < 3) {
-            console.log(`⏳ ${attempt * 2} saniye bekleniyor...`);
-            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            console.log(`⏳ ${attempt * 3} saniye bekleniyor...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 3000));
           }
         }
       }
@@ -1426,7 +1515,8 @@ class AIService {
       optimizedQuery += ` ${roomColors[0]} tonlarda`;
     }
 
-    optimizedQuery += ' tablo duvar dekorasyonu canvas';
+    // GENEL EV DEKORASYONU TERİMİ - Artık sadece tablo değil
+    optimizedQuery += ' ev dekorasyonu';
 
     console.log('Optimize edilmiş sorgu:', optimizedQuery);
     return optimizedQuery;
@@ -1452,7 +1542,7 @@ class AIService {
         price: '0 TL',
         rating: 0,
         reviewCount: 0,
-        image: 'https://via.placeholder.com/400x300/f3f4f6/6b7280?text=Ürün+Bulunamadı',
+        image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjNmNGY2Ii8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmI3MjgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiPsOccnVuIEJ1bHVuYW1hZMSxPC90ZXh0Pgo8L3N2Zz4=',
         link: 'https://www.trendyol.com',
         source: 'Sistem',
         brand: 'Sistem',
@@ -2692,26 +2782,26 @@ app.post('/api/generate-product-placement', upload.fields([
 
     const roomImage = req.files.roomImage[0];
     const productImage = req.files.productImage[0];
-    
+
     // Generate unique output filename
     const outputFilename = `placement-${uuidv4()}.png`;
     const outputPath = path.join(__dirname, 'uploads', outputFilename);
-    
+
     // Get script path
     const scriptPath = path.join(__dirname, 'gpt.py');
-    
+
     // Use cross-platform Python command
     const pythonCommand = process.platform === 'win32' ? 'python' : 'python';
-    
+
     console.log('🤖 GPT Image Generation başlatılıyor...');
     console.log(`📁 Oda görseli: ${roomImage.path}`);
     console.log(`📁 Ürün görseli: ${productImage.path}`);
     console.log(`📁 Çıktı dosyası: ${outputPath}`);
-    
+
     const pythonProcess = spawn(pythonCommand, [
-      scriptPath, 
-      roomImage.path, 
-      productImage.path, 
+      scriptPath,
+      roomImage.path,
+      productImage.path,
       outputPath
     ], {
       stdio: ['pipe', 'pipe', 'pipe']
@@ -2733,13 +2823,13 @@ app.post('/api/generate-product-placement', upload.fields([
     pythonProcess.on('close', (code) => {
       if (code === 0) {
         console.log('✅ GPT Image Generation tamamlandı');
-        
+
         // Check if output file exists
         if (fs.existsSync(outputPath)) {
           // Read the generated image and convert to base64
           const imageBuffer = fs.readFileSync(outputPath);
           const base64Image = imageBuffer.toString('base64');
-          
+
           res.json({
             success: true,
             message: 'Ürün yerleştirme görseli başarıyla oluşturuldu',
