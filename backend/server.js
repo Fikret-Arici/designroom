@@ -236,9 +236,11 @@ class AIService {
           '--disable-backgrounding-occluded-windows',
           '--disable-renderer-backgrounding',
           '--disable-features=VizDisplayCompositor',
-          '--disable-blink-features=AutomationControlled'
+          '--disable-blink-features=AutomationControlled',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
         ],
-        timeout: 30000
+        timeout: 60000
       });
 
       const page = await browser.newPage();
@@ -264,12 +266,12 @@ class AIService {
       // Sayfayı yükle
       await page.goto(trendyolUrl, {
         waitUntil: 'domcontentloaded',
-        timeout: 30000
+        timeout: 60000
       });
 
       // Ürün kartlarını bekle
       await page.waitForSelector('.p-card-wrppr, .product-down, .prdct-cntnr-wrppr', {
-        timeout: 10000
+        timeout: 30000
       });
 
       // Ürünleri çek
@@ -1109,8 +1111,8 @@ class AIService {
   // AI Compatibility Analysis
   async analyzeCompatibility(product, roomStyle, roomColors) {
     try {
-      // Rate limiting için bekle
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Rate limiting için daha uzun bekle
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const compatibilityPrompt = `
       Bu ürünün oda stiliyle uyumluluğunu analiz et:
@@ -1148,6 +1150,11 @@ class AIService {
       return Math.max(0, Math.min(1, score));
     } catch (error) {
       console.error('Uyumluluk analizi hatası:', error);
+      // Rate limit hatası durumunda daha uzun bekle
+      if (error.response && error.response.status === 429) {
+        console.log('⚠️ Rate limit hatası, 5 saniye bekleniyor...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
       return 0.5;
     }
   }
@@ -1267,12 +1274,35 @@ class AIService {
         features = this.parseQueryManually(query);
       }
 
-      // 2. Gerçek Trendyol Scraping
+      // 2. Gerçek Trendyol Scraping - 3 deneme
       console.log('🕷️ Trendyol\'dan gerçek ürün çekiliyor...');
-      const products = await this.scrapeTrendyolProducts(query, features);
+      let products = [];
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`🔄 Deneme ${attempt}/3...`);
+          products = await this.scrapeTrendyolProducts(query, features);
+          
+          if (products && products.length > 0) {
+            console.log(`✅ ${products.length} ürün bulundu (Deneme ${attempt})`);
+            break;
+          } else {
+            throw new Error('Hiç ürün bulunamadı');
+          }
+        } catch (error) {
+          lastError = error;
+          console.log(`❌ Deneme ${attempt} başarısız:`, error.message);
+          
+          if (attempt < 3) {
+            console.log(`⏳ ${attempt * 2} saniye bekleniyor...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          }
+        }
+      }
 
       if (products.length === 0) {
-        throw new Error('Hiç ürün bulunamadı');
+        throw lastError || new Error('Hiç ürün bulunamadı');
       }
 
       console.log(`✅ ${products.length} gerçek ürün bulundu`);
