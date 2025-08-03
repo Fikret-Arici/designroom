@@ -6,7 +6,7 @@ client = OpenAI(
 
 
 prompt = """
-Lütfen aşağıdaki oda fotoğrafına, ikinci görseldeki halıyı gerçekçi bir şekilde yerleştir. Halıyı odanın zeminine, perspektif ve ölçeklendirme kurallarına uygun olarak konumlandır. Işık yönü, gölge uyumu ve halının kenarlarının netliği korunarak, doğal bir şekilde oturtulmalı. Halı dışında ikinci görseldeki hiçbir öğe kullanılmamalıdır. Odanın genel stiline uyacak şekilde halı, odanın ortasına veya en uygun boş alana yerleştirilmelidir. Zemin ile halı arasında gerçekçi bir temas hissi verilmeli ve sonuç tek bir bütünleşik görsel olarak sunulmalıdır.
+Lütfen aşağıdaki oda fotoğrafına, ikinci görseldeki dekoratif ürünü gerçekçi ve doğal bir şekilde yerleştir. Ürünün türünü (örneğin tablo, halı, koltuk, lambader vb.) analiz ederek, odadaki en uygun konuma perspektif, ölçek ve ışık koşullarına dikkat ederek yerleştir. Ürün, odanın mevcut yapısına ve tarzına estetik olarak uyum sağlamalıdır. Gölge, ışık yönü, derinlik hissi ve temas yüzeyi gerçekçi olacak şekilde işlenmelidir. Sadece ikinci görseldeki ürün kullanılmalı; arka plan veya başka öğeler yerleştirilmeyecek. Sonuç görseli tek ve bütünleşik bir yerleştirme olacak şekilde oluşturulmalıdır.
 """
 
 result = client.images.edit(
