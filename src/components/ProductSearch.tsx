@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, ExternalLink, Star, TrendingUp, Truck, Sparkles, Tag } from 'lucide-react';
+import { Search, ExternalLink, Star, TrendingUp, Truck, Sparkles, Tag, ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ApiService from '@/services/apiService';
 import { CommentAnalysis } from './CommentAnalysis';
@@ -43,6 +43,9 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
   const [isSearching, setIsSearching] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProductForAnalysis, setSelectedProductForAnalysis] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
   const { toast } = useToast();
   const apiService = ApiService.getInstance();
 
@@ -117,11 +120,46 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
   };
 
   const handleProductSelect = (product: Product) => {
+    setSelectedProduct(product);
+    setProcessedImage(null); // Reset processed image
     onProductSelect(product);
     toast({
       title: "Ürün Seçildi",
       description: `${product.name} yerleştirme için seçildi.`,
     });
+  };
+
+  const handleRemoveBackground = async () => {
+    if (!selectedProduct) {
+      toast({
+        title: "Hata",
+        description: "Lütfen önce bir ürün seçin.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRemovingBackground(true);
+
+    try {
+      console.log('🖼️ Arka plan kaldırma başlatılıyor...');
+      const response = await apiService.removeBackground(selectedProduct.image);
+      
+      setProcessedImage(response.processedImage);
+      toast({
+        title: "Başarılı",
+        description: "Arka plan başarıyla kaldırıldı!",
+      });
+    } catch (error: any) {
+      console.error('Arka plan kaldırma hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Arka plan kaldırma sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRemovingBackground(false);
+    }
   };
 
   const formatPrice = (price: string) => {
@@ -136,7 +174,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             AI Ürün Arama
           </h3>
           <p className="text-sm text-muted-foreground">
-            İstediğiniz tabloyu tanımlayın, AI ajanımız Trendyol'dan uygun seçenekleri bulsun
+            İstediğiniz dekoratif ürünü tanımlayın, AI ajanımız Trendyol'dan uygun seçenekleri bulsun
           </p>
           {roomColors && roomColors.length > 0 && (
             <div className="flex items-center gap-1 mt-2">
@@ -149,8 +187,8 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
         </div>
 
         <div className="flex gap-2">
-          <Input
-            placeholder="Örn: mavi tonlarda soyut tablo, küçük boyut"
+                     <Input
+             placeholder="Örn: mavi tonlarda soyut tablo, vintage halı, modern vazo"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -166,7 +204,13 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             className="bg-gradient-button"
           >
             {isSearching ? (
-              <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <div className="w-4 h-4 border-2 border-white/30 rounded-full"></div>
+                  <div className="absolute top-0 left-0 w-4 h-4 border-2 border-transparent border-t-white rounded-full animate-spin"></div>
+                </div>
+                <span className="text-xs">Aranıyor</span>
+              </div>
             ) : (
               <Search className="w-4 h-4" />
             )}
@@ -174,13 +218,46 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
         </div>
 
         {isSearching && (
-          <Card className="p-4 border-ai animate-pulse">
-            <div className="flex items-center gap-3">
-              <div className="animate-scan w-full h-1 bg-gradient-ai rounded-full"></div>
+          <Card className="p-6 border-ai/30 bg-gradient-card">
+            <div className="flex flex-col items-center space-y-4">
+              {/* Modern Loading Animation */}
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-ai/20 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-ai rounded-full animate-spin"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-8 h-8 bg-gradient-ai rounded-full animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Loading Text with Typing Effect */}
+              <div className="text-center space-y-2">
+                <h4 className="font-semibold text-ai">AI Ajanı Çalışıyor</h4>
+                <div className="flex items-center justify-center space-x-1">
+                  <span className="text-sm text-muted-foreground">Trendyol'da ürün arıyor</span>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress Steps */}
+              <div className="w-full max-w-xs space-y-2">
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-muted-foreground">AI sorgusu analiz ediliyor</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-ai rounded-full animate-pulse"></div>
+                  <span className="text-ai">Trendyol API'sine bağlanılıyor</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">Ürünler filtreleniyor</span>
+                </div>
+              </div>
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              AI ajanı Trendyol'da ürün arıyor...
-            </p>
           </Card>
         )}
 
@@ -313,6 +390,121 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Arka Plan Kaldırma Bölümü */}
+        {selectedProduct && (
+          <Card className="p-6 border-ai/30 bg-gradient-card">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-ai">Seçilen Ürün: {selectedProduct.name}</h4>
+                  <p className="text-sm text-muted-foreground">Arka planı kaldırılmış ürünü görüntüleyin</p>
+                </div>
+                <Button
+                  onClick={handleRemoveBackground}
+                  disabled={isRemovingBackground}
+                  className="bg-gradient-button"
+                >
+                  {isRemovingBackground ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="relative">
+                        <div className="w-4 h-4 border-2 border-white/30 rounded-full"></div>
+                        <div className="absolute top-0 left-0 w-4 h-4 border-2 border-transparent border-t-white rounded-full animate-spin"></div>
+                      </div>
+                      <span className="text-xs">İşleniyor</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Arka Planı Kaldır
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {isRemovingBackground && (
+                <Card className="p-6 border-ai/30 bg-gradient-card">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-4 border-ai/20 rounded-full"></div>
+                      <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-ai rounded-full animate-spin"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <div className="w-8 h-8 bg-gradient-ai rounded-full animate-pulse"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center space-y-2">
+                      <h4 className="font-semibold text-ai">BRIA-RMBG-2.0 İşleniyor</h4>
+                      <div className="flex items-center justify-center space-x-1">
+                        <span className="text-sm text-muted-foreground">Arka plan kaldırılıyor</span>
+                        <div className="flex space-x-1">
+                          <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-1 h-1 bg-ai rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="w-full max-w-xs space-y-2">
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-muted-foreground">Görsel analiz ediliyor</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-ai rounded-full animate-pulse"></div>
+                        <span className="text-ai">BRIA-RMBG-2.0 modeli çalışıyor</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-muted rounded-full"></div>
+                        <span className="text-muted-foreground">Arka plan kaldırılıyor</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {processedImage && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-foreground mb-2">Orijinal Görsel</h5>
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.name}
+                        className="w-full h-48 object-cover rounded-lg border"
+                      />
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-foreground mb-2">Arka Planı Kaldırılmış</h5>
+                      <div className="relative">
+                        <img
+                          src={processedImage}
+                          alt={`${selectedProduct.name} - Arka planı kaldırılmış`}
+                          className="w-full h-48 object-contain rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100"
+                        />
+                        <Badge className="absolute top-2 right-2 bg-green-500 text-white">
+                          ✅ İşlendi
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-green-700">
+                        Arka plan başarıyla kaldırıldı! Bu ürün artık oda yerleştirmesi için hazır.
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      BRIA-RMBG-2.0
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
         )}
       </div>
     </Card>

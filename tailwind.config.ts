@@ -106,6 +106,26 @@ export default {
 				'scan': {
 					'0%': { transform: 'translateX(-100%)' },
 					'100%': { transform: 'translateX(100%)' }
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						opacity: '0.3',
+						transform: 'scale(1)'
+					},
+					'50%': {
+						opacity: '0.6',
+						transform: 'scale(1.05)'
+					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
@@ -113,12 +133,18 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'ai-glow': 'ai-glow 2s ease-in-out infinite',
 				'float': 'float 3s ease-in-out infinite',
-				'scan': 'scan 2s ease-in-out infinite'
+				'scan': 'scan 2s ease-in-out infinite',
+				'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
+				'fade-in': 'fade-in 0.5s ease-out'
 			},
 			backgroundImage: {
 				'gradient-ai': 'var(--gradient-ai)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-button': 'var(--gradient-button)'
+				'gradient-button': 'var(--gradient-button)',
+				'gradient-background': 'var(--gradient-background)'
+			},
+			backdropBlur: {
+				xs: '2px',
 			}
 		}
 	},

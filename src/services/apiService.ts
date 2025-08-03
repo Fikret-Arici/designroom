@@ -51,6 +51,12 @@ export interface DecorSuggestionsResponse {
   message: string;
 }
 
+export interface BackgroundRemovalResponse {
+  success: boolean;
+  processedImage: string;
+  message: string;
+}
+
 class ApiService {
   private static instance: ApiService;
 
@@ -163,6 +169,42 @@ class ApiService {
     }
   }
 
+  // Analyze room with specific product for placement
+  async analyzeRoomWithProduct(roomImageBase64: string, product: any): Promise<RoomAnalysisResponse> {
+    try {
+      console.log('🎯 API: Ürüne özel oda analizi isteği gönderiliyor...', product.name);
+      
+      const response = await fetch(`${API_BASE_URL}/analyze-room-with-product`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomImageBase64,
+          product: {
+            name: product.name,
+            description: product.description,
+            image: product.image,
+            source: product.source,
+            price: product.price,
+            rating: product.rating
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ API: Ürüne özel oda analizi yanıtı alındı');
+      return result;
+    } catch (error) {
+      console.error('❌ API: Ürüne özel oda analizi hatası:', error);
+      throw new Error('Ürüne özel oda analizi sırasında hata oluştu');
+    }
+  }
+
   // Place product in room
   async placeProduct(roomImageBase64: string, productImageBase64: string, placementData: any): Promise<PlacementResponse> {
     try {
@@ -246,6 +288,34 @@ class ApiService {
     } catch (error) {
       console.error('❌ API: Dekoratif ürün önerileri hatası:', error);
       throw new Error('Dekoratif ürün önerileri sırasında hata oluştu');
+    }
+  }
+
+  // Remove background from image
+  async removeBackground(imageBase64: string): Promise<BackgroundRemovalResponse> {
+    try {
+      console.log('🖼️ API: Arka plan kaldırma isteği gönderiliyor...');
+      
+      const response = await fetch(`${API_BASE_URL}/remove-background`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ API: Arka plan kaldırma yanıtı alındı');
+      return result;
+    } catch (error) {
+      console.error('❌ API: Arka plan kaldırma hatası:', error);
+      throw new Error('Arka plan kaldırma sırasında hata oluştu');
     }
   }
 

@@ -226,7 +226,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
                   <p className="text-white font-semibold">🎨 Professional AI Yerleştirme</p>
                   <div className="mt-3 space-y-1 text-sm text-gray-300">
-                    <p className="animate-pulse">🔄 1/3: Hugging Face ile arka plan kaldırılıyor...</p>
+                                         <p className="animate-pulse">🔄 1/3: BRIA-RMBG-2.0 ile arka plan kaldırılıyor...</p>
                     <p className="animate-pulse">🔄 2/3: AI optimal pozisyon hesaplıyor...</p>
                     <p className="animate-pulse">🔄 3/3: Professional overlay hazırlanıyor...</p>
                   </div>
@@ -268,7 +268,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                   }}
                 >
                   <img 
-                    src={selectedProduct.image} 
+                    src={placementData.productImageUrl || selectedProduct.image} 
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover rounded-sm"
                     style={{
@@ -297,90 +297,29 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
         </Card>
       </div>
 
-      {/* Sonuç Bilgileri */}
-      {placementData && (
-        <Card className="bg-gray-900/50 border-gray-700 p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">📊 Yerleştirme Detayları</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400">{Math.round(placementData.confidence * 100)}%</div>
-              <div className="text-gray-400">Uyum Skoru</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">{placementData.overlayData.position.x}%, {placementData.overlayData.position.y}%</div>
-              <div className="text-gray-400">Konum</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">{placementData.overlayData.position.width}×{placementData.overlayData.position.height}%</div>
-              <div className="text-gray-400">Boyut</div>
-            </div>
-          </div>
-
-          {/* Background Removal Status */}
-          <div className="mb-4 p-4 rounded-lg bg-gray-800/50">
-            <div className="flex items-center gap-2 mb-2">
-              {placementData.overlayData.backgroundRemoved ? (
-                <>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-green-400 font-semibold">🎯 Professional Yerleştirme</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span className="text-yellow-400 font-semibold">⚡ Hızlı Yerleştirme</span>
-                </>
-              )}
-            </div>
-            <div className="text-sm text-gray-300">
-              {placementData.overlayData.backgroundRemoved 
-                ? 'Hugging Face REMBG ile arka plan kaldırıldı' 
-                : 'Arka plan kaldırma işlemi atlandı'}
-            </div>
-          </div>
-
-          {/* Processing Steps */}
-          {placementData.processingSteps && (
-            <div className="mb-6 p-4 rounded-lg bg-gray-800/50">
-              <h4 className="text-white font-semibold mb-3">🔄 İşlem Adımları</h4>
-              <div className="space-y-2">
-                {placementData.processingSteps.map((step, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
-                    <span className="text-gray-300">{step}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mb-6">
-            <p className="text-white text-center">{placementData.message}</p>
-          </div>
-
-          {/* Aksiyon Butonları */}
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button onClick={downloadResult} className="bg-blue-600 hover:bg-blue-700">
-              <Download className="h-4 w-4 mr-2" />
-              İndir
-            </Button>
-            
-            <Button onClick={shareResult} variant="outline">
-              <Share2 className="h-4 w-4 mr-2" />
-              Paylaş
-            </Button>
-            
-            <Button onClick={generatePlacement} variant="outline">
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Yeni Deneme
-            </Button>
-            
-            <Button onClick={onReset} variant="outline">
-              Yeni Oda
-            </Button>
-          </div>
-        </Card>
-      )}
+             {/* Aksiyon Butonları */}
+       {placementData && (
+         <div className="flex flex-wrap gap-3 justify-center">
+           <Button onClick={downloadResult} className="bg-blue-600 hover:bg-blue-700">
+             <Download className="h-4 w-4 mr-2" />
+             İndir
+           </Button>
+           
+           <Button onClick={shareResult} variant="outline">
+             <Share2 className="h-4 w-4 mr-2" />
+             Paylaş
+           </Button>
+           
+           <Button onClick={generatePlacement} variant="outline">
+             <RotateCcw className="h-4 w-4 mr-2" />
+             Yeni Deneme
+           </Button>
+           
+           <Button onClick={onReset} variant="outline">
+             Yeni Oda
+           </Button>
+         </div>
+       )}
     </div>
   );
 };
