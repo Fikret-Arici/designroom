@@ -1111,7 +1111,7 @@ class AIService {
     try {
       // Rate limiting için bekle
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const compatibilityPrompt = `
       Bu ürünün oda stiliyle uyumluluğunu analiz et:
       
@@ -1554,7 +1554,7 @@ class AIService {
       console.log('🔑 Gemini API anahtarı kontrol ediliyor...');
       console.log('API anahtarı var mı:', !!this.geminiApiKey);
       console.log('API anahtarı uzunluğu:', this.geminiApiKey?.length);
-      
+
       if (!this.geminiApiKey || this.geminiApiKey === 'your-gemini-api-key-here') {
         console.warn('⚠️ Gemini API anahtarı eksik, fallback kullanılıyor...');
         return this.getProductSpecificFallback(product);
@@ -1600,7 +1600,7 @@ Sadece JSON formatında döndür:
       while (retryCount < maxRetries) {
         try {
           console.log(`📤 Gemini API isteği gönderiliyor... (Deneme ${retryCount + 1}/${maxRetries})`);
-          
+
           response = await axios.post(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`,
             {
@@ -1669,7 +1669,7 @@ Sadece JSON formatında döndür:
       } catch (parseError) {
         console.error('❌ JSON parse hatası:', parseError);
         console.log('Parse edilemeyen metin:', analysisText);
-        
+
         // AI yanıtından bilgileri çıkarmaya çalış
         analysis = this.extractAnalysisFromText(analysisText);
         if (!analysis.style) {
@@ -1718,7 +1718,7 @@ Sadece JSON formatında döndür:
   // Ürüne özel fallback analiz
   getProductSpecificFallback(product) {
     console.log('🔄 Fallback analiz kullanılıyor:', product.name);
-    
+
     // Ürün tipine göre farklı yerleştirme alanları
     let placementAreas = [
       { x: 30, y: 20, width: 40, height: 30 },
@@ -1770,7 +1770,7 @@ Sadece JSON formatında döndür:
   // AI yanıtından analiz bilgilerini çıkar
   extractAnalysisFromText(text) {
     console.log('🔍 AI yanıtından bilgi çıkarılıyor:', text.substring(0, 100) + '...');
-    
+
     const analysis = {};
 
     // Oda stili
@@ -1836,7 +1836,7 @@ Sadece JSON formatında döndür:
       console.log('🔄 1/3: Ürün arka planı kaldırılıyor...');
       let productWithoutBg;
       let backgroundRemoved = false;
-      
+
       try {
         productWithoutBg = await this.removeBackground(productImageBase64);
         backgroundRemoved = true;
@@ -1853,7 +1853,7 @@ Sadece JSON formatında döndür:
 
       // 3. ADIM: Gerçek ürün yerleştirme verisi hazırla
       console.log('🔄 3/3: Gerçek ürün yerleştirme verisi hazırlanıyor...');
-      
+
       const placement = {
         success: true,
         imageUrl: roomImageBase64, // Orijinal oda
@@ -1889,17 +1889,17 @@ Sadece JSON formatında döndür:
           rotation: 0,
           lighting: backgroundRemoved ? 'Professional arka plan kaldırma' : 'Basit yerleştirme'
         },
-        message: backgroundRemoved 
+        message: backgroundRemoved
           ? '🎯 AI tabloyu profesyonel şekilde yerleştirdi! Arka plan kaldırıldı, perspektif ve gölgeler optimize edildi.'
           : '🎯 AI tabloyu yerleştirdi! Arka plan kaldırma başarısız oldu ama ürün başarıyla yerleştirildi.',
-                 processingSteps: [
-           backgroundRemoved 
-             ? '✅ BRIA-RMBG-2.0 ile arka plan kaldırıldı'
-             : '⚠️ Arka plan kaldırma başarısız, orijinal görsel kullanıldı',
-           '✅ AI optimal yerleştirme pozisyonu hesaplandı',
-           '✅ Professional gölge ve perspektif uygulandı',
-           `✅ Oda uyumu %${Math.round((backgroundRemoved ? 0.95 : 0.85) * 100)} seviyesinde`
-         ]
+        processingSteps: [
+          backgroundRemoved
+            ? '✅ BRIA-RMBG-2.0 ile arka plan kaldırıldı'
+            : '⚠️ Arka plan kaldırma başarısız, orijinal görsel kullanıldı',
+          '✅ AI optimal yerleştirme pozisyonu hesaplandı',
+          '✅ Professional gölge ve perspektif uygulandı',
+          `✅ Oda uyumu %${Math.round((backgroundRemoved ? 0.95 : 0.85) * 100)} seviyesinde`
+        ]
       };
 
       console.log('✅ GERÇEK ÜRÜN YERLEŞTİRME tamamlandı!');
@@ -2299,7 +2299,7 @@ app.post('/api/analyze-room-with-product', async (req, res) => {
     const { roomImageBase64, product } = req.body;
 
     if (!roomImageBase64 || !product) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Oda görseli ve ürün bilgisi gerekli',
         message: 'Lütfen oda fotoğrafı ve ürün bilgilerini kontrol edin.'
       });
@@ -2322,10 +2322,10 @@ app.post('/api/analyze-room-with-product', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Ürüne özel oda analizi hatası:', error);
-    
+
     // Daha detaylı hata mesajı
     let errorMessage = 'Ürüne özel oda analizi sırasında hata oluştu';
-    
+
     if (error.message.includes('API anahtarı')) {
       errorMessage = 'AI servisi geçici olarak kullanılamıyor';
     } else if (error.message.includes('timeout')) {
@@ -2333,8 +2333,8 @@ app.post('/api/analyze-room-with-product', async (req, res) => {
     } else if (error.message.includes('network')) {
       errorMessage = 'Ağ bağlantısı sorunu';
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       error: errorMessage,
       message: 'Lütfen daha sonra tekrar deneyin veya farklı bir ürün seçin.'
     });
@@ -2452,7 +2452,9 @@ app.post('/api/analyze-comments', rateLimit, async (req, res) => {
     const scriptPath = path.join(__dirname, 's2.py');
 
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python', [scriptPath, productUrl], {
+      // Windows'ta Python launcher'ı dene, yoksa python komutunu kullan
+      const pythonCommand = process.platform === 'win32' ? 'py' : 'python';
+      const pythonProcess = spawn(pythonCommand, [scriptPath, productUrl], {
         env: {
           ...process.env,
           PYTHONIOENCODING: 'utf-8',
