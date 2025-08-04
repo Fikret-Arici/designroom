@@ -473,18 +473,31 @@ class AIService {
     // AKILLI KELİME EKLEME SİSTEMİ - Sadece kategori varsa ekleme yap
     if (features.category) {
       const categoryKeywords = {
-        'tablo': ['tablo', 'kanvas', 'duvar dekorasyonu'],
-        'vazo': ['vazo', 'dekoratif vazo', 'ev dekorasyonu'],
-        'lamba': ['lamba', 'aydınlatma', 'ev dekorasyonu'],
-        'halı': ['halı', 'ev tekstili', 'zemin döşeme'],
-        'perde': ['perde', 'ev tekstili', 'pencere dekorasyonu'],
-        'yastık': ['yastık', 'ev tekstili', 'dekoratif yastık'],
-        'ayna': ['ayna', 'dekoratif ayna', 'ev dekorasyonu'],
-        'saat': ['duvar saati', 'masa saati', 'ev dekorasyonu'],
-        'raf': ['dekoratif raf', 'duvar rafı', 'ev dekorasyonu'],
-        'bitki': ['yapay bitki', 'saksı', 'ev dekorasyonu'],
-        'mumluk': ['mumluk', 'dekoratif mumluk', 'ev dekorasyonu'],
-        'dekorasyon': ['ev dekorasyonu', 'dekoratif aksesuar']
+        'tablo': ['tablo', 'kanvas', 'duvar tablosu', 'dekoratif tablo', 'resim tablosu'],
+        'vazo': ['vazo', 'dekoratif vazo', 'çiçek vazosu', 'cam vazo', 'seramik vazo'],
+        'lamba': ['lamba', 'aydınlatma', 'masa lambası', 'duvar lambası', 'tavan lambası', 'led lamba'],
+        'halı': ['halı', 'kilim', 'zemin halısı', 'dekoratif halı', 'ev halısı'],
+        'perde': ['perde', 'tül perde', 'pencere perdesi', 'dekoratif perde', 'stor perde'],
+        'yastık': ['yastık', 'dekoratif yastık', 'koltuk yastığı', 'yastık kılıfı', 'ev yastığı'],
+        'ayna': ['ayna', 'dekoratif ayna', 'duvar aynası', 'banyo aynası', 'salon aynası'],
+        'saat': ['duvar saati', 'masa saati', 'dekoratif saat', 'analog saat', 'dijital saat'],
+        'raf': ['dekoratif raf', 'duvar rafı', 'kitaplık rafı', 'dekoratif raf', 'sergi rafı'],
+        'bitki': ['yapay bitki', 'saksı', 'dekoratif bitki', 'çiçek saksısı', 'ev bitkisi'],
+        'mumluk': ['mumluk', 'dekoratif mumluk', 'mum standı', 'mum tutucu', 'dekoratif mum'],
+        'dekorasyon': ['dekoratif aksesuar', 'ev dekorasyonu', 'dekoratif obje', 'dekoratif ürün'],
+        'koltuk': ['koltuk', 'kanape', 'salon koltuğu', 'dekoratif koltuk', 'ev koltuğu'],
+        'masa': ['masa', 'çalışma masası', 'yemek masası', 'dekoratif masa', 'ev masası'],
+        'sandalye': ['sandalye', 'dekoratif sandalye', 'ev sandalyesi', 'yemek sandalyesi'],
+        'dolap': ['dolap', 'gardırop', 'dekoratif dolap', 'ev dolabı', 'giysi dolabı'],
+        'komodin': ['komodin', 'yatak komodini', 'dekoratif komodin', 'ev komodini'],
+        'abajur': ['abajur', 'lamba abajuru', 'dekoratif abajur', 'masa abajuru'],
+        'paspas': ['paspas', 'kapı paspası', 'dekoratif paspas', 'ev paspası'],
+        'havlu': ['havlu', 'banyo havlusu', 'dekoratif havlu', 'ev havlusu'],
+        'çarşaf': ['çarşaf', 'yatak çarşafı', 'dekoratif çarşaf', 'ev çarşafı'],
+        'battaniye': ['battaniye', 'dekoratif battaniye', 'ev battaniyesi', 'koltuk battaniyesi'],
+        'seccade': ['seccade', 'namaz seccadesi', 'dekoratif seccade', 'ev seccadesi'],
+        'mobilya': ['mobilya', 'ev mobilyası', 'dekoratif mobilya', 'salon mobilyası'],
+        'aksesuar': ['aksesuar', 'dekoratif aksesuar', 'ev aksesuarı', 'dekoratif obje']
       };
 
       // Kategoriye uygun kelimeler ekle
