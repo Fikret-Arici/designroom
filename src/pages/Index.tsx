@@ -148,18 +148,7 @@ const Index = () => {
              AI ajanlarımız seçtiğiniz ürünü size mükemmel yerleştirme önerisi sunsun.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Badge variant="outline" className="text-ai border-ai">
-              <Target className="w-3 h-3 mr-1" />
-              
-            </Badge>
-            <Badge variant="outline" className="text-ai border-ai">
-              <Brain className="w-3 h-3 mr-1" />
-              
-            </Badge>
-            <Badge variant="outline" className="text-ai border-ai">
-              <Sparkles className="w-3 h-3 mr-1" />
-              
-            </Badge>
+            
           </div>
         </div>
       </div>
