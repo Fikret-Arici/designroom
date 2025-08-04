@@ -2085,14 +2085,14 @@ Sadece JSON formatında döndür:
           contents: [{
             parts: [
               {
-                text: `Bu oda fotoğrafını kısa ve öz bir şekilde analiz et. Şu konulara odaklan:
+                text: `Bu oda fotoğrafını analiz ederek şu konulara odaklan:
 
-1. **Genel İzlenim**: Odanın atmosferi (2-3 cümle)
-2. **Dekorasyon Tarzı**: Hangi stil kullanılmış (1-2 cümle)
-3. **Renk Paleti**: Baskın renkler (1 cümle)
-4. **Tablo Yerleştirme**: Hangi duvarlara tablo asılabilir (1-2 cümle)
+1. **Genel İzlenim**: Odanın atmosferi ve genel görünümü (2-3 cümle)
+2. **Dekorasyon Tarzı**: Kullanılan stil ve tasarım yaklaşımı (1-2 cümle)
+3. **Renk Paleti**: Baskın renkler ve renk uyumu (1 cümle)
+4. **Dekoratif Ürün Önerileri**: Hangi duvarlara ve alanlara hangi dekoratif ürünler (tablo, ayna, vazo, bitki, lamba vb.) yerleştirilebilir (1-2 cümle)
 
-Kısa, samimi ve yapıcı bir dille yaz. 2-3 paragraf halinde yaz.`
+Direkt ve profesyonel bir dille yaz. 2-3 paragraf halinde, samimi olmayan bir ton kullan.`
               },
               {
                 inline_data: {
