@@ -2163,28 +2163,37 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
           contents: [{
             parts: [
               {
-                text: `Bu bir oda fotoğrafıdır. Görsele göre 5 farklı kategori için dekoratif ürün önerileri ver:
+                text: `
+Aşağıdaki görüntü bir oda fotoğrafıdır. Lütfen görseldeki objeleri analiz et ve sadece eksik veya zayıf kalan alanlara yönelik **uyumlu ve gerçekçi dekoratif ürün önerileri** sun. Her bir öneri, odanın mevcut tarzı, ışık durumu ve boş alanlarına göre **özenle seçilmiş olmalı**. Ürünler yalnızca aşağıdaki 5 kategoriye ait olacak şekilde önerilsin. Her kategori için sadece 1 adet ürün önerisi yaz:
 
-1. Duvarlar (örnek: tablo, ayna, saat)
-2. Mobilya Üstü (örnek: vazo, bitki, mumluk)
-3. Zemin (örnek: halı, yastık, kilim)
-4. Aydınlatma (örnek: masa lambası, LED, abajur)
-5. Dokuma (örnek: perde, yastık, battaniye)
+1. **Duvarlar** (örnek: tablo, ayna, duvar saati, çerçeve, duvar panosu)
+2. **Mobilya Üstü** (örnek: bitki, dekoratif obje, mumluk, masa üstü kitap)
+3. **Zemin** (örnek: halı, kilim, puf, zemin lambası)
+4. **Aydınlatma** (örnek: abajur, LED şerit, ayak lambası, tavan lambası)
+5. **Dokuma & Kumaş** (örnek: perde, kırlent, battaniye, koltuk örtüsü)
 
-Her kategori için yalnızca 1 ürün ismi yaz. Sadece ürün adlarını kısa maddeler halinde ver, açıklama ekleme. Biçim şu şekilde olsun:
+ Öneriler **odada zaten bulunan eşyaları tekrar etmemeli**. Onun yerine eksik kalan veya geliştirmeye açık alanlar hedef alınmalı.  
+ Her ürün, stil olarak odaya uymalı (örneğin minimalistse “soyut tablo”, rustikse “ahşap çerçeve” gibi).  
+ Yanıt sadece şu formatta, kısa ve net olarak yazılsın:
 
-**Duvarlar:**
-- tablo
-- ayna
+**Duvarlar:**  
+- soyut tablo
 
-**Mobilya Üstü:**
-- bitki
-- mumluk
+**Mobilya Üstü:**  
+- seramik vazo
 
-... gibi.
+**Zemin:**  
+- geometrik desenli halı
 
-Sade, kısa ve maddeler halinde yaz.
+**Aydınlatma:**  
+- modern ayak lambası
+
+**Dokuma:**  
+- keten gri perde
+
+Hiçbir açıklama yazma, sadece ürün adlarını ver.
 `
+
               },
               {
                 inline_data: {
