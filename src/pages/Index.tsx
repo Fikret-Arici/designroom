@@ -143,7 +143,7 @@ const Index = () => {
             <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
           </div>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Odanızın fotoğrafını yükleyin, istediğiniz dekoratif ürünü tarif edin veya yükleyin.
+            Odanızın fotoğrafını yükleyin,istediğiniz dekoratif ürünü tarif edin veya yükleyin.
              Oda analizini alın ve dekoratif ürün önerileri alın. 
              AI ajanlarımız seçtiğiniz ürünü özel size mükemmel yerleştirme önerisi sunsun.
           </p>
