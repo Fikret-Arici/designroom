@@ -145,7 +145,7 @@ const Index = () => {
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Odanızın fotoğrafını yükleyin, istediğiniz dekoratif ürünü tarif edin veya yükleyin.
              Oda analizini alın ve dekoratif ürün önerileri alın. 
-             AI ajanlarımız seçtiğiniz ürünü size mükemmel yerleştirme önerisi sunsun.
+             AI ajanlarımız seçtiğiniz ürünü özel size mükemmel yerleştirme önerisi sunsun.
           </p>
           <div className="flex items-center justify-center gap-4">
             
