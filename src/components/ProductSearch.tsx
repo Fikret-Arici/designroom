@@ -484,7 +484,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                           className="w-full h-48 object-contain rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100"
                         />
                         <Badge className="absolute top-2 right-2 bg-green-500 text-white">
-                          ✅ İşlendi
+                           İşlendi
                         </Badge>
                       </div>
                     </div>
