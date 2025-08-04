@@ -143,21 +143,22 @@ const Index = () => {
             <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
           </div>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Odanızın fotoğrafını yükleyin, istediğiniz dekoratif ürünü tarif edin.
-            AI ajanlarımız size mükemmel yerleştirme önerisi sunsun.
+            Odanızın fotoğrafını yükleyin, istediğiniz dekoratif ürünü tarif edin veya yükleyin.
+             Oda analizini alın ve dekoratif ürün önerileri alın. 
+             AI ajanlarımız seçtiğiniz ürünü size mükemmel yerleştirme önerisi sunsun.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Badge variant="outline" className="text-ai border-ai">
               <Target className="w-3 h-3 mr-1" />
-              3 AI Agent
+              
             </Badge>
             <Badge variant="outline" className="text-ai border-ai">
               <Brain className="w-3 h-3 mr-1" />
-              GPT-4 Vision
+              
             </Badge>
             <Badge variant="outline" className="text-ai border-ai">
               <Sparkles className="w-3 h-3 mr-1" />
-              DALL·E Edit
+              
             </Badge>
           </div>
         </div>
