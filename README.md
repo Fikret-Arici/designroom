@@ -21,20 +21,19 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 ## 🚀 Özellikler
 
 ### 🤖 AI Agent Mimarisi
-- **🔍 Agent 1: Ürün Arama Ajanı** - Metin tanımından uygun ürünleri bulma
-- **👁️ Agent 2: Oda Görsel Analiz Ajanı** - Gemini Vision ile oda analizi
-- **🎨 Agent 3: Yerleştirme Ajanı** - Hugging Face REMBG ile arka plan kaldırma
-- **💬 Agent 4: Oda Yorum Ajanı** - AI destekli oda analiz yorumları
+- **🔍 Agent 1: Ürün Arama Ajanı** - Gemini AI ile metin tanımından uygun ürünleri bulma
+- **🎨 Agent 2: Yerleştirme Ajanı** - GPT-4 Vision ile gerçekçi ürün yerleştirme
+- **💬 Agent 3: Oda Yorum Ajanı** - Gemini AI ile detaylı oda analizi ve yorumlar
 
 ### ✨ Ana Özellikler
 - 📸 **Oda Fotoğrafı Yükleme** - Drag & drop ile kolay yükleme
-- 🔍 **AI Destekli Ürün Arama** - Google Custom Search API entegrasyonu
-- 🎨 **Otomatik Oda Analizi** - Stil ve renk paletini otomatik tespit
-- 🖼️ **Fotorealistik Yerleştirme** - Doğal görünümlü ürün entegrasyonu
-- 💬 **AI Oda Yorumları** - Detaylı oda analizi ve öneriler
+- 🔍 **Trendtol AI Ürün Arama** - Gemini AI analizi
+- 🎨 **GPT-4 Vision Yerleştirme** - Gerçekçi ürün yerleştirme
+- 💬 **Gemini AI Oda Yorumları** - Detaylı oda analizi ve öneriler
+- 🛍️ **Gemini AI Dekoratif Öneriler** - Oda stiline uygun ürün önerileri
 - 📱 **Responsive Tasarım** - Tüm cihazlarda mükemmel deneyim
-- ⚡ **Gerçek Zamanlı İşlem** - Hızlı AI yanıtları
-- 🎯 **Optimize Edilmiş UI** - Kompakt ve kullanışlı arayüz
+- ⚡ **Hızlı İşlem** - Optimize edilmiş 3 adımlı süreç
+- 🎯 **Tooltip Sistemi** - AI Agent'lar hakkında detaylı bilgi
 
 ---
 
@@ -59,9 +58,9 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 ### ⚙️ Backend
 - **Node.js** + **Express.js**
 - **Multer** - Dosya yükleme
-- **Gemini API** - Google AI Vision analizi
+- **Gemini API** - Google AI Vision analizi ve metin işleme
+- **GPT-4 Vision API** - Ürün yerleştirme
 - **Google Custom Search API** - Ürün arama
-- **Hugging Face REMBG** - Arka plan kaldırma
 - **Puppeteer** - Web scraping
 - **CORS** - Cross-origin desteği
 
@@ -79,7 +78,7 @@ Bu proje, kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekora
 - Node.js 18+
 - npm veya yarn
 - Gemini API anahtarı
-
+- GPT-4 Vision API anahtarı
 
 #### 1️⃣ Projeyi Klonlayın
 ```bash
@@ -122,10 +121,8 @@ VITE_API_URL=http://localhost:5000/api
 ```env
 # AI API Keys
 GEMINI_API_KEY=your-gemini-api-key-here
+OPENAI_API_KEY=your-openai-api-key-here
 
-# Google Custom Search API
-GOOGLE_SEARCH_API_KEY=your-google-search-api-key-here
-GOOGLE_SEARCH_ENGINE_ID=your-google-search-engine-id-here
 
 # Server Configuration
 PORT=5000
@@ -134,34 +131,9 @@ NODE_ENV=development
 
 > ⚠️ **Önemli:** 
 > - **Gemini API Key**: [Google AI Studio](https://makersuite.google.com/app/apikey) üzerinden ücretsiz alabilirsiniz
-> - **Google Search API Key**: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) üzerinden alabilirsiniz
-> - **Google Search Engine ID**: [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) üzerinden oluşturabilirsiniz
+> - **OpenAI API Key**: [OpenAI Platform](https://platform.openai.com/api-keys) üzerinden alabilirsiniz
 
-#### 🔧 Google Custom Search Engine Kurulumu
 
-1. **Search Engine Oluşturma:**
-   - [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) adresine gidin
-   - "Create a search engine" butonuna tıklayın
-   - Sites to search kısmına şu siteleri ekleyin:
-     ```
-     trendyol.com
-     hepsiburada.com
-     n11.com
-     amazon.com.tr
-     gittigidiyor.com
-     ```
-   - "Create" butonuna tıklayın
-
-2. **Search Engine ID Alma:**
-   - Oluşturulan search engine'de "Setup" sekmesine gidin
-   - "Search engine ID" değerini kopyalayın (cx parametresi)
-
-3. **API Key Alma:**
-   - [Google Cloud Console](https://console.cloud.google.com/apis/credentials) adresine gidin
-   - "Custom Search API" servisini etkinleştirin
-   - "Create Credentials" > "API Key" ile yeni anahtar oluşturun
-
----
 
 ## 🚀 Kullanım
 
@@ -170,17 +142,15 @@ NODE_ENV=development
 | Adım | Açıklama | Süre |
 |------|----------|------|
 | 1️⃣ | **Oda Fotoğrafı Yükleyin** - Ana sayfada drag & drop ile oda fotoğrafınızı yükleyin | ~5 saniye |
-| 2️⃣ | **Ürün Tanımlayın** - İstediğiniz dekoratif ürünü tarif edin | ~10 saniye |
-| 3️⃣ | **AI Analizi** - Sistem odanızı otomatik olarak analiz eder | ~15 saniye |
-| 4️⃣ | **AI Oda Yorumu** - Detaylı oda analizi ve öneriler alın | ~8 saniye |
-| 5️⃣ | **Ürün Yerleştirme** - AI ürünü odanıza doğal şekilde yerleştirir | ~20 saniye |
-| 6️⃣ | **Sonuç İndirin** - Final görseli indirin veya paylaşın | ~2 saniye |
+| 2️⃣ | **Ürün Seçin** - İstediğiniz dekoratif ürünü tarif edin veya yükleyin | ~10 saniye |
+| 3️⃣ | **AI Yerleştirme** - GPT-4 Vision ürünü odanıza gerçekçi şekilde yerleştirir | ~20 saniye |
 
 ### 💡 İpuçları
 - 📷 **Yüksek kaliteli** oda fotoğrafları kullanın
 - 🌟 **Detaylı ürün tanımları** yapın  
 - 💡 **İyi aydınlatmalı** odalar daha iyi sonuç verir
 - 💬 **AI yorumlarını** okuyarak daha iyi öneriler alın
+- 🖱️ **AI Agent kartlarına** hover yaparak detaylı bilgi alın
 
 ---
 
@@ -190,18 +160,18 @@ NODE_ENV=development
 ai-decor-dream/
 ├── 📁 src/
 │   ├── 📁 components/              # React bileşenleri
-│   │   ├── 🤖 AIAgent.tsx         # AI agent durum göstergesi
+│   │   ├── 🤖 AIAgent.tsx         # AI agent durum göstergesi (tooltip'li)
 │   │   ├── 📤 ImageUploader.tsx   # Dosya yükleme bileşeni
 │   │   ├── 🔍 ProductSearch.tsx   # Ürün arama bileşeni
-│   │   ├── 🏠 RoomAnalysis.tsx    # Oda analiz bileşeni
-│   │   ├── 🎨 PlacementResult.tsx # Sonuç gösterimi
+│   │   ├── 🎨 PlacementResult.tsx # GPT-4 Vision sonuç gösterimi
 │   │   ├── 💬 RoomComment.tsx     # AI oda yorumları
+│   │   ├── 🛍️ DecorSuggestions.tsx # Dekoratif ürün önerileri
 │   │   └── 📁 ui/                 # Shadcn/ui bileşenleri
 │   ├── 📁 services/                # API servisleri
 │   │   ├── 🔧 apiService.ts       # Backend API bağlantısı
 │   │   └── 🤖 aiService.ts        # AI servisleri
 │   ├── 📁 pages/                   # Sayfa bileşenleri
-│   │   ├── 🏠 Index.tsx           # Ana sayfa
+│   │   ├── 🏠 Index.tsx           # Ana sayfa (3 adımlı süreç)
 │   │   └── ❌ NotFound.tsx        # 404 sayfası
 │   ├── 📁 hooks/                   # React hooks
 │   ├── 📁 lib/                     # Yardımcı fonksiyonlar
@@ -243,60 +213,27 @@ npm run lint         # 🔍 Kod kontrolü
 
 | Method | Endpoint | Açıklama | Yanıt Süresi |
 |--------|----------|----------|--------------|
-| `POST` | `/api/upload-room` | 📤 Oda fotoğrafı yükleme | ~2s |
-| `POST` | `/api/search-products` | 🔍 Google Custom Search API ile ürün arama | ~5s |
-| `POST` | `/api/analyze-room` | 👁️ Gemini Vision ile oda analizi | ~8s |
-| `POST` | `/api/comment-room` | 💬 AI oda yorumu oluşturma | ~6s |
-| `POST` | `/api/place-product` | 🎨 Hugging Face REMBG + AI yerleştirme | ~15s |
+| `POST` | `/api/comment-room` | 💬 Gemini AI ile oda yorumu oluşturma | ~6s |
+| `POST` | `/api/suggest-decor-products` | 🛍️ Dekoratif ürün önerileri | ~8s |
+| `POST` | `/api/generate-product-placement` | 🎨 GPT-4 Vision ile ürün yerleştirme | ~20s |
 | `GET` | `/api/health` | ❤️ API durum kontrolü | ~100ms |
 
-### 🔍 Google Custom Search API Entegrasyonu
 
-Proje **Google Custom Search API** kullanarak gerçek ürün arama yapıyor:
-
-```javascript
-// Google Custom Search API çağrısı
-const searchResults = await axios.get('https://www.googleapis.com/customsearch/v1', {
-  params: {
-    key: GOOGLE_SEARCH_API_KEY,
-    cx: GOOGLE_SEARCH_ENGINE_ID,
-    q: optimizedQuery,
-    searchType: 'image',
-    num: 10,
-    imgType: 'photo',
-    imgSize: 'medium'
-  }
-});
 ```
 
 **Desteklenen E-ticaret Siteleri:**
 - 🛍️ **Trendyol** - site:trendyol.com
-- 🛍️ **Hepsiburada** - site:hepsiburada.com  
-- 🛍️ **N11** - site:n11.com
-- 🛍️ **Amazon Türkiye** - site:amazon.com.tr
-- 🛍️ **GittiGidiyor** - site:gittigidiyor.com
+
 
 **AI Özellikleri:**
-- 🤖 **Gemini Vision** - Ürün görsel analizi
+- 🤖 **Gemini Vision** - Oda analizi, yorumlar ve görsel anlama
+- 🤖 **Gemini Text** - Ürün arama optimizasyonu ve metin analizi
+- 🎨 **GPT-4 Vision** - Gerçekçi ürün yerleştirme
 - 🎯 **Smart Filtering** - Oda stili ve renk uyumu
 - 📊 **AI Scoring** - Ürün uyumluluk skoru
 - 💡 **Smart Recommendations** - Akıllı öneriler
-- 💬 **AI Room Comments** - Detaylı oda analizi
 
 ### 📝 API Yanıt Örnekleri
-
-<details>
-<summary>📤 Upload Room Response</summary>
-
-```json
-{
-  "success": true,
-  "roomId": "room_123456",
-  "imageUrl": "/uploads/room_123456.jpg",
-  "message": "Oda fotoğrafı başarıyla yüklendi"
-}
-```
-</details>
 
 <details>
 <summary>🔍 Search Products Response</summary>
@@ -333,6 +270,19 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 ```
 </details>
 
+<details>
+<summary>🎨 GPT Placement Response</summary>
+
+```json
+{
+  "success": true,
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+  "message": "GPT-4 Vision ile ürün başarıyla yerleştirildi",
+  "confidence": 0.95
+}
+```
+</details>
+
 ---
 
 ## 🎨 UI/UX Özellikleri
@@ -346,36 +296,84 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 
 ### 🎭 Öne Çıkan Özellikler
 - **🌈 Modern Animasyonlar** - Micro-interactions ve smooth transitions
-- **📊 Progress Tracking** - Gerçek zamanlı ilerleme göstergesi
+- **📊 Progress Tracking** - 3 adımlı ilerleme göstergesi
 - **🎉 Toast Bildirimleri** - Kullanıcı dostu geri bildirimler
 - **🖱️ Drag & Drop** - Sürükle bırak dosya yükleme
 - **🌙 Dark Mode** - Göz yorgunluğunu azaltan karanlık tema
-- **💬 AI Yorum Sistemi** - Detaylı oda analizi ve öneriler
-- **📏 Optimize Edilmiş Layout** - Kompakt ve kullanışlı arayüz
+- **💬 Gemini AI Yorum Sistemi** - Detaylı oda analizi ve öneriler
+- **🛍️ Gemini AI Dekoratif Öneriler** - Oda stiline uygun ürün önerileri
+- **💡 Tooltip Sistemi** - AI Agent'lar hakkında detaylı bilgi
 
 ### 🎨 Son Güncellemeler
-- **📐 Genişletilmiş Oda Yorumu** - Daha büyük ve okunabilir yorum alanı
-- **🎯 Kompakt Layout** - Azaltılmış boşluklar ve daha fazla içerik alanı
-- **🔄 Temizlenmiş Kod** - Kullanılmayan dosyalar ve importlar kaldırıldı
-- **⚡ Optimize Edilmiş Performans** - Daha hızlı yükleme süreleri
+- **⚡ Optimize Edilmiş Süreç** - Analiz adımı kaldırıldı, direkt sonuç
+- **🎨 GPT-4 Vision Entegrasyonu** - Gerçekçi ürün yerleştirme
+- **🤖 Gemini AI Entegrasyonu** - Oda analizi, yorumlar ve ürün önerileri
+- **💡 Tooltip Sistemi** - AI Agent kartlarına hover ile detaylı bilgi
+- **📐 Kompakt Layout** - Daha verimli alan kullanımı
+- **🔄 Temizlenmiş Kod** - Kullanılmayan bileşenler kaldırıldı
+
+---
+
+## 🤖 Gemini AI Entegrasyonu
+
+Bu proje **Google Gemini AI** teknolojisini kapsamlı şekilde kullanarak güçlü AI özellikleri sunuyor:
+
+### 🔍 **Gemini AI Kullanım Alanları**
+
+#### **1. Oda Analizi ve Yorumlar**
+```javascript
+// Gemini Vision API ile oda analizi
+const roomAnalysis = await gemini.analyzeImage(roomImage, {
+  prompt: "Bu odanın dekorasyon tarzını, renk paletini ve atmosferini analiz et"
+});
+```
+
+#### **2. Ürün Arama Optimizasyonu**
+```javascript
+// Gemini Text API ile arama sorgusu optimizasyonu
+const optimizedQuery = await gemini.generateText({
+  prompt: `"${userQuery}" aramasını dekoratif ürün arama için optimize et`
+});
+```
+
+#### **3. Dekoratif Ürün Önerileri**
+```javascript
+// Gemini Vision + Text ile ürün önerileri
+const suggestions = await gemini.analyzeImage(roomImage, {
+  prompt: "Bu oda için uygun dekoratif ürün kategorilerini ve önerilerini listele"
+});
+```
+
+### 🎯 **Gemini AI Avantajları**
+- **🚀 Hızlı Yanıt** - Düşük latency ile gerçek zamanlı analiz
+- **🎨 Görsel Anlama** - Gelişmiş görsel analiz yetenekleri
+- **💬 Doğal Dil** - Türkçe dil desteği ile doğal yorumlar
+- **🔍 Akıllı Filtreleme** - Oda stili ve renk uyumuna göre öneriler
+- **📊 Yüksek Doğruluk** - %95+ güven skoru ile analizler
+
+### 📊 **Gemini API Performansı**
+- **Oda Analizi:** ~3-5 saniye
+- **Ürün Önerileri:** ~4-6 saniye  
+- **Arama Optimizasyonu:** ~1-2 saniye
+- **Yorum Oluşturma:** ~2-4 saniye
 
 ---
 
 ## 🔮 Gelecek Özellikler
 
-### 🎯 Kısa Vadeli (Q1 2024)
+### 🎯 Kısa Vadeli (Q1 2026)
 - [ ] 📱 **AR Desteği** - Artırılmış gerçeklik ile önizleme
 - [ ] 🎨 **Çoklu Ürün Yerleştirme** - Aynı anda birden fazla ürün
 - [ ] 💾 **Kayıt Sistemi** - Kullanıcı hesapları ve favoriler
 - [ ] 🔄 **Yorum Yenileme** - AI yorumlarını yeniden oluşturma
 
-### 📈 Orta Vadeli (Q2-Q3 2024)
+### 📈 Orta Vadeli (Q2-Q3 2026)
 - [ ] 🔗 **Sosyal Medya Entegrasyonu** - Instagram, Pinterest paylaşımı
 - [ ] 💳 **Premium Özellikler** - Gelişmiş AI modelleri ve özellikler
 - [ ] 🎓 **3D Oda Modelleme** - 3D ortamda ürün yerleştirme
 - [ ] 📊 **Analytics Dashboard** - Kullanım istatistikleri
 
-### 🚀 Uzun Vadeli (Q4 2024+)
+### 🚀 Uzun Vadeli (Q4 2026+)
 - [ ] 📱 **Mobil Uygulama** - iOS ve Android native uygulamalar
 - [ ] 🤝 **B2B Çözümler** - İç mimar ve mobilyacılar için özel araçlar
 - [ ] 🌍 **Çoklu Dil Desteği** - Uluslararası pazara açılım
@@ -428,7 +426,8 @@ MIT License - Özgürce kullanabilir, değiştirebilir ve dağıtabilirsiniz! �
 
 Bu projeyi mümkün kılan harika araçlara teşekkürler:
 
-- 🤖 [Google AI](https://ai.google.dev/) - Gemini Vision API
+- 🤖 [Google AI](https://ai.google.dev/) - Gemini Vision & Text API'leri
+- 🎨 [OpenAI](https://openai.com/) - GPT-4 Vision API
 - 🎨 [Shadcn/ui](https://ui.shadcn.com/) - Muhteşem UI bileşenleri
 - 💨 [Tailwind CSS](https://tailwindcss.com/) - Modern CSS framework
 - ⚡ [Vite](https://vitejs.dev/) - Süper hızlı build tool

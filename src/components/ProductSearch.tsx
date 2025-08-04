@@ -250,7 +250,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
                   <div className="w-2 h-2 bg-ai rounded-full animate-pulse"></div>
-                  <span className="text-ai">Trendyol API'sine bağlanılıyor</span>
+                  <span className="text-ai">Trendyol ürün araması yapılıyor</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
                   <div className="w-2 h-2 bg-muted rounded-full"></div>
