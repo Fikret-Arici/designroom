@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ImageUploader } from '@/components/ImageUploader';
 import { ProductSearch } from '@/components/ProductSearch';
-import { RoomAnalysis } from '@/components/RoomAnalysis';
+
 import { PlacementResult } from '@/components/PlacementResult';
 import { RoomComment } from '@/components/RoomComment';
 import { DecorSuggestions } from '@/components/DecorSuggestions';
@@ -25,23 +25,16 @@ interface Product {
   description: string;
 }
 
-type Step = 'upload' | 'product' | 'analysis' | 'result';
+type Step = 'upload' | 'product' | 'result';
 
-interface RoomAnalysis {
-  style: string;
-  dominantColors: string[];
-  lightingType: string;
-  roomSize: string;
-  suggestions: string[];
-  placementAreas: { x: number; y: number; width: number; height: number }[];
-}
+
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [roomImage, setRoomImage] = useState<string>('');
   const [roomFile, setRoomFile] = useState<File | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [roomAnalysis, setRoomAnalysis] = useState<RoomAnalysis | null>(null);
+
   const [roomComment, setRoomComment] = useState<any>(null);
   const [decorSuggestions, setDecorSuggestions] = useState<any>(null);
   const [productMethod, setProductMethod] = useState<'upload' | 'describe'>('describe');
@@ -51,7 +44,6 @@ const Index = () => {
   const steps = [
     { id: 'upload', title: 'Oda Yükle', description: 'Oda fotoğrafınızı yükleyin' },
     { id: 'product', title: 'Ürün Seç', description: 'Yerleştirmek istediğiniz ürünü seçin' },
-    { id: 'analysis', title: 'AI Analiz', description: 'Oda analizi yapılıyor' },
     { id: 'result', title: 'Sonuç', description: 'AI yerleştirme sonucu' }
   ];
 
@@ -71,13 +63,10 @@ const Index = () => {
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
-    setCurrentStep('analysis');
-  };
-
-  const handleAnalysisComplete = (analysis: RoomAnalysis) => {
-    setRoomAnalysis(analysis);
     setCurrentStep('result');
   };
+
+
 
   const handleDecorProductSelect = (productName: string) => {
     // Önce "Metinle Tarif Et" sekmesine geç
@@ -98,7 +87,7 @@ const Index = () => {
     setRoomImage('');
     setRoomFile(null);
     setSelectedProduct(null);
-    setRoomAnalysis(null);
+
     setRoomComment(null);
     setDecorSuggestions(null);
     setProductSearchQuery('');
@@ -112,7 +101,6 @@ const Index = () => {
   const getActiveAgent = (): 'search' | 'analysis' | 'placement' | null => {
     switch (currentStep) {
       case 'product': return 'search';
-      case 'analysis': return 'analysis';
       case 'result': return 'placement';
       default: return null;
     }
@@ -121,7 +109,6 @@ const Index = () => {
   const getCompletedAgents = () => {
     const agents: ('search' | 'analysis' | 'placement')[] = [];
     if (selectedProduct) agents.push('search');
-    if (roomAnalysis) agents.push('analysis');
     if (currentStep === 'result') agents.push('placement');
     return agents;
   };
@@ -242,8 +229,6 @@ const Index = () => {
                       <TabsContent value="describe" className="mt-4">
                         <ProductSearch
                           onProductSelect={handleProductSelect}
-                          roomStyle={roomAnalysis?.style}
-                          roomColors={roomAnalysis?.dominantColors}
                           initialSearchQuery={productSearchQuery}
                           onSearchQueryChange={setProductSearchQuery}
                         />
@@ -272,15 +257,7 @@ const Index = () => {
                 </div>
               )}
 
-              {(currentStep === 'analysis' || currentStep === 'result') && (
-                <div className="animate-fade-in">
-                  <RoomAnalysis
-                    roomImage={roomImage}
-                    selectedProduct={selectedProduct}
-                    onAnalysisComplete={handleAnalysisComplete}
-                  />
-                </div>
-              )}
+
 
               {currentStep === 'result' && selectedProduct && (
                 <div className="animate-fade-in">

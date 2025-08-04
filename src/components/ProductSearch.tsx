@@ -260,7 +260,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             </div>
           </Card>
         )}
-        // Test commit for Fikret
+        
 
 
         {products.length > 0 && !isSearching && (
