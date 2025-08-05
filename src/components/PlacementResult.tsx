@@ -226,7 +226,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
               <div className="w-full h-96 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-red-400 mb-2">❌ {error}</p>
-                  <Button onClick={generatePlacement} variant="outline" size="sm">
+                  <Button onClick={() => generatePlacement()} variant="outline" size="sm">
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Tekrar Dene
                   </Button>
