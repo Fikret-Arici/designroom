@@ -2152,7 +2152,7 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
   async suggestDecorProducts(imageBase64, retryCount = 0) {
     const maxRetries = 3;
     const retryDelay = 2000; // 2 saniye
-    
+
     try {
       console.log(`🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor... (Deneme: ${retryCount + 1}/${maxRetries + 1})`);
 
@@ -2264,16 +2264,16 @@ Sadece fiziksel ürün adlarını ver, hiçbir ek açıklama yapma.
 
     } catch (error) {
       console.error('❌ AI dekoratif ürün önerileri hatası:', error);
-      
+
       // 503 Service Unavailable veya 429 Rate Limit için retry
       if ((error.response?.status === 503 || error.response?.status === 429) && retryCount < maxRetries) {
-        console.log(`⏳ ${retryDelay/1000} saniye sonra tekrar denenecek... (${retryCount + 1}/${maxRetries})`);
-        
+        console.log(`⏳ ${retryDelay / 1000} saniye sonra tekrar denenecek... (${retryCount + 1}/${maxRetries})`);
+
         // Bekle ve tekrar dene
         await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1))); // Exponential backoff
         return this.suggestDecorProducts(imageBase64, retryCount + 1);
       }
-      
+
       // 503 Service Unavailable hatası için özel mesaj
       if (error.response?.status === 503) {
         console.error('❌ Gemini API servis hatası - API geçici olarak kullanılamıyor');
@@ -2285,7 +2285,7 @@ Sadece fiziksel ürün adlarını ver, hiçbir ek açıklama yapma.
           timestamp: new Date().toISOString()
         };
       }
-      
+
       // 429 Rate Limit hatası için özel mesaj
       if (error.response?.status === 429) {
         console.error('❌ Gemini API rate limit aşıldı');

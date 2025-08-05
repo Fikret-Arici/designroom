@@ -77,7 +77,7 @@ class AIService {
   private static instance: AIService;
   private apiKey: string = '';
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): AIService {
     if (!AIService.instance) {
@@ -94,9 +94,9 @@ class AIService {
   async searchProducts(query: string, roomStyle?: string, roomColors?: string[]): Promise<Product[]> {
     try {
       console.log('🔍 Agent 1: Gemini ile ürün arama başlatılıyor...');
-      
+
       const response = await apiService.searchProducts(query, roomStyle, roomColors);
-      
+
       if (response.success && response.products) {
         console.log(`✅ ${response.products.length} ürün bulundu`);
         return response.products;
@@ -114,9 +114,9 @@ class AIService {
   async analyzeRoom(imageBase64: string): Promise<RoomAnalysis> {
     try {
       console.log('👁️ Agent 2: Gemini Vision ile oda analizi başlatılıyor...');
-      
+
       const response = await apiService.analyzeRoom(imageBase64);
-      
+
       if (response.success && response.analysis) {
         console.log('✅ Oda analizi tamamlandı:', response.analysis);
         return response.analysis;
@@ -139,14 +139,14 @@ class AIService {
   ): Promise<PlacementResult> {
     try {
       console.log('🎨 Agent 3: Gemini ile ürün yerleştirme başlatılıyor...');
-      
+
       const placementData = {
         area: placementArea,
         analysis: roomAnalysis
       };
-      
+
       const response = await apiService.placeProduct(roomImageBase64, productImageBase64, placementData);
-      
+
       if (response.success && response.result) {
         console.log('✅ Ürün yerleştirme tamamlandı');
         return response.result;
@@ -164,9 +164,9 @@ class AIService {
   async commentRoom(imageBase64: string): Promise<RoomComment> {
     try {
       console.log('💬 Agent 4: Gemini ile oda yorumu başlatılıyor...');
-      
+
       const response = await apiService.commentRoom(imageBase64);
-      
+
       if (response.success && response.comment) {
         console.log('✅ Oda yorumu tamamlandı');
         return response.comment;
@@ -184,9 +184,9 @@ class AIService {
   async suggestDecorProducts(imageBase64: string): Promise<DecorSuggestions | DecorSuggestionsError> {
     try {
       console.log('🎨 Agent 5: Gemini ile dekoratif ürün önerileri başlatılıyor...');
-      
+
       const response = await apiService.suggestDecorProducts(imageBase64);
-      
+
       if (response.success && response.suggestions && !('error' in response.suggestions)) {
         console.log('✅ Dekoratif ürün önerileri tamamlandı');
         return response.suggestions as DecorSuggestions;

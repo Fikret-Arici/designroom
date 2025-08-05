@@ -136,7 +136,7 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
                   <p className="text-xs text-muted-foreground mt-1">{suggestions.details}</p>
                 )}
               </div>
-              
+
               {/* Fallback önerileri göster */}
               {suggestions.fallback && (
                 <div className="mt-4">
@@ -163,7 +163,7 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
                   ))}
                 </div>
               )}
-              
+
               <div className="text-center">
                 <Badge variant="secondary" className="text-xs">
                   <Clock className="w-3 h-3 mr-1" />
