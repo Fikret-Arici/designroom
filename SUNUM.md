@@ -2,9 +2,12 @@
 
 <div align="center">
 
+<span style="color: #1a1a1a; font-weight: bold; font-size: 1.2em;">
 
 **Yapay Zeka Destekli Dekorasyon Asistanı**  
 *Hayalinizdeki odayı AI ile gerçeğe dönüştürün* ✨
+
+</span>
 
 ---
 
@@ -31,6 +34,8 @@
 
 ### 🏷️ Proje Bilgileri
 
+<span style="color: #1a1a1a; font-weight: 600;">
+
 | **Özellik** | **Değer** |
 |-------------|-----------|
 | **Proje Adı** | AI Dekor Dream |
@@ -40,17 +45,27 @@
 | **Takım Büyüklüğü** | 3 Geliştirici |
 | **Hedef Kitle** |  E-ticaret kullanıcıları, Ev sahipleri, İç mimarlar,|
 
+</span>
+
 ### 🎨 Proje Konsepti
+
+<span style="color: #1a1a1a; font-weight: 600;">
 
 > **"Kullanıcıların oda fotoğraflarını yükleyerek AI destekli dekoratif ürün yerleştirme deneyimi yaşamalarını sağlayan modern web uygulaması"**
 
+</span>
+
 ### 🌟 Ana Özellikler
+
+<span style="color: #1a1a1a; font-weight: 500;">
 
 - 📸 **Oda Fotoğrafı Analizi** - AI ile oda stili ve renk analizi
 - 🔍 **Akıllı Ürün Arama** - Gemini AI ile optimize edilmiş arama
 - 🎨 **Gerçekçi Yerleştirme** - GPT-4 Vision ile fotorealistik yerleştirme
 - 💬 **AI Yorumları** - Detaylı oda analizi ve öneriler
 - 📱 **Responsive Tasarım** - Tüm cihazlarda mükemmel deneyim
+
+</span>
 
 ---
 
@@ -60,6 +75,8 @@
 
 ### 📊 Pazar Analizi
 
+<span style="color: #1a1a1a; font-weight: 500;">
+
 ```
 Dekorasyon Pazarı:
 ├── 📈 Büyüyen e-ticaret sektörü
@@ -68,6 +85,8 @@ Dekorasyon Pazarı:
 ├── 📱 Mobil kullanım artışı
 └── 💰 Premium hizmet talebi
 ```
+
+</span>
 
 ---
 
@@ -113,6 +132,8 @@ graph TD
 
 ### 🚀 Çözüm Avantajları
 
+<span style="color: #1a1a1a; font-weight: 600;">
+
 | **Avantaj** | **Açıklama** | **Fayda** |
 |-------------|--------------|-----------|
 | ⚡ **Hızlı Karar** | AI analizi ile saniyeler içinde | Zaman tasarrufu |
@@ -120,6 +141,8 @@ graph TD
 | 🖼️ **Görsel Güven** | Satın alma öncesi görselleştirme | Risk azaltma |
 | 🤖 **Uzman Öneri** | AI destekli karar verme | Kaliteli sonuç |
 | 📱 **Kolay Kullanım** | Sezgisel arayüz | Kullanıcı memnuniyeti |
+
+</span>
 
 ---
 
@@ -204,6 +227,8 @@ const commentAgent = {
 
 ### 🎯 Frontend Teknolojileri
 
+<span style="color: #1a1a1a; font-weight: 600;">
+
 | **Teknoloji** | **Versiyon** | **Kullanım Amacı** |
 |---------------|--------------|-------------------|
 | ⚛️ **React** | 18.x | UI Framework |
@@ -214,7 +239,11 @@ const commentAgent = {
 | 🎯 **React Router** | 6.x | Routing |
 | 🔄 **React Query** | 5.x | State management |
 
+</span>
+
 ### ⚙️ Backend Teknolojileri
+
+<span style="color: #1a1a1a; font-weight: 600;">
 
 | **Teknoloji** | **Versiyon** | **Kullanım Amacı** |
 |---------------|--------------|-------------------|
@@ -224,7 +253,11 @@ const commentAgent = {
 | 🔒 **CORS** | 2.x | Cross-origin |
 | 🎭 **Puppeteer** | 21.x | Web scraping |
 
+</span>
+
 ### 🤖 AI Teknolojileri
+
+<span style="color: #1a1a1a; font-weight: 600;">
 
 | **API** | **Model** | **Kullanım Alanı** |
 |---------|-----------|-------------------|
@@ -233,7 +266,11 @@ const commentAgent = {
 | 🎨 **GPT-4 Vision** | gpt-4-vision-preview | Ürün yerleştirme |
 | 🔍 **Google Custom Search** | v1 | Ürün arama |
 
+</span>
+
 ### 📊 Sistem Mimarisi
+
+<span style="color: #1a1a1a; font-weight: 500;">
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -246,6 +283,8 @@ const commentAgent = {
 │ └─ Results      │    │ └─ Processing   │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+</span>
 
 ---
 
@@ -342,6 +381,8 @@ const commentAgent = {
 
 ### ⚡ Hız Performansı
 
+<span style="color: #1a1a1a; font-weight: 600;">
+
 | **İşlem** | **Ortalama Süre** | **Hedef** | **Durum** |
 |-----------|-------------------|-----------|-----------|
 | 🖼️ Oda Analizi | 3-5 saniye | <5s | ✅ |
@@ -354,9 +395,13 @@ const commentAgent = {
 | 📱 Sayfa Yükleme | <2 saniye | <3s | ✅ |
 | 🔄 API Yanıt | <1 saniye | <2s | ✅ |
 
+</span>
+
 
 
 ### 📈 Teknik Performans
+
+<span style="color: #1a1a1a; font-weight: 500;">
 
 ```javascript
 // Performance Metrics
@@ -378,11 +423,15 @@ const performanceMetrics = {
 };
 ```
 
+</span>
+
 ---
 
 ## 🎯 Kullanım Senaryoları
 
 ### 👥 Hedef Kullanıcılar
+
+<span style="color: #1a1a1a; font-weight: 600;">
 
 | **Kullanıcı Tipi** | **İhtiyaç** | **Fayda** |
 |-------------------|-------------|-----------|
@@ -390,6 +439,8 @@ const performanceMetrics = {
 | 🎨 **İç Mimar** | Müşteri sunumu | Profesyonel görselleştirme |
 | 🛒 **E-ticaret** | Ürün satın alma | Görsel güven |
 | 📱 **Sosyal Medya** | İçerik oluşturma | Yaratıcı görseller |
+
+</span>
 
 ### 🎬 Kullanım Senaryoları
 
@@ -562,6 +613,8 @@ gantt
 
 ### 🤝 İletişim
 
+<span style="color: #1a1a1a; font-weight: 600;">
+
 | **Platform** | **Bilgi** |
 |--------------|-----------|
 | 📧 **Email** | fikretarici35@gmail.com |
@@ -569,14 +622,20 @@ gantt
 | 📱 **Telefon** | +90 5309354275 |
 | 💼 **LinkedIn** |  |
 
+</span>
+
 ---
 
 <div align="center">
+
+<span style="color: #1a1a1a; font-weight: bold; font-size: 1.1em;">
 
 **🎨 AI Dekor Dream**  
 *Geleceğin dekorasyon deneyimi* ✨
 
 **Teşekkürler!** 🙏
+
+</span>
 
 </div>
 
