@@ -2804,6 +2804,7 @@ app.post('/api/generate-product-placement', upload.fields([
 
     const roomImage = req.files.roomImage[0];
     const productImage = req.files.productImage[0];
+    const customPrompt = req.body.customPrompt || '';
 
     // Generate unique output filename
     const outputFilename = `placement-${uuidv4()}.png`;
@@ -2812,20 +2813,30 @@ app.post('/api/generate-product-placement', upload.fields([
     // Get script path
     const scriptPath = path.join(__dirname, 'gpt.py');
 
-    // Use cross-platform Python command
-    const pythonCommand = process.platform === 'win32' ? 'python' : 'python';
+    // Use configured Python executable path
+    const pythonCommand = 'C:/btk_proje/.venv/Scripts/python.exe';
 
     console.log('🤖 GPT Image Generation başlatılıyor...');
     console.log(`📁 Oda görseli: ${roomImage.path}`);
     console.log(`📁 Ürün görseli: ${productImage.path}`);
     console.log(`📁 Çıktı dosyası: ${outputPath}`);
+    if (customPrompt) {
+      console.log(`💬 Özel istek: ${customPrompt}`);
+    }
 
-    const pythonProcess = spawn(pythonCommand, [
+    const pythonArgs = [
       scriptPath,
       roomImage.path,
       productImage.path,
       outputPath
-    ], {
+    ];
+
+    // Eğer custom prompt varsa argüman olarak ekle
+    if (customPrompt && customPrompt.trim()) {
+      pythonArgs.push(customPrompt.trim());
+    }
+
+    const pythonProcess = spawn(pythonCommand, pythonArgs, {
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
