@@ -86,8 +86,11 @@ graph TD
     
     C --> E[🔍 Ürün Arama]
     D --> E
+
+    C --> F[📤 Ürün Yükleme]
+    D --> F
     
-    E --> F[📤 Ürün Yükleme]
+    
     E --> G[💬 Yorum Detaylı Analiz]
     
     F --> H[🎨 AI Yerleştirme]
