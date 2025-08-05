@@ -45,7 +45,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
     setError(null);
     
     try {
-      console.log('🎨 GPT Image Generation başlatılıyor...');
+      console.log('🎨 AI Image Generation başlatılıyor...');
       
       // FormData oluştur
       const formData = new FormData();
@@ -60,7 +60,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
       const productBlob = await productResponse.blob();
       formData.append('productImage', productBlob, 'product.jpg');
       
-      // GPT endpoint'ini çağır
+      // AI endpoint'ini çağır
       const response = await fetch('http://localhost:5000/api/generate-product-placement', {
         method: 'POST',
         body: formData
@@ -77,24 +77,24 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
         const newPlacementData: PlacementData = {
           success: true,
           imageUrl: result.image,
-          message: result.message || "GPT ile ürün yerleştirme tamamlandı!",
+          message: result.message || "AI ile ürün yerleştirme tamamlandı!",
           confidence: 0.95
         };
         
         setPlacementData(newPlacementData);
         toast({
-          title: "✅ GPT Yerleştirme Tamamlandı!",
-          description: result.message || "GPT ürünü mükemmel şekilde yerleştirdi!"
+          title: "✅ AI Yerleştirme Tamamlandı!",
+          description: result.message || "AI ürünü mükemmel şekilde yerleştirdi!"
         });
       } else {
-        throw new Error(result.message || 'GPT yerleştirme başarısız');
+        throw new Error(result.message || 'AI yerleştirme başarısız');
       }
       
     } catch (error) {
-      console.error('GPT yerleştirme hatası:', error);
-      setError('GPT yerleştirme sırasında hata oluştu');
+      console.error('AI yerleştirme hatası:', error);
+      setError('AI yerleştirme sırasında hata oluştu');
       toast({
-        title: "❌ GPT Yerleştirme Hatası",
+        title: "❌ AI Yerleştirme Hatası",
         description: "Lütfen tekrar deneyin.",
         variant: "destructive"
       });
@@ -111,7 +111,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
   const downloadResult = () => {
     if (!placementData) return;
 
-    // GPT'den gelen final görseli direkt indir
+    // AI'dan gelen final görseli direkt indir
     const link = document.createElement('a');
     link.download = 'ai-decor-result.png';
     link.href = placementData.imageUrl;
@@ -119,7 +119,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
 
     toast({
       title: "📥 İndiriliyor",
-      description: "GPT ile oluşturulan görsel indiriliyor..."
+      description: "AI ile oluşturulan görsel indiriliyor..."
     });
   };
 
@@ -146,9 +146,9 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-2">🎨 GPT Yerleştirme Sonucu</h2>
+        <h2 className="text-3xl font-bold text-white mb-2">🎨 AI Yerleştirme Sonucu</h2>
         <p className="text-gray-300">
-          GPT-4 Vision ürünü odanıza gerçekçi şekilde yerleştirdi
+          AI Vision ürünü odanıza gerçekçi şekilde yerleştirdi
         </p>
       </div>
 
@@ -183,11 +183,11 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
           </div>
         </Card>
 
-        {/* GPT Yerleştirme Sonucu */}
+        {/* AI Yerleştirme Sonucu */}
         <Card className="bg-gray-900/50 border-gray-700 p-4">
           <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-purple-400" />
-            GPT Yerleştirme Sonucu
+            AI Yerleştirme Sonucu
             {placementData && (
               <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -201,10 +201,10 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
               <div className="w-full h-96 flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                  <p className="text-white font-semibold">🎨 GPT Image Generation</p>
+                  <p className="text-white font-semibold">🎨 AI Image Generation</p>
                   <div className="mt-3 space-y-1 text-sm text-gray-300">
                     <p className="animate-pulse">🔄 1/3: Görseller hazırlanıyor...</p>
-                    <p className="animate-pulse">🔄 2/3: GPT-4 Vision ile analiz ediliyor...</p>
+                    <p className="animate-pulse">🔄 2/3: AI Vision ile analiz ediliyor...</p>
                     <p className="animate-pulse">🔄 3/3: Ürün yerleştirme oluşturuluyor...</p>
                   </div>
                   <div className="mt-4 text-xs text-gray-400">
@@ -229,7 +229,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                     <div className="relative">
                       <img 
                         src={placementData.imageUrl} 
-                        alt="GPT Yerleştirme Sonucu" 
+                        alt="AI Yerleştirme Sonucu" 
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
@@ -240,18 +240,11 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                   <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
                     <img 
                       src={placementData.imageUrl} 
-                      alt="GPT Yerleştirme Sonucu - Tam Boyut" 
+                      alt="AI Yerleştirme Sonucu - Tam Boyut" 
                       className="w-full h-full object-contain rounded-lg"
                     />
                   </DialogContent>
                 </Dialog>
-                
-                {/* Güven skoru */}
-                <div className="absolute top-2 right-2">
-                  <Badge className="bg-green-500/90 text-white">
-                    {Math.round(placementData.confidence * 100)}% Uyum
-                  </Badge>
-                </div>
               </div>
             ) : null}
           </div>
