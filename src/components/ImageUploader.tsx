@@ -1,9 +1,14 @@
 import { useState, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Camera } from 'lucide-react';
+import { Camera, Upload, X, ZoomIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ApiService from '@/services/apiService';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface ImageUploaderProps {
   onImageUpload: (file: File, preview: string) => void;
@@ -103,12 +108,28 @@ export const ImageUploader = ({
       </div>
       
       {preview ? (
-        <div className="relative">
-          <img 
-            src={preview} 
-            alt="Preview" 
-            className="w-full h-64 object-cover rounded-lg border-2 border-border"
-          />
+        <div className="relative group cursor-pointer">
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative">
+                <img 
+                  src={preview} 
+                  alt="Preview" 
+                  className="w-full h-64 object-cover rounded-lg border-2 border-border transition-transform duration-200 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                  <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </div>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+              <img 
+                src={preview} 
+                alt="Preview - Tam Boyut" 
+                className="w-full h-full object-contain rounded-lg"
+              />
+            </DialogContent>
+          </Dialog>
           <Button
             variant="destructive"
             size="sm"

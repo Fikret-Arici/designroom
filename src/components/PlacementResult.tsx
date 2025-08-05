@@ -2,8 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Share2, RotateCcw, Wand2, CheckCircle } from 'lucide-react';
+import { Download, Share2, RotateCcw, Wand2, CheckCircle, ZoomIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface Product {
   id: string;
@@ -153,12 +158,28 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
           <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
             📷 Orijinal Oda
           </h3>
-          <div className="relative rounded-lg overflow-hidden">
-            <img 
-              src={originalRoom} 
-              alt="Orijinal Oda" 
-              className="w-full h-96 object-cover"
-            />
+          <div className="relative rounded-lg overflow-hidden group cursor-pointer">
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative">
+                  <img 
+                    src={originalRoom} 
+                    alt="Orijinal Oda" 
+                    className="w-full h-96 object-cover transition-transform duration-200 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
+                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+                <img 
+                  src={originalRoom} 
+                  alt="Orijinal Oda - Tam Boyut" 
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </Card>
 
@@ -202,13 +223,28 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                 </div>
               </div>
             ) : placementData ? (
-              <div className="relative w-full h-96">
-                {/* GPT'den gelen final görsel */}
-                <img 
-                  src={placementData.imageUrl} 
-                  alt="GPT Yerleştirme Sonucu" 
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative w-full h-96 group cursor-pointer">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="relative">
+                      <img 
+                        src={placementData.imageUrl} 
+                        alt="GPT Yerleştirme Sonucu" 
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
+                        <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+                    <img 
+                      src={placementData.imageUrl} 
+                      alt="GPT Yerleştirme Sonucu - Tam Boyut" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </DialogContent>
+                </Dialog>
                 
                 {/* Güven skoru */}
                 <div className="absolute top-2 right-2">

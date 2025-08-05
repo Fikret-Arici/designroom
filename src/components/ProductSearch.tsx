@@ -3,9 +3,14 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, ExternalLink, Star, TrendingUp, Truck, Sparkles, Tag, ImageIcon } from 'lucide-react';
+import { Search, ExternalLink, Star, TrendingUp, Truck, Sparkles, Tag, ImageIcon, ZoomIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ApiService from '@/services/apiService';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { CommentAnalysis } from './CommentAnalysis';
 
 interface Product {
@@ -269,11 +274,27 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             {products.map((product) => (
               <Card key={product.id} className="p-4 hover:border-ai transition-all duration-300">
                 <div className="flex gap-4">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-20 h-20 object-cover rounded-lg border"
-                  />
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className="relative group cursor-pointer">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-20 h-20 object-cover rounded-lg border transition-transform duration-200 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                          <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                      <img 
+                        src={product.image} 
+                        alt={`${product.name} - Tam Boyut`} 
+                        className="w-full h-full object-contain rounded-lg"
+                      />
+                    </DialogContent>
+                  </Dialog>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -471,20 +492,52 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <h5 className="font-medium text-foreground mb-2">Orijinal Görsel</h5>
-                      <img
-                        src={selectedProduct.image}
-                        alt={selectedProduct.name}
-                        className="w-full h-48 object-cover rounded-lg border"
-                      />
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="relative group cursor-pointer">
+                            <img
+                              src={selectedProduct.image}
+                              alt={selectedProduct.name}
+                              className="w-full h-48 object-cover rounded-lg border transition-transform duration-200 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                              <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                          <img 
+                            src={selectedProduct.image} 
+                            alt={`${selectedProduct.name} - Tam Boyut`} 
+                            className="w-full h-full object-contain rounded-lg"
+                          />
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <div>
                       <h5 className="font-medium text-foreground mb-2">Arka Planı Kaldırılmış</h5>
                       <div className="relative">
-                        <img
-                          src={processedImage}
-                          alt={`${selectedProduct.name} - Arka planı kaldırılmış`}
-                          className="w-full h-48 object-contain rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100"
-                        />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="relative group cursor-pointer">
+                              <img
+                                src={processedImage}
+                                alt={`${selectedProduct.name} - Arka planı kaldırılmış`}
+                                className="w-full h-48 object-contain rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100 transition-transform duration-200 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                                <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                            <img 
+                              src={processedImage} 
+                              alt={`${selectedProduct.name} - Arka planı kaldırılmış - Tam Boyut`} 
+                              className="w-full h-full object-contain rounded-lg"
+                            />
+                          </DialogContent>
+                        </Dialog>
                         <Badge className="absolute top-2 right-2 bg-green-500 text-white">
                            İşlendi
                         </Badge>
