@@ -66,6 +66,10 @@ export interface DecorSuggestions {
 export interface DecorSuggestionsError {
   error: string;
   message: string;
+  details?: string;
+  fallback?: {
+    [category: string]: string[];
+  };
   timestamp: string;
 }
 

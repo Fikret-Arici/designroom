@@ -2148,10 +2148,13 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
 
 
 
-  // Dekoratif Ürün Önerileri Ajanı - Gemini ile
-  async suggestDecorProducts(imageBase64) {
+  // Dekoratif Ürün Önerileri Ajanı - Gemini ile (Retry mekanizmalı)
+  async suggestDecorProducts(imageBase64, retryCount = 0) {
+    const maxRetries = 3;
+    const retryDelay = 2000; // 2 saniye
+    
     try {
-      console.log('🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor...');
+      console.log(`🎨 AI Dekoratif Ürün Önerileri Agent çalışıyor... (Deneme: ${retryCount + 1}/${maxRetries + 1})`);
 
       // Base64'ten buffer'a çevir
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
@@ -2164,7 +2167,48 @@ Genel olarak, bu oda modern minimalist bir yaklaşımla tasarlanmış ve dekorat
             parts: [
               {
                 text: `
-Aşağıdaki görüntü bir oda fotoğrafıdır. Lütfen görseldeki objeleri analiz et ve sadece eksik veya zayıf kalan alanlara yönelik **uyumlu ve gerçekçi dekoratif ürün önerileri** sun. Her bir öneri, odanın mevcut tarzı, ışık durumu ve boş alanlarına göre **özenle seçilmiş olmalı**. Ürünler yalnızca aşağıdaki 5 kategoriye ait olacak şekilde önerilsin. Her kategori için sadece 1 adet ürün önerisi yaz:
+Aşağıdaki görüntü bir oda fotoğrafıdır. Bu oda için fiziksel olarak yerleştirilebilir, somut dekoratif ürün önerileri sun. Öneriler AI ile oda içine kolayca yerleştirilebilir nesneler olmalı.
+
+ÖNEMLI: Önce fotoğraftaki oda tipini belirle (yatak odası, banyo, mutfak, oturma odası, çalışma odası vb.) ve önerilerini bu oda tipine göre özelleştir.
+
+ÖNERİLECEK ÜRÜN TİPLERİ (somut, yerleştirilebilir nesneler):
+- Tablolar, çerçeveler, posterler (duvara asılabilir)
+- Vazolar, saksılar, dekoratif objeler (masaya/rafa konabilir)  
+- Halılar, kilimler (zemine serilir)
+- Lambalar, abajurler (masa/zemin lambası)
+- Yastıklar, battaniyeler (koltuk/yatak üstü)
+- Kitaplar, dekoratif kutu/sepetler (rafa konabilir)
+- Saatler, aynalar (duvara asılabilir)
+- Mumluklar, fenerler (masaya konabilir)
+- Bitkiler, çiçekler (saksı ile)
+- Perdeler, stor (pencereye asılır)
+
+ÖNERİLMEYECEKLER (soyut/hizmetler):
+- "Aromaterapi", "düzenleme", "temizlik"
+- "Aydınlatma sistemi", "dekorasyon konsepti"
+- Elektrik tesisatı, dolap içi organizasyon
+
+Lütfen aşağıdaki kriterleri göz önünde bulundur:
+- Odanın türü ve özel gereksinimleri
+- Mevcut stil ve renk paleti
+- Fiziksel olarak yerleştirilebilir nesneler
+- AI ile kolayca görselleştirilebilir ürünler
+- Bütçe dostu ve satın alınabilir ürünler
+
+Her ürün önerisi için sadece somut ürün adını belirt. Yanıt formatı:
+
+1. [Somut Ürün Adı 1]
+2. [Somut Ürün Adı 2]
+3. [Somut Ürün Adı 3]
+4. [Somut Ürün Adı 4]
+5. [Somut Ürün Adı 5]
+6. [Somut Ürün Adı 6]
+7. [Somut Ürün Adı 7]
+8. [Somut Ürün Adı 8]
+9. [Somut Ürün Adı 9]
+10. [Somut Ürün Adı 10]
+
+Sadece fiziksel ürün adlarını ver, hiçbir ek açıklama yapma.
 
 1. **Duvarlar** (örnek: tablo, ayna, duvar saati, çerçeve, duvar panosu)
 2. **Mobilya Üstü** (örnek: bitki, dekoratif obje, mumluk, masa üstü kitap)
@@ -2175,23 +2219,6 @@ Aşağıdaki görüntü bir oda fotoğrafıdır. Lütfen görseldeki objeleri an
  Öneriler **odada zaten bulunan eşyaları tekrar etmemeli**. Onun yerine eksik kalan veya geliştirmeye açık alanlar hedef alınmalı.  
  Her ürün, stil olarak odaya uymalı (örneğin minimalistse “soyut tablo”, rustikse “ahşap çerçeve” gibi).  
  Yanıt sadece şu formatta, kısa ve net olarak yazılsın:
-
-**Duvarlar:**  
-- soyut tablo
-
-**Mobilya Üstü:**  
-- seramik vazo
-
-**Zemin:**  
-- geometrik desenli halı
-
-**Aydınlatma:**  
-- modern ayak lambası
-
-**Dokuma:**  
-- keten gri perde
-
-Hiçbir açıklama yazma, sadece ürün adlarını ver.
 `
 
               },
@@ -2215,9 +2242,6 @@ Hiçbir açıklama yazma, sadece ürün adlarını ver.
         }
       );
 
-
-
-
       // Yanıtın text kısmını güvenli şekilde al
       const parts = response.data.candidates[0]?.content?.parts || [];
       const suggestionsText = parts.find(p => p.text)?.text || '';
@@ -2226,7 +2250,7 @@ Hiçbir açıklama yazma, sadece ürün adlarını ver.
         console.log('✅ AI dekoratif ürün önerileri başarılı');
         console.log('AI Yanıtı:', suggestionsText);
 
-        // Metni kategorilere ayır
+        // Metni ürün listesine çevir
         const categories = this.parseDecorSuggestions(suggestionsText);
 
         return {
@@ -2240,75 +2264,107 @@ Hiçbir açıklama yazma, sadece ürün adlarını ver.
 
     } catch (error) {
       console.error('❌ AI dekoratif ürün önerileri hatası:', error);
+      
+      // 503 Service Unavailable veya 429 Rate Limit için retry
+      if ((error.response?.status === 503 || error.response?.status === 429) && retryCount < maxRetries) {
+        console.log(`⏳ ${retryDelay/1000} saniye sonra tekrar denenecek... (${retryCount + 1}/${maxRetries})`);
+        
+        // Bekle ve tekrar dene
+        await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1))); // Exponential backoff
+        return this.suggestDecorProducts(imageBase64, retryCount + 1);
+      }
+      
+      // 503 Service Unavailable hatası için özel mesaj
+      if (error.response?.status === 503) {
+        console.error('❌ Gemini API servis hatası - API geçici olarak kullanılamıyor');
+        return {
+          error: 'Servis Geçici Kullanılamaz',
+          message: 'Gemini AI servisi şu anda geçici olarak kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.',
+          details: `API Quota veya servis limiti aşılmış olabilir. ${maxRetries + 1} deneme yapıldı.`,
+          fallback: this.getFallbackDecorSuggestions(),
+          timestamp: new Date().toISOString()
+        };
+      }
+      
+      // 429 Rate Limit hatası için özel mesaj
+      if (error.response?.status === 429) {
+        console.error('❌ Gemini API rate limit aşıldı');
+        return {
+          error: 'Rate Limit Aşıldı',
+          message: 'API istek limiti aşıldı. Lütfen bir süre bekleyip tekrar deneyin.',
+          details: `${maxRetries + 1} deneme yapıldı ancak rate limit devam ediyor.`,
+          fallback: this.getFallbackDecorSuggestions(),
+          timestamp: new Date().toISOString()
+        };
+      }
 
-      // Hata durumunda boş sonuç döndür
+      // Genel hata durumunda fallback sonuç döndür
       return {
-        error: 'Yorum yapılamadı',
-        message: 'AI yorumu oluşturulurken bir hata oluştu',
+        error: 'AI Analiz Hatası',
+        message: 'AI ürün önerileri oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        details: error.message || 'Bilinmeyen hata',
+        fallback: this.getFallbackDecorSuggestions(),
         timestamp: new Date().toISOString()
       };
     }
 
   }
 
-  // Dekoratif önerileri kategorilere ayırma fonksiyonu
+  // Dekoratif önerileri parse etme fonksiyonu - 10 ürün listesi formatı
   parseDecorSuggestions(text) {
     try {
-      console.log('Parsing decor suggestions from:', text);
+      console.log('Parsing 10 product suggestions from:', text);
 
-      const categories = {};
+      const products = [];
       const lines = text.split('\n');
-      let currentCategory = null;
 
       for (const line of lines) {
         const trimmedLine = line.trim();
 
-        // Kategori başlıklarını bul
-        if (trimmedLine.includes('Duvarlar İçin:') || trimmedLine.includes('**Duvarlar İçin**:')) {
-          currentCategory = 'Duvarlar İçin';
-          categories[currentCategory] = [];
-        } else if (trimmedLine.includes('Mobilya Üstü:') || trimmedLine.includes('**Mobilya Üstü**:')) {
-          currentCategory = 'Mobilya Üstü';
-          categories[currentCategory] = [];
-        } else if (trimmedLine.includes('Zemin:') || trimmedLine.includes('**Zemin**:')) {
-          currentCategory = 'Zemin';
-          categories[currentCategory] = [];
-        } else if (trimmedLine.includes('Aydınlatma:') || trimmedLine.includes('**Aydınlatma**:')) {
-          currentCategory = 'Aydınlatma';
-          categories[currentCategory] = [];
-        } else if (trimmedLine.includes('Dokuma:') || trimmedLine.includes('**Dokuma**:')) {
-          currentCategory = 'Dokuma';
-          categories[currentCategory] = [];
-        }
-        // Öğe listelerini bul (- ile başlayan satırlar)
-        else if (trimmedLine.startsWith('-') && currentCategory) {
-          const item = trimmedLine.substring(1).trim();
-          if (item && !categories[currentCategory].includes(item)) {
-            categories[currentCategory].push(item);
-          }
-        }
-        // Numaralı listeleri de bul (1. 2. gibi)
-        else if (/^\d+\./.test(trimmedLine) && currentCategory) {
-          const item = trimmedLine.replace(/^\d+\.\s*/, '').trim();
-          if (item && !categories[currentCategory].includes(item)) {
-            categories[currentCategory].push(item);
+        // Numaralı listeleri bul (1. 2. 3. ... 10. formatında)
+        const match = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
+        if (match) {
+          const productName = match[2].trim();
+          if (productName && productName !== '[Ürün Adı 1]' && !productName.includes('[Ürün Adı')) {
+            products.push(productName);
           }
         }
       }
 
-      console.log('Parsed categories:', categories);
+      console.log('Parsed products:', products);
 
-      // Eğer hiç kategori bulunamadıysa, hata döndür
-      if (Object.keys(categories).length === 0) {
-        console.log('No categories found in AI response');
-        throw new Error('AI yanıtında kategori bulunamadı');
+      // Eğer hiç ürün bulunamadıysa, hata döndür
+      if (products.length === 0) {
+        console.log('No products found in AI response');
+        throw new Error('AI yanıtında ürün bulunamadı');
       }
 
-      return categories;
+      // Ürünleri "Önerilen Ürünler" kategorisinde döndür
+      return {
+        'Önerilen Ürünler': products
+      };
     } catch (error) {
       console.error('Parse decor suggestions error:', error);
       throw error; // Hatayı yukarı fırlat
     }
+  }
+
+  // Fallback dekoratif ürün önerileri - API hatası durumunda kullanılır
+  getFallbackDecorSuggestions() {
+    return {
+      'Genel Dekoratif Ürünler': [
+        'Dekoratif Tablo',
+        'Saksı Bitkisi',
+        'Duvar Saati',
+        'Dekoratif Vazo',
+        'Yastık',
+        'Halı',
+        'Masa Lambası',
+        'Dekoratif Ayna',
+        'Kitap Seti',
+        'Mum ve Mumluk'
+      ]
+    };
   }
 
 

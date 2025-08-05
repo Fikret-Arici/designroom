@@ -92,7 +92,7 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Lightbulb className="w-6 h-6 text-ai" />
-          <h3 className="text-lg font-semibold text-foreground">Odaya Konabilecek Dekoratif Ürünler</h3>
+          <h3 className="text-lg font-semibold text-foreground">AI Tarafından Önerilen Ürünler</h3>
           <Badge variant="outline" className="text-ai border-ai">
             <Sparkles className="w-3 h-3 mr-1" />
             Gemini AI
@@ -126,12 +126,45 @@ export const DecorSuggestions = ({ roomImage, onSuggestionsComplete, onProductSe
       {suggestions && !isLoading && (
         <div className="space-y-4">
           {'error' in suggestions ? (
-            // Error case
-            <div className="text-center py-8">
-              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-              <h4 className="font-semibold text-destructive mb-2">{suggestions.error}</h4>
-              <p className="text-muted-foreground text-sm">{suggestions.message}</p>
-              <div className="mt-4">
+            // Error case - API hatası durumunda fallback önerileri göster
+            <div className="space-y-4">
+              <div className="text-center py-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                <AlertCircle className="w-8 h-8 mx-auto mb-2 text-destructive" />
+                <h4 className="font-semibold text-destructive mb-1">{suggestions.error}</h4>
+                <p className="text-muted-foreground text-sm">{suggestions.message}</p>
+                {suggestions.details && (
+                  <p className="text-xs text-muted-foreground mt-1">{suggestions.details}</p>
+                )}
+              </div>
+              
+              {/* Fallback önerileri göster */}
+              {suggestions.fallback && (
+                <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">Genel Öneriler:</span>
+                  </div>
+                  {Object.entries(suggestions.fallback).map(([category, items]) => (
+                    <div key={category} className="mb-4">
+                      <h4 className="font-medium text-sm mb-2 text-foreground">{category}</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {items.map((item: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground justify-center"
+                            onClick={() => handleProductClick(item)}
+                          >
+                            {item}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="text-center">
                 <Badge variant="secondary" className="text-xs">
                   <Clock className="w-3 h-3 mr-1" />
                   {new Date(suggestions.timestamp).toLocaleTimeString('tr-TR')}
