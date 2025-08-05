@@ -80,17 +80,27 @@ Dekorasyon Pazarı:
 ```mermaid
 graph TD
     A[📸 Oda Fotoğrafı] --> B[🤖 AI Analiz]
-    B --> C[🔍 Ürün Arama]
-    C --> D[🎨 AI Yerleştirme]
-    D --> E[📱 Sonuç Görüntüleme]
     
-    B --> F[💬 Oda Yorumları]
-    C --> G[🛍️ Ürün Önerileri]
+    B --> C[💬 Oda Yorumları]
+    B --> D[🛍️ Dekoratif Ürün Önerileri]
+    
+    C --> E[🔍 Ürün Arama]
+    D --> E
+    E --> F[📤 Ürün Yükleme]
+    
+    E --> G[🎨 AI Yerleştirme]
+    F --> G
+    
+    G --> H[📱 Sonuç Görüntüleme]
     
     style A fill:#e1f5fe
-    style E fill:#c8e6c9
+    style H fill:#c8e6c9
     style B fill:#fff3e0
-    style D fill:#f3e5f5
+    style G fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff8e1
+    style E fill:#f3e5f5
+    style F fill:#e3f2fd
 ```
 
 </div>
@@ -165,13 +175,17 @@ const commentAgent = {
 ### 🔄 AI Koordinasyon Süreci
 
 ```
-1️⃣ Oda Yükleme
+1️⃣ Oda Fotoğrafı Yükleme
    ↓
-2️⃣ Gemini Vision Analizi
+2️⃣ AI Analiz (Gemini Vision)
+   ├─ 💬 Oda Yorumları
+   └─ 🛍️ Dekoratif Ürün Önerileri
    ↓
-3️⃣ Ürün Arama (Gemini + Scraping)
+3️⃣ Ürün Seçimi
+   ├─ 🔍 Ürün Arama (Gemini + Scraping)
+   └─ 📤 Ürün Yükleme
    ↓
-4️⃣ GPT-4 Vision Yerleştirme
+4️⃣ AI Yerleştirme (GPT-4 Vision)
    ↓
 5️⃣ Sonuç Görüntüleme
 ```
@@ -248,16 +262,36 @@ const commentAgent = {
 ⏱️ Süre: ~3-5 saniye
 ```
 
-#### **Adım 3: Ürün Arama** 🔍
+#### **Adım 3a: Oda Yorumları** 💬
 ```
-🔍 "Modern mavi tablo" araması
+💬 AI oda analizi tamamlandı
+✅ Stil önerileri: Modern, Minimalist
+✅ Renk paleti: Mavi tonları
+✅ Atmosfer: Ferah ve temiz
+⏱️ Süre: ~2-3 saniye
+```
+
+#### **Adım 3b: Dekoratif Ürün Önerileri** 🛍️
+```
+🛍️ AI ürün önerileri hazırlanıyor
+✅ Uygun kategoriler: Tablo, Halı, Dekor
+✅ Renk uyumu: Mavi tonları
+✅ Stil uyumu: Modern, Minimalist
+⏱️ Süre: ~2-3 saniye
+```
+
+#### **Adım 4: Ürün Seçimi** 🔍
+```
+🔍 Ürün arama veya yükleme seçeneği
+├─ Arama: "Modern mavi tablo" araması
+├─ Yükleme: Kendi ürün fotoğrafı
 🤖 Gemini AI optimizasyonu
 🛍️ Trendyol'dan ürün çekme
 ✅ 15 ürün bulundu
 ⏱️ Süre: ~4-6 saniye
 ```
 
-#### **Adım 4: AI Yerleştirme** 🎨
+#### **Adım 5: AI Yerleştirme** 🎨
 ```
 🎨 GPT-4 Vision yerleştirme
 🔄 3 adımlı progress:
@@ -267,7 +301,7 @@ const commentAgent = {
 ⏱️ Süre: ~20-30 saniye
 ```
 
-#### **Adım 5: Sonuç Görüntüleme** 📱
+#### **Adım 6: Sonuç Görüntüleme** 📱
 ```
 ✅ Gerçekçi yerleştirme sonucu
 🔍 Tam boyut görüntüleme
@@ -293,7 +327,10 @@ const commentAgent = {
 | **İşlem** | **Ortalama Süre** | **Hedef** | **Durum** |
 |-----------|-------------------|-----------|-----------|
 | 🖼️ Oda Analizi | 3-5 saniye | <5s | ✅ |
+| 💬 Oda Yorumları | 2-3 saniye | <4s | ✅ |
+| 🛍️ Ürün Önerileri | 2-3 saniye | <4s | ✅ |
 | 🔍 Ürün Arama | 4-6 saniye | <8s | ✅ |
+| 📤 Ürün Yükleme | 1-2 saniye | <3s | ✅ |
 | 🎨 AI Yerleştirme | 20-30 saniye | <35s | ✅ |
 | 📱 Sayfa Yükleme | <2 saniye | <3s | ✅ |
 | 🔄 API Yanıt | <1 saniye | <2s | ✅ |
@@ -343,6 +380,8 @@ const performanceMetrics = {
 🎯 İhtiyaç: Boş odadan başlayarak dekorasyon
 🤖 AI Çözümü: 
    ├─ Oda analizi ve stil önerisi
+   ├─ Oda yorumları ve atmosfer analizi
+   ├─ Dekoratif ürün önerileri
    ├─ Uygun ürün arama
    └─ Gerçekçi yerleştirme görseli
 💡 Sonuç: Hızlı ve doğru dekorasyon kararı
@@ -354,6 +393,8 @@ const performanceMetrics = {
 🎯 İhtiyaç: Küçük değişikliklerle büyük etki
 🤖 AI Çözümü:
    ├─ Mevcut oda analizi
+   ├─ Oda yorumları ve iyileştirme önerileri
+   ├─ Dekoratif ürün önerileri
    ├─ Eksik element tespiti
    └─ Uyumlu ürün önerileri
 💡 Sonuç: Maliyet etkin yenileme
@@ -364,6 +405,7 @@ const performanceMetrics = {
 👤 Kullanıcı: Online alışveriş yapan
 🎯 İhtiyaç: Ürünün odada nasıl görüneceğini bilmek
 🤖 AI Çözümü:
+   ├─ Oda analizi ve stil uyumu
    ├─ Ürün yerleştirme simülasyonu
    ├─ Boyut ve renk uyumu
    └─ Satın alma güvencesi
@@ -375,6 +417,7 @@ const performanceMetrics = {
 👤 Kullanıcı: İç mimar
 🎯 İhtiyaç: Müşteri onayı için görselleştirme
 🤖 AI Çözümü:
+   ├─ Detaylı oda analizi ve yorumlar
    ├─ Profesyonel yerleştirme
    ├─ Çoklu seçenek sunumu
    └─ Hızlı revizyon imkanı
