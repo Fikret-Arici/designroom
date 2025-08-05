@@ -86,21 +86,24 @@ graph TD
     
     C --> E[🔍 Ürün Arama]
     D --> E
+    
     E --> F[📤 Ürün Yükleme]
+    E --> G[💬 Yorum Detaylı Analiz]
     
-    E --> G[🎨 AI Yerleştirme]
-    F --> G
+    F --> H[🎨 AI Yerleştirme]
+    G --> H
     
-    G --> H[📱 Sonuç Görüntüleme]
+    H --> I[📱 Sonuç Görüntüleme]
     
     style A fill:#e1f5fe
-    style H fill:#c8e6c9
+    style I fill:#c8e6c9
     style B fill:#fff3e0
-    style G fill:#f3e5f5
+    style H fill:#f3e5f5
     style C fill:#e8f5e8
     style D fill:#fff8e1
     style E fill:#f3e5f5
     style F fill:#e3f2fd
+    style G fill:#fff3e0
 ```
 
 </div>
@@ -185,7 +188,9 @@ const commentAgent = {
    ├─ 🔍 Ürün Arama (Gemini + Scraping)
    └─ 📤 Ürün Yükleme
    ↓
-4️⃣ AI Yerleştirme (GPT-4 Vision)
+4️⃣ Analiz ve Yerleştirme
+   ├─ 💬 Yorum Detaylı Analiz
+   └─ 🎨 AI Yerleştirme (GPT-4 Vision)
    ↓
 5️⃣ Sonuç Görüntüleme
 ```
@@ -291,7 +296,17 @@ const commentAgent = {
 ⏱️ Süre: ~4-6 saniye
 ```
 
-#### **Adım 5: AI Yerleştirme** 🎨
+#### **Adım 5a: Yorum Detaylı Analiz** 💬
+```
+💬 AI detaylı analiz başlatılıyor
+✅ Oda-ürün uyumluluk analizi
+✅ Stil ve renk uyumu değerlendirmesi
+✅ Boyut ve oran analizi
+✅ Atmosfer uyumu kontrolü
+⏱️ Süre: ~3-4 saniye
+```
+
+#### **Adım 5b: AI Yerleştirme** 🎨
 ```
 🎨 GPT-4 Vision yerleştirme
 🔄 3 adımlı progress:
@@ -331,6 +346,7 @@ const commentAgent = {
 | 🛍️ Ürün Önerileri | 2-3 saniye | <4s | ✅ |
 | 🔍 Ürün Arama | 4-6 saniye | <8s | ✅ |
 | 📤 Ürün Yükleme | 1-2 saniye | <3s | ✅ |
+| 💬 Yorum Detaylı Analiz | 3-4 saniye | <5s | ✅ |
 | 🎨 AI Yerleştirme | 20-30 saniye | <35s | ✅ |
 | 📱 Sayfa Yükleme | <2 saniye | <3s | ✅ |
 | 🔄 API Yanıt | <1 saniye | <2s | ✅ |
@@ -546,7 +562,7 @@ gantt
 | **Platform** | **Bilgi** |
 |--------------|-----------|
 | 📧 **Email** | fikretarici35@gmail.com |
-| 🌐 **Website** | www.ai-decor-dream.netlify.com |
+| 🌐 **Website** | https://ai-decor-dream.netlify.app/com |
 | 📱 **Telefon** | +90 5309354275 |
 | 💼 **LinkedIn** |  |
 
