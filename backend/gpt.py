@@ -2,11 +2,19 @@ import base64
 import sys
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# .env dosyasını yükle
+load_dotenv()
 
 def generate_product_placement(room_image_path, product_image_path, output_path, custom_prompt=None):
-    client = OpenAI(
-        api_key='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',
-    )
+    # Environment variable'dan API anahtarını al
+    api_key = os.getenv('OPENAI_API_KEY')
+    
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY environment variable bulunamadı. Lütfen .env dosyasında ayarlayın.")
+    
+    client = OpenAI(api_key=api_key)
 
     # Temel prompt
     base_prompt = """
