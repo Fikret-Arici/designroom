@@ -1,7 +1,7 @@
 import base64
 from openai import OpenAI
 client = OpenAI(
-    api_key='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',
+    api_key='',
 )
 
 
