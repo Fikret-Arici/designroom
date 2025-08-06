@@ -34,6 +34,7 @@ interface PortfolioItem {
 
 const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
 
   const categories = [
@@ -50,9 +51,9 @@ const Portfolio = () => {
       id: '1',
       title: "Modern Oturma Odası Dekorasyonu",
       category: "living",
-      beforeImage: "/api/placeholder/400/300",
-      afterImage: "/api/placeholder/400/300",
-      productImage: "/api/placeholder/200/200",
+      beforeImage: "/backend/uploads/93242fc1-1f75-4fbf-94de-a63751765c3c-room.jpg",
+      afterImage: "/backend/uploads/placement-f7290cfd-2972-48ef-a269-8bf69eeb4b70.png",
+      productImage: "/backend/uploads/0888d49e-f0e2-461b-9784-b543ecaf7cb2-product.jpg",
       description: "Minimalist tarzda modern oturma odası için AI destekli dekoratif ürün yerleştirmesi",
       tags: ["Modern", "Minimalist", "Oturma Odası"],
       rating: 4.9,
@@ -65,9 +66,9 @@ const Portfolio = () => {
       id: '2',
       title: "Rustik Yatak Odası Tasarımı",
       category: "bedroom",
-      beforeImage: "/api/placeholder/400/300",
-      afterImage: "/api/placeholder/400/300",
-      productImage: "/api/placeholder/200/200",
+      beforeImage: "/backend/uploads/93242fc1-1f75-4fbf-94de-a63751765c3c-room.jpg",
+      afterImage: "/backend/uploads/placement-f7290cfd-2972-48ef-a269-8bf69eeb4b70.png",
+      productImage: "/backend/uploads/0888d49e-f0e2-461b-9784-b543ecaf7cb2-product.jpg",
       description: "Doğal ahşap ve rustik dekoratif öğelerle yatak odası yenileme projesi",
       tags: ["Rustik", "Doğal", "Yatak Odası"],
       rating: 4.8,
@@ -137,86 +138,51 @@ const Portfolio = () => {
                                  {/* Three Images Side by Side with Smooth Transitions */}
                  <div className="relative h-48 overflow-hidden">
                    <div className="grid grid-cols-3 h-full gap-1">
-                     {/* İlk Hali - Boş Oda */}
-                     <div className="relative overflow-hidden">
-                       <div 
-                         className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
-                         style={{ backgroundImage: `url(${item.beforeImage})` }}
-                       >
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
-                       </div>
-                       <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
-                         <span className="text-xs font-medium">İlk Hali</span>
-                       </div>
-                     </div>
-                     
-                     {/* Ürün Resmi */}
-                     <div className="relative overflow-hidden">
-                       <div 
-                         className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
-                         style={{ backgroundImage: `url(${item.productImage})` }}
-                       >
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
-                       </div>
-                       <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
-                         <span className="text-xs font-medium">Ürün</span>
-                       </div>
-                     </div>
-                     
-                     {/* Son Yerleştirilmiş Resim */}
-                     <div className="relative overflow-hidden">
-                       <div 
-                         className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
-                         style={{ backgroundImage: `url(${item.afterImage})` }}
-                       >
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
-                       </div>
-                       <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
-                         <span className="text-xs font-medium">Sonuç</span>
-                       </div>
-                     </div>
+                                           {/* İlk Hali - Boş Oda */}
+                      <div className="relative overflow-hidden cursor-pointer" onClick={() => setSelectedImage(item.beforeImage)}>
+                        <div 
+                          className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
+                          style={{ backgroundImage: `url(${item.beforeImage})` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                        </div>
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                          <span className="text-xs font-medium">İlk Hali</span>
+                        </div>
+                      </div>
+                      
+                      {/* Ürün Resmi */}
+                      <div className="relative overflow-hidden cursor-pointer" onClick={() => setSelectedImage(item.productImage)}>
+                        <div 
+                          className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
+                          style={{ backgroundImage: `url(${item.productImage})` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                        </div>
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                          <span className="text-xs font-medium">Ürün</span>
+                        </div>
+                      </div>
+                      
+                      {/* Son Yerleştirilmiş Resim */}
+                      <div className="relative overflow-hidden cursor-pointer" onClick={() => setSelectedImage(item.afterImage)}>
+                        <div 
+                          className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
+                          style={{ backgroundImage: `url(${item.afterImage})` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                        </div>
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                          <span className="text-xs font-medium">Sonuç</span>
+                        </div>
+                      </div>
                    </div>
                  </div>
 
-                {/* Overlay with Stats */}
-                <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-background/80 backdrop-blur rounded-full px-2 py-1">
-                    <Heart className="w-3 h-3 text-red-500" />
-                    <span className="text-xs">{item.likes}</span>
-                  </div>
-                  <div className="flex items-center gap-1 bg-background/80 backdrop-blur rounded-full px-2 py-1">
-                    <Eye className="w-3 h-3 text-blue-500" />
-                    <span className="text-xs">{item.views}</span>
-                  </div>
-                </div>
+                
               </div>
 
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-sm font-medium">{item.rating}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {item.tags.slice(0, 2).map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {item.description}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{item.author}</span>
-                  <span>{new Date(item.createdAt).toLocaleDateString('tr-TR')}</span>
-                </div>
+                             <div className="p-6">
 
                 <Dialog>
                   <DialogTrigger asChild>
@@ -225,12 +191,8 @@ const Portfolio = () => {
                       <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
-                        <p className="text-muted-foreground">{item.description}</p>
-                      </div>
+                                     <DialogContent className="max-w-4xl">
+                     <div className="space-y-6">
                       
                                              <div className="space-y-4">
                          <h4 className="font-semibold mb-2">Proje Görselleri</h4>
@@ -259,29 +221,7 @@ const Portfolio = () => {
                           </div>
                        </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-2">
-                          {item.tags.map((tag, index) => (
-                            <Badge key={index} variant="outline">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span>{item.rating}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Heart className="w-4 h-4 text-red-500" />
-                            <span>{item.likes}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Eye className="w-4 h-4 text-blue-500" />
-                            <span>{item.views}</span>
-                          </div>
-                        </div>
-                      </div>
+                      
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -337,6 +277,28 @@ const Portfolio = () => {
            </p>
          </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] p-4">
+            <img
+              src={selectedImage}
+              alt="Büyütülmüş görsel"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-lg shadow-2xl"
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 w-8 h-8 bg-background/80 backdrop-blur rounded-full flex items-center justify-center text-foreground hover:bg-background transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

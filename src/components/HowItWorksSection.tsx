@@ -19,7 +19,7 @@ const HowItWorksSection = () => {
       number: 1,
       icon: <Upload className="w-8 h-8" />,
       title: "Oda Fotoğrafını Yükle",
-      description: "Dekoratif ürün yerleştirmek istediğiniz odanın fotoğrafını yükleyin. AI sistemimiz odanızı detaylı şekilde analiz edecek.",
+      description: "Dekoratif ürün yerleştirmek istediğiniz odanın fotoğrafını yükleyin. AI sistemimiz odanızı detaylı şekilde analiz edecek ve sizin odanızın detaylı bir yorumunu size verecek ardından yine odanızı inceleyip size kişileştirilmiş dekoratif ürünleri önericek.",
       features: ["Yüksek çözünürlük desteği", "Otomatik oda tespiti", "Işık analizi"],
       color: "text-blue-500",
       bgColor: "bg-blue-50 dark:bg-blue-950/20"
@@ -28,7 +28,7 @@ const HowItWorksSection = () => {
       number: 2,
       icon: <Search className="w-8 h-8" />,
       title: "Ürünü Seç veya Tarif Et",
-      description: "İstediğiniz dekoratif ürünü metin ile tarif edin veya fotoğrafını yükleyin. Geniş ürün veritabanımızdan seçim yapın.",
+      description: "İstediğiniz dekoratif ürünü metin ile tarif edin veya fotoğrafını yükleyin. Tarif ettiğiniz ürünün trendyoldaki örneklerini görüntüleyebilirsiniz ve bunların arasından seçim yapabilir direkt sayfasına gidip alışverişinizi yapabilirsiniz.",
       features: ["Akıllı ürün arama", "Görsel tanıma", "Özel ürün yükleme"],
       color: "text-green-500",
       bgColor: "bg-green-50 dark:bg-green-950/20"
@@ -37,7 +37,7 @@ const HowItWorksSection = () => {
       number: 3,
       icon: <Brain className="w-8 h-8" />,
       title: "AI Analizi",
-      description: "Yapay zeka ajanlarımız odanızı analiz eder, uygun yerleştirme noktalarını belirler ve dekorasyon önerileri sunar.",
+      description: "Yapay zeka ajanlarımız odanızı analiz eder, uygun yerleştirme noktalarını belirler ve dekorasyon yerleşimini size sunar.",
       features: ["Oda boyutu hesaplama", "Stil analizi", "Renk uyumu kontrolü"],
       color: "text-purple-500",
       bgColor: "bg-purple-50 dark:bg-purple-950/20"
