@@ -326,17 +326,17 @@ const searchResults = await axios.get('https://www.googleapis.com/customsearch/v
 
 ## 🔮 Gelecek Özellikler
 
-### 🎯 Kısa Vadeli (Q1 2024)
+### 🎯 Kısa Vadeli (Q1 2026)
 - [ ] 📱 **AR Desteği** - Artırılmış gerçeklik ile önizleme
 - [ ] 🎨 **Çoklu Ürün Yerleştirme** - Aynı anda birden fazla ürün
 - [ ] 💾 **Kayıt Sistemi** - Kullanıcı hesapları ve favoriler
 
-### 📈 Orta Vadeli (Q2-Q3 2024)
+### 📈 Orta Vadeli (Q2-Q3 2026)
 - [ ] 🔗 **Sosyal Medya Entegrasyonu** - Instagram, Pinterest paylaşımı
 - [ ] 💳 **Premium Özellikler** - Gelişmiş AI modelleri ve özellikler
 - [ ] 🎓 **3D Oda Modelleme** - 3D ortamda ürün yerleştirme
 
-### 🚀 Uzun Vadeli (Q4 2024+)
+### 🚀 Uzun Vadeli (Q4 2026+)
 - [ ] 📱 **Mobil Uygulama** - iOS ve Android native uygulamalar
 - [ ] 🤝 **B2B Çözümler** - İç mimar ve mobilyacılar için özel araçlar
 - [ ] 🌍 **Çoklu Dil Desteği** - Uluslararası pazara açılım
