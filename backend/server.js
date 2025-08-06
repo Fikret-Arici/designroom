@@ -2841,7 +2841,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    message: 'AI Dekoratif Yerleştirme API çalışıyor'
+          message: 'AI Dekor Dream API çalışıyor'
   });
 });
 
@@ -2870,7 +2870,7 @@ app.post('/api/generate-product-placement', upload.fields([
     const scriptPath = path.join(__dirname, 'gpt.py');
 
     // Use configured Python executable path
-    const pythonCommand = 'C:/btk_proje/.venv/Scripts/python.exe';
+    const pythonCommand = process.platform === 'win32' ? 'python' : 'python';
 
     console.log('🤖 GPT Image Generation başlatılıyor...');
     console.log(`📁 Oda görseli: ${roomImage.path}`);
@@ -2968,7 +2968,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 AI Dekoratif Yerleştirme API sunucusu ${PORT} portunda çalışıyor`);
+  console.log(`🚀 AI Dekor Dream API sunucusu ${PORT} portunda çalışıyor`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🤖 Gemini API: ${GEMINI_API_KEY ? '✅ Yapılandırıldı' : '❌ Yapılandırılmadı'}`);
   console.log(`🔍 Google Search API: ${process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID ? '✅ Yapılandırıldı' : '❌ Yapılandırılmadı'}`);

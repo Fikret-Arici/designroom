@@ -9,6 +9,9 @@ import { PlacementResult } from '@/components/PlacementResult';
 import { RoomComment } from '@/components/RoomComment';
 import { DecorSuggestions } from '@/components/DecorSuggestions';
 import { AIAgent } from '@/components/AIAgent';
+import Header from '@/components/Header';
+import AboutSection from '@/components/AboutSection';
+import HowItWorksSection from '@/components/HowItWorksSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Sparkles, Target, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -115,9 +118,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Header */}
+      <Header />
+      
       {/* Hero Section */}
       <div
-        className="relative h-96 flex items-center justify-center text-center bg-cover bg-center"
+        id="hero"
+        className="relative h-96 flex items-center justify-center text-center bg-cover bg-center pt-16"
         style={{ backgroundImage: `url(${aiHeroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background/60"></div>
@@ -125,7 +132,7 @@ const Index = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="w-12 h-12 text-ai animate-float" />
             <h1 className="text-5xl font-bold bg-gradient-ai bg-clip-text text-transparent">
-              AI Dekoratif Yerleştirme
+              AI Dekor Dream
             </h1>
             <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
           </div>
@@ -336,6 +343,10 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* New Sections */}
+      <AboutSection />
+      <HowItWorksSection />
     </div>
   );
 };
