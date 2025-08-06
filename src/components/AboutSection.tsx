@@ -40,9 +40,9 @@ const AboutSection = () => {
             AI Dekor Dream ile Tanışın
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Yapay zeka teknolojisini dekorasyon dünyası ile buluşturarak, 
-            ev dekorasyonunda yeni bir çağ başlatıyoruz. Odalarınızı hayalinizdeki 
-            gibi dekore etmenin en akıllı yolu.
+            E-ticaret dünyasında yapay zeka teknolojisini kullanarak, 
+            dekoratif ürünleri satın almadan önce evinizde nasıl görüneceğini 
+            görmenizi sağlıyoruz. Online alışveriş deneyimini dönüştürüyoruz.
           </p>
         </div>
 
@@ -58,13 +58,14 @@ const AboutSection = () => {
                 <h3 className="text-2xl font-bold text-foreground">Misyonumuz</h3>
               </div>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Herkesin hayalindeki yaşam alanını yaratabilmesi için yapay zeka 
-                teknolojisinin gücünden faydalanıyoruz. Dekorasyon sürecini 
-                kolaylaştırır, hızlandırır ve kişiselleştiririz.
+                E-ticaret dünyasında yapay zeka teknolojisini kullanarak, 
+                müşterilerin dekoratif ürünleri satın almadan önce evlerinde 
+                nasıl görüneceğini görmelerini sağlıyoruz.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Amacımız, her bütçeye ve zevke uygun, profesyonel kalitede 
-                dekorasyon çözümleri sunarak yaşam kalitesini artırmaktır.
+                Amacımız, online alışveriş deneyimini dönüştürerek, 
+                müşterilerin güvenle ve bilinçle dekoratif ürün satın almalarını 
+                sağlamak ve e-ticaret platformlarında yeni bir standart oluşturmaktır.
               </p>
             </Card>
 
@@ -76,10 +77,10 @@ const AboutSection = () => {
                 <h3 className="text-2xl font-bold text-foreground">Vizyonumuz</h3>
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                Dekorasyon dünyasında AI teknolojisinin öncüsü olmak ve 
-                gelecekte herkesin evinde kişisel AI dekoratörü bulundurmasını 
-                sağlamak. Teknoloji ile sanatı birleştirerek, yaşam alanlarını 
-                daha güzel ve fonksiyonel hale getirmek.
+                E-ticaret sektöründe AI teknolojisinin öncüsü olmak ve 
+                tüm online dekoratif ürün satışlarında standart hale gelmek. 
+                Müşterilerin satın alma kararlarını kolaylaştırarak, 
+                e-ticaret platformlarında yeni bir alışveriş deneyimi yaratmak.
               </p>
             </Card>
           </div>
@@ -114,12 +115,12 @@ const AboutSection = () => {
         {/* Call to Action */}
         <div className="text-center mt-12">
           <p className="text-lg text-muted-foreground mb-6">
-            Siz de AI teknolojisinin gücünü dekorasyonunuzda deneyimleyin
+            E-ticaret deneyiminizi AI teknolojisi ile dönüştürün
           </p>
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="w-5 h-5 text-ai-secondary animate-pulse" />
             <span className="text-ai font-semibold">
-              Hayalinizdeki dekorasyona sadece birkaç tık uzaktasınız
+              Güvenle alışveriş yapmanın yeni yolu
             </span>
             <Sparkles className="w-5 h-5 text-ai-secondary animate-pulse" />
           </div>

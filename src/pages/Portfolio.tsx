@@ -66,9 +66,9 @@ const Portfolio = () => {
       id: '2',
       title: "Rustik Yatak Odası Tasarımı",
       category: "bedroom",
-      beforeImage: "/backend/uploads/93242fc1-1f75-4fbf-94de-a63751765c3c-room.jpg",
-      afterImage: "/backend/uploads/placement-f7290cfd-2972-48ef-a269-8bf69eeb4b70.png",
-      productImage: "/backend/uploads/0888d49e-f0e2-461b-9784-b543ecaf7cb2-product.jpg",
+      beforeImage: "/backend/uploads/0f4cf9a0-b2b3-48ff-9980-93610c17fc3a-room.jpg",
+      afterImage: "backend/uploads/placement-547ed577-6089-4b9e-ab7f-4fc37c02762f.png",
+      productImage: "backend/uploads/8ccddf7f-82ba-4c9e-8459-ea894bd40f45-product.jpg",
       description: "Doğal ahşap ve rustik dekoratif öğelerle yatak odası yenileme projesi",
       tags: ["Rustik", "Doğal", "Yatak Odası"],
       rating: 4.8,
@@ -76,7 +76,22 @@ const Portfolio = () => {
       views: 890,
       createdAt: "2024-01-10",
       author: "Ayşe Demir"
-    }
+    },
+    {
+        id: '3',
+        title: "Rustik Yatak Odası Tasarımı",
+        category: "bedroom",
+        beforeImage: "backend/uploads/0370020b-4a07-4b1d-a8f5-1b3ee3b9b6f9-room.jpg",
+        afterImage: "backend/uploads/placement-e86bf729-e2d6-41c8-a8d4-47a16ddf68db.png",
+        productImage: "backend/uploads/ccec05cb-dbba-47aa-91f7-888779e0d7b0-product.jpg",
+        description: "Doğal ahşap ve rustik dekoratif öğelerle yatak odası yenileme projesi",
+        tags: ["Rustik", "Doğal", "Yatak Odası"],
+        rating: 4.8,
+        likes: 189,
+        views: 890,
+        createdAt: "2024-01-10",
+        author: "Ayşe Demir"
+      }
   ];
 
   const filteredItems = selectedCategory === 'all' 
