@@ -156,19 +156,19 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-2">🎨 AI Yerleştirme Sonucu</h2>
-        <p className="text-gray-300">
+        <h2 className="text-3xl font-bold text-foreground mb-2">🎨 AI Yerleştirme Sonucu</h2>
+        <p className="text-muted-foreground">
           AI Vision ürünü odanıza gerçekçi şekilde yerleştirdi
         </p>
       </div>
 
       <div className="space-y-6">
         {/* Orijinal Oda */}
-        <Card className="bg-gray-900/50 border-gray-700 p-4">
-          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+        <Card className="bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl p-4">
+          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
             📷 Orijinal Oda
           </h3>
-          <div className="relative rounded-lg overflow-hidden group cursor-pointer">
+          <div className="relative rounded-xl overflow-hidden group cursor-pointer">
             <Dialog>
               <DialogTrigger asChild>
                 <div className="relative">
@@ -182,11 +182,11 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                   </div>
                 </div>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+              <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                 <img
                   src={originalRoom}
                   alt="Orijinal Oda - Tam Boyut"
-                  className="w-full h-full object-contain rounded-lg"
+                  className="w-full h-full object-contain rounded-xl"
                 />
               </DialogContent>
             </Dialog>
@@ -194,30 +194,30 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
         </Card>
 
         {/* AI Yerleştirme Sonucu */}
-        <Card className="bg-gray-900/50 border-gray-700 p-4">
-          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-            <Wand2 className="h-5 w-5 text-purple-400" />
+        <Card className="bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl p-4">
+          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <Wand2 className="h-5 w-5 text-ai" />
             AI Yerleştirme Sonucu
             {placementData && (
-              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+              <Badge variant="secondary" className="bg-ai-secondary/20 text-ai-secondary border-ai-secondary/30">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Tamamlandı
               </Badge>
             )}
           </h3>
 
-          <div className="relative rounded-lg overflow-hidden bg-gray-800">
+          <div className="relative rounded-xl overflow-hidden bg-muted/50 border border-border/50">
             {isGenerating ? (
               <div className="w-full h-96 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                  <p className="text-white font-semibold">🎨 AI Image Generation</p>
-                  <div className="mt-3 space-y-1 text-sm text-gray-300">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ai mx-auto mb-4"></div>
+                  <p className="text-foreground font-semibold">🎨 AI Image Generation</p>
+                  <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                     <p className="animate-pulse">🔄 1/3: Görseller hazırlanıyor...</p>
                     <p className="animate-pulse">🔄 2/3: AI Vision ile analiz ediliyor...</p>
                     <p className="animate-pulse">🔄 3/3: Ürün yerleştirme oluşturuluyor...</p>
                   </div>
-                  <div className="mt-4 text-xs text-gray-400">
+                  <div className="mt-4 text-xs text-muted-foreground">
                     Bu süreç 20-30 saniye sürebilir
                   </div>
                 </div>
@@ -225,8 +225,8 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
             ) : error ? (
               <div className="w-full h-96 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-red-400 mb-2">❌ {error}</p>
-                  <Button onClick={() => generatePlacement()} variant="outline" size="sm">
+                  <p className="text-destructive mb-2">❌ {error}</p>
+                  <Button onClick={() => generatePlacement()} variant="outline" size="sm" className="border-border/50">
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Tekrar Dene
                   </Button>
@@ -247,11 +247,11 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                       </div>
                     </div>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+                  <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                     <img
                       src={placementData.imageUrl}
                       alt="AI Yerleştirme Sonucu - Tam Boyut"
-                      className="w-full h-full object-contain rounded-lg"
+                      className="w-full h-full object-contain rounded-xl"
                     />
                   </DialogContent>
                 </Dialog>
@@ -264,12 +264,12 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
       {/* Aksiyon Butonları */}
       {placementData && (
         <div className="flex flex-wrap gap-3 justify-center">
-          <Button onClick={downloadResult} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={downloadResult} className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white shadow-lg rounded-xl">
             <Download className="h-4 w-4 mr-2" />
             İndir
           </Button>
 
-          <Button onClick={shareResult} variant="outline">
+          <Button onClick={shareResult} variant="outline" className="border-border/50 hover:bg-ai/5 rounded-xl">
             <Share2 className="h-4 w-4 mr-2" />
             Paylaş
           </Button>
@@ -278,12 +278,13 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
             onClick={() => setShowCustomPromptInput(true)}
             variant="outline"
             disabled={isGenerating}
+            className="border-border/50 hover:bg-ai/5 rounded-xl"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Yeni Deneme
           </Button>
 
-          <Button onClick={onReset} variant="outline">
+          <Button onClick={onReset} variant="outline" className="border-border/50 hover:bg-ai/5 rounded-xl">
             Yeni Oda
           </Button>
         </div>
@@ -291,21 +292,21 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
 
       {/* Custom Prompt Dialog */}
       {showCustomPromptInput && (
-        <Card className="mt-4 p-4 bg-gray-900/50 border-gray-700">
+        <Card className="mt-4 p-4 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Özel Yerleştirme İsteği</h3>
+            <h3 className="text-lg font-semibold text-foreground">Özel Yerleştirme İsteği</h3>
             <Input
               type="text"
               placeholder="Nasıl yerleştirmemizi istersiniz, özel bir isteğiniz varsa belirtin"
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              className="bg-background border-border/50 text-foreground placeholder-muted-foreground"
             />
             <div className="flex gap-2">
               <Button
                 onClick={() => generatePlacement(customPrompt)}
                 disabled={isGenerating}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white shadow-lg rounded-xl"
               >
                 {isGenerating ? 'Oluşturuluyor...' : 'Yeni Deneme Oluştur'}
               </Button>
@@ -315,6 +316,7 @@ export const PlacementResult = ({ originalRoom, selectedProduct, onReset }: Plac
                   setCustomPrompt('');
                 }}
                 variant="outline"
+                className="border-border/50 hover:bg-ai/5 rounded-xl"
               >
                 İptal
               </Button>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Brain, Search, Eye, Wand2 } from 'lucide-react';
+import { Home, Search, Eye, Wand2 } from 'lucide-react';
 
 interface AIAgentProps {
   type: 'search' | 'analysis' | 'placement';
@@ -71,40 +71,40 @@ export const AIAgent = ({ type, isActive, isCompleted }: AIAgentProps) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Card className={`p-4 transition-all duration-500 cursor-pointer hover:scale-105 ${
+        <Card className={`p-4 transition-all duration-500 cursor-pointer hover:scale-105 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl ${
           isActive 
-            ? 'border-ai animate-ai-glow' 
+            ? 'border-ai shadow-lg shadow-ai/20' 
             : isCompleted 
-              ? 'border-green-500 bg-green-500/10' 
-              : 'border-muted hover:border-ai/50'
+              ? 'border-ai-secondary bg-ai-secondary/10' 
+              : 'border-border/50 hover:border-ai/30'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-full ${config.color} ${
-              isActive ? 'animate-float' : ''
+              isActive ? 'animate-pulse' : ''
             }`}>
-              <Icon className="w-5 h-5 text-primary-foreground" />
+              <Icon className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground">{config.title}</h3>
-              <p className="text-sm text-muted-foreground">{config.description}</p>
+              <h3 className="font-semibold text-foreground group-hover:text-foreground">{config.title}</h3>
+              <p className="text-sm text-muted-foreground group-hover:text-muted-foreground">{config.description}</p>
             </div>
             <div className="flex items-center gap-2">
               {isActive && (
-                <Badge variant="secondary" className="animate-pulse">
+                <Badge variant="secondary" className="animate-pulse bg-ai/10 text-ai border-ai/20">
                   İşliyor...
                 </Badge>
               )}
               {isCompleted && (
-                <Badge className="bg-green-500 text-white">
+                <Badge className="bg-ai-secondary text-white">
                   Tamamlandı
                 </Badge>
               )}
-              <Brain className={`w-4 h-4 ${isActive ? 'text-ai animate-pulse' : 'text-muted-foreground'}`} />
+              <Home className={`w-4 h-4 ${isActive ? 'text-ai' : 'text-muted-foreground'}`} />
             </div>
           </div>
         </Card>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-sm p-4">
+      <TooltipContent side="top" className="max-w-sm p-4 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
         <div className="space-y-3">
           <div>
             <h4 className="font-semibold text-foreground mb-1">{config.tooltip.title}</h4>
@@ -121,7 +121,7 @@ export const AIAgent = ({ type, isActive, isCompleted }: AIAgentProps) => {
               ))}
             </ul>
           </div>
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
               💡 Bu ajan hakkında daha fazla bilgi için deneme yapın.
             </p>

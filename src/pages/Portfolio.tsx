@@ -101,7 +101,6 @@ const Portfolio = () => {
 
 
 
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -110,7 +109,7 @@ const Portfolio = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36">
         {/* Header */}
         <div className="text-center mb-16">
-          <Badge variant="outline" className="text-ai border-ai mb-4">
+          <Badge variant="outline" className="text-ai border-ai bg-ai/5 mb-4">
             Örnek Çalışmalar
           </Badge>
           <h1 className="text-4xl font-bold text-foreground mb-6">
@@ -133,10 +132,10 @@ const Portfolio = () => {
               key={category.id}
               variant={selectedCategory === category.id ? "default" : "outline"}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center gap-2 ${
+              className={`flex items-center gap-2 rounded-xl ${
                 selectedCategory === category.id 
-                  ? 'bg-gradient-ai text-white' 
-                  : 'hover:bg-ai/10'
+                  ? 'bg-gradient-to-r from-ai to-ai-secondary text-white shadow-lg' 
+                  : 'hover:bg-ai/10 border-border/50'
               }`}
             >
               {category.icon}
@@ -148,7 +147,7 @@ const Portfolio = () => {
         {/* Portfolio Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="overflow-hidden glass-effect hover:shadow-xl transition-all duration-300 group">
+            <Card key={item.id} className="overflow-hidden bg-white/80 backdrop-blur border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 group rounded-2xl">
               <div className="relative">
                                  {/* Three Images Side by Side with Smooth Transitions */}
                  <div className="relative h-48 overflow-hidden">
@@ -159,9 +158,9 @@ const Portfolio = () => {
                           className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
                           style={{ backgroundImage: `url(${item.beforeImage})` }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-20"></div>
                         </div>
-                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded-lg px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
                           <span className="text-xs font-medium">İlk Hali</span>
                         </div>
                       </div>
@@ -172,9 +171,9 @@ const Portfolio = () => {
                           className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
                           style={{ backgroundImage: `url(${item.productImage})` }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-20"></div>
                         </div>
-                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded-lg px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
                           <span className="text-xs font-medium">Ürün</span>
                         </div>
                       </div>
@@ -185,9 +184,9 @@ const Portfolio = () => {
                           className="w-full h-full bg-muted bg-cover bg-center transition-all duration-500 ease-in-out group-hover:scale-110 group-hover:brightness-110"
                           style={{ backgroundImage: `url(${item.afterImage})` }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-30"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-20"></div>
                         </div>
-                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur rounded-lg px-2 py-1 transition-all duration-300 group-hover:bg-background/95">
                           <span className="text-xs font-medium">Sonuç</span>
                         </div>
                       </div>
@@ -201,12 +200,12 @@ const Portfolio = () => {
 
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full group mt-4">
+                    <Button variant="outline" className="w-full group mt-4 rounded-xl border-border/50 hover:bg-ai/5">
                       Detayları Gör
                       <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </DialogTrigger>
-                                     <DialogContent className="max-w-4xl">
+                                     <DialogContent className="max-w-4xl bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                      <div className="space-y-6">
                       
                                              <div className="space-y-4">
@@ -215,21 +214,21 @@ const Portfolio = () => {
                             <div>
                               <h5 className="text-sm font-medium mb-2 text-muted-foreground">İlk Hali</h5>
                               <div 
-                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg"
+                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg border border-border/50"
                                 style={{ backgroundImage: `url(${item.beforeImage})` }}
                               ></div>
                             </div>
                             <div>
                               <h5 className="text-sm font-medium mb-2 text-muted-foreground">Ürün</h5>
                               <div 
-                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg"
+                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg border border-border/50"
                                 style={{ backgroundImage: `url(${item.productImage})` }}
                               ></div>
                             </div>
                             <div>
                               <h5 className="text-sm font-medium mb-2 text-muted-foreground">Son Yerleştirilmiş</h5>
                               <div 
-                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg"
+                                className="w-full h-48 bg-muted bg-cover bg-center rounded-lg border border-border/50"
                                 style={{ backgroundImage: `url(${item.afterImage})` }}
                               ></div>
                             </div>
@@ -247,7 +246,7 @@ const Portfolio = () => {
 
                  {/* Empty State */}
          {filteredItems.length === 0 && (
-           <Card className="p-12 text-center glass-effect">
+           <Card className="p-12 text-center bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
              <div className="space-y-4">
                <Sparkles className="w-16 h-16 mx-auto text-muted-foreground" />
                <h3 className="text-xl font-semibold">Henüz proje bulunmuyor</h3>
@@ -265,23 +264,23 @@ const Portfolio = () => {
            </h3>
            <div className="flex items-center justify-center gap-4 mb-8">
              {/* Boş Oda */}
-             <div className="w-24 h-24 border-4 border-foreground rounded-lg flex items-center justify-center bg-background">
+             <div className="w-24 h-24 border-2 border-ai rounded-xl flex items-center justify-center bg-white/80 backdrop-blur shadow-lg">
                <span className="text-sm font-medium text-foreground">Boş Oda</span>
              </div>
              
              {/* Plus İşareti */}
-             <div className="text-2xl font-bold text-foreground">+</div>
+             <div className="text-2xl font-bold text-ai">+</div>
              
              {/* Ürün */}
-             <div className="w-24 h-24 border-4 border-foreground rounded-lg flex items-center justify-center bg-background">
+             <div className="w-24 h-24 border-2 border-ai-secondary rounded-xl flex items-center justify-center bg-white/80 backdrop-blur shadow-lg">
                <span className="text-sm font-medium text-foreground">Ürün</span>
              </div>
              
              {/* Ok */}
-             <div className="text-2xl font-bold text-foreground">→</div>
+             <div className="text-2xl font-bold text-ai">→</div>
              
              {/* Son Görsel */}
-             <div className="w-24 h-24 border-4 border-foreground rounded-lg flex items-center justify-center bg-background">
+             <div className="w-24 h-24 border-2 border-ai-accent rounded-xl flex items-center justify-center bg-white/80 backdrop-blur shadow-lg">
                <span className="text-sm font-medium text-foreground">Son Görsel</span>
              </div>
            </div>
@@ -296,18 +295,18 @@ const Portfolio = () => {
       {/* Image Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={() => setSelectedImage(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh] p-4">
             <img
               src={selectedImage}
               alt="Büyütülmüş görsel"
-              className="w-full h-auto max-h-[80vh] object-contain rounded-lg shadow-2xl"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
             />
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 w-8 h-8 bg-background/80 backdrop-blur rounded-full flex items-center justify-center text-foreground hover:bg-background transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 bg-background/90 backdrop-blur rounded-full flex items-center justify-center text-foreground hover:bg-background transition-colors"
             >
               ✕
             </button>

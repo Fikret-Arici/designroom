@@ -69,7 +69,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
     if (!query.trim()) {
       toast({
         title: "Hata",
-        description: "Lütfen aramak istediğiniz ürünü tanımlayın.",
+        description: "Lütfen aramak istediğ  ürünü tanımlayın.",
         variant: "destructive",
       });
       return;
@@ -172,7 +172,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -185,7 +185,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
             <div className="flex items-center gap-1 mt-2">
               <span className="text-xs text-muted-foreground">Oda renkleri:</span>
               {roomColors.map((color, index) => (
-                <Badge key={index} variant="outline" className="text-xs">{color}</Badge>
+                <Badge key={index} variant="outline" className="text-xs bg-ai/5 border-ai/20">{color}</Badge>
               ))}
             </div>
           )}
@@ -202,11 +202,12 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
               }
             }}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            className="border-border/50"
           />
           <Button
             onClick={handleSearch}
             disabled={isSearching}
-            className="bg-gradient-button"
+            className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white shadow-lg rounded-xl"
           >
             {isSearching ? (
               <div className="flex items-center space-x-2">
@@ -223,14 +224,14 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
         </div>
 
         {isSearching && (
-          <Card className="p-6 border-ai/30 bg-gradient-card">
+          <Card className="p-6 border-ai/30 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
             <div className="flex flex-col items-center space-y-4">
               {/* Modern Loading Animation */}
               <div className="relative">
                 <div className="w-16 h-16 border-4 border-ai/20 rounded-full"></div>
                 <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-ai rounded-full animate-spin"></div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-8 h-8 bg-gradient-ai rounded-full animate-pulse"></div>
+                  <div className="w-8 h-8 bg-gradient-to-r from-ai to-ai-secondary rounded-full animate-pulse"></div>
                 </div>
               </div>
               
@@ -250,7 +251,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
               {/* Progress Steps */}
               <div className="w-full max-w-xs space-y-2">
                 <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-ai-secondary rounded-full animate-pulse"></div>
                   <span className="text-muted-foreground">AI sorgusu analiz ediliyor</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
@@ -272,7 +273,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
           <div className="space-y-3">
             <h4 className="font-semibold text-foreground">Bulunan Ürünler:</h4>
             {products.map((product) => (
-              <Card key={product.id} className="p-4 hover:border-ai transition-all duration-300">
+              <Card key={product.id} className="p-4 hover:border-ai transition-all duration-300 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
                 <div className="flex gap-4">
                   <Dialog>
                     <DialogTrigger asChild>
@@ -280,18 +281,18 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                         <img
                           src={product.image}
                           alt={product.name}
-                          className="w-20 h-20 object-cover rounded-lg border transition-transform duration-200 group-hover:scale-105"
+                          className="w-20 h-20 object-cover rounded-xl border border-border/50 transition-transform duration-200 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-xl">
                           <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                         </div>
                       </div>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                    <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                       <img 
                         src={product.image} 
                         alt={`${product.name} - Tam Boyut`} 
-                        className="w-full h-full object-contain rounded-lg"
+                        className="w-full h-full object-contain rounded-xl"
                       />
                     </DialogContent>
                   </Dialog>
@@ -301,7 +302,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                         <div className="flex items-center gap-2 mb-1">
                           <h5 className="font-semibold text-foreground">{product.name}</h5>
                           {product.aiScore && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs bg-ai/10 border-ai/20">
                               <Sparkles className="w-3 h-3 mr-1" />
                               AI: {product.aiScore}
                             </Badge>
@@ -311,8 +312,8 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                         <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
 
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-xs">{product.source}</Badge>
-                          <Badge variant="outline" className="text-xs">{product.brand}</Badge>
+                          <Badge variant="outline" className="text-xs bg-muted/50">{product.source}</Badge>
+                          <Badge variant="outline" className="text-xs bg-muted/50">{product.brand}</Badge>
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-xs text-muted-foreground">{product.rating}</span>
@@ -324,7 +325,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                           <div className="flex items-center gap-1 mb-2">
                             <span className="text-xs text-muted-foreground">Renkler:</span>
                             {product.colors.map((color, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">{color}</Badge>
+                              <Badge key={index} variant="outline" className="text-xs bg-ai/5 border-ai/20">{color}</Badge>
                             ))}
                           </div>
                         )}
@@ -362,8 +363,8 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
 
                         {product.shipping && (
                           <div className="flex items-center gap-1 mb-2">
-                            <Truck className="w-3 h-3 text-green-500" />
-                            <span className="text-xs text-green-500">{product.shipping}</span>
+                            <Truck className="w-3 h-3 text-ai-secondary" />
+                            <span className="text-xs text-ai-secondary">{product.shipping}</span>
                           </div>
                         )}
 
@@ -371,7 +372,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                           <Button
                             size="sm"
                             onClick={() => handleProductSelect(product)}
-                            className="flex-1"
+                            className="flex-1 bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white shadow-lg rounded-xl"
                           >
                             Seç
                           </Button>
@@ -387,7 +388,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                                 setSelectedProductForAnalysis(product);
                               }
                             }}
-                            className="flex-1"
+                            className="flex-1 border-border/50 hover:bg-ai/5 rounded-xl"
                           >
                             {selectedProductForAnalysis?.id === product.id ? 'Analizi Kapat' : 'Yorumları Analiz Et'}
                           </Button>
@@ -396,7 +397,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                     </div>
                   </div>
 
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="hover:bg-ai/5 rounded-xl">
                     <a href={product.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-4 h-4" />
                     </a>
@@ -417,7 +418,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
 
         {/* Arka Plan Kaldırma Bölümü */}
         {selectedProduct && (
-          <Card className="p-6 border-ai/30 bg-gradient-card">
+          <Card className="p-6 border-ai/30 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -427,7 +428,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                 <Button
                   onClick={handleRemoveBackground}
                   disabled={isRemovingBackground}
-                  className="bg-gradient-button"
+                  className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white shadow-lg rounded-xl"
                 >
                   {isRemovingBackground ? (
                     <div className="flex items-center space-x-2">
@@ -447,13 +448,13 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
               </div>
 
               {isRemovingBackground && (
-                <Card className="p-6 border-ai/30 bg-gradient-card">
+                <Card className="p-6 border-ai/30 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
                   <div className="flex flex-col items-center space-y-4">
                     <div className="relative">
                       <div className="w-16 h-16 border-4 border-ai/20 rounded-full"></div>
                       <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-ai rounded-full animate-spin"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <div className="w-8 h-8 bg-gradient-ai rounded-full animate-pulse"></div>
+                        <div className="w-8 h-8 bg-gradient-to-r from-ai to-ai-secondary rounded-full animate-pulse"></div>
                       </div>
                     </div>
                     
@@ -471,7 +472,7 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                     
                     <div className="w-full max-w-xs space-y-2">
                       <div className="flex items-center space-x-2 text-xs">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-ai-secondary rounded-full animate-pulse"></div>
                         <span className="text-muted-foreground">Görsel analiz ediliyor</span>
                       </div>
                       <div className="flex items-center space-x-2 text-xs">
@@ -498,18 +499,18 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                             <img
                               src={selectedProduct.image}
                               alt={selectedProduct.name}
-                              className="w-full h-48 object-cover rounded-lg border transition-transform duration-200 group-hover:scale-105"
+                              className="w-full h-48 object-cover rounded-xl border border-border/50 transition-transform duration-200 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-xl">
                               <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                             </div>
                           </div>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                        <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                           <img 
                             src={selectedProduct.image} 
                             alt={`${selectedProduct.name} - Tam Boyut`} 
-                            className="w-full h-full object-contain rounded-lg"
+                            className="w-full h-full object-contain rounded-xl"
                           />
                         </DialogContent>
                       </Dialog>
@@ -523,36 +524,36 @@ export const ProductSearch = ({ onProductSelect, roomStyle, roomColors, initialS
                               <img
                                 src={processedImage}
                                 alt={`${selectedProduct.name} - Arka planı kaldırılmış`}
-                                className="w-full h-48 object-contain rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100 transition-transform duration-200 group-hover:scale-105"
+                                className="w-full h-48 object-contain rounded-xl border border-border/50 bg-gradient-to-br from-gray-50 to-gray-100 transition-transform duration-200 group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-xl">
                                 <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                               </div>
                             </div>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-transparent border-none">
+                          <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
                             <img 
                               src={processedImage} 
                               alt={`${selectedProduct.name} - Arka planı kaldırılmış - Tam Boyut`} 
-                              className="w-full h-full object-contain rounded-lg"
+                              className="w-full h-full object-contain rounded-xl"
                             />
                           </DialogContent>
                         </Dialog>
-                        <Badge className="absolute top-2 right-2 bg-green-500 text-white">
+                        <Badge className="absolute top-2 right-2 bg-ai-secondary text-white">
                            İşlendi
                         </Badge>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-ai-secondary/10 border border-ai-secondary/20 rounded-xl">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-700">
+                      <div className="w-2 h-2 bg-ai-secondary rounded-full"></div>
+                      <span className="text-sm text-ai-secondary">
                         Arka plan başarıyla kaldırıldı! Bu ürün artık oda yerleştirmesi için hazır.
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs bg-ai-secondary/10 border-ai-secondary/30">
                       BRIA-RMBG-2.0
                     </Badge>
                   </div>

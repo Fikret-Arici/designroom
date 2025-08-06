@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Brain, Sparkles } from 'lucide-react';
+import { Menu, Home, Sparkles } from 'lucide-react';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,16 +44,18 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <Brain className="w-8 h-8 text-ai animate-float" />
-            <span className="text-xl font-bold bg-gradient-ai bg-clip-text text-transparent">
+            <div className="w-8 h-8 bg-gradient-to-br from-ai to-ai-secondary rounded-lg flex items-center justify-center">
+              <Home className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-foreground">
               AI Dekor Dream
             </span>
-            <Sparkles className="w-5 h-5 text-ai-secondary animate-pulse" />
+            <Sparkles className="w-5 h-5 text-ai-secondary" />
           </div>
 
           {/* Desktop Navigation */}
@@ -73,7 +75,7 @@ const Header = () => {
           <div className="hidden md:flex">
             <Button 
               onClick={() => navigate('/')}
-              className="bg-gradient-ai hover:opacity-90 text-white font-semibold px-6"
+              className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white font-semibold px-6 rounded-xl shadow-lg"
             >
               Hemen Başla
             </Button>
@@ -86,10 +88,12 @@ const Header = () => {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background/95 backdrop-blur">
               <div className="flex items-center gap-2 mb-8">
-                <Brain className="w-8 h-8 text-ai" />
-                <span className="text-xl font-bold bg-gradient-ai bg-clip-text text-transparent">
+                <div className="w-8 h-8 bg-gradient-to-br from-ai to-ai-secondary rounded-lg flex items-center justify-center">
+                  <Home className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-foreground">
                   AI Dekor Dream
                 </span>
               </div>
@@ -105,7 +109,7 @@ const Header = () => {
                 ))}
                 <Button 
                   onClick={() => navigate('/')}
-                  className="bg-gradient-ai hover:opacity-90 text-white font-semibold mt-6"
+                  className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white font-semibold mt-6 rounded-xl"
                 >
                   Hemen Başla
                 </Button>

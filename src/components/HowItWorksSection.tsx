@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Upload, 
   Search, 
-  Brain, 
+  Home, 
   Sparkles, 
   ArrowRight, 
   Camera,
@@ -21,8 +21,8 @@ const HowItWorksSection = () => {
       title: "Oda Fotoğrafını Yükle",
       description: "Dekoratif ürün yerleştirmek istediğiniz odanın fotoğrafını yükleyin. AI sistemimiz odanızı detaylı şekilde analiz edecek ve sizin odanızın detaylı bir yorumunu size verecek ardından yine odanızı inceleyip size kişileştirilmiş dekoratif ürünleri önericek.",
       features: ["Yüksek çözünürlük desteği", "Otomatik oda tespiti", "Işık analizi"],
-      color: "text-blue-500",
-      bgColor: "bg-blue-50 dark:bg-blue-950/20"
+      color: "text-ai",
+      bgColor: "bg-ai/10"
     },
     {
       number: 2,
@@ -30,17 +30,17 @@ const HowItWorksSection = () => {
       title: "Ürünü Seç veya Tarif Et",
       description: "İstediğiniz dekoratif ürünü metin ile tarif edin veya fotoğrafını yükleyin. Tarif ettiğiniz ürünün trendyoldaki örneklerini görüntüleyebilirsiniz ve bunların arasından seçim yapabilir direkt sayfasına gidip alışverişinizi yapabilirsiniz.",
       features: ["Akıllı ürün arama", "Görsel tanıma", "Özel ürün yükleme"],
-      color: "text-green-500",
-      bgColor: "bg-green-50 dark:bg-green-950/20"
+      color: "text-ai-secondary",
+      bgColor: "bg-ai-secondary/10"
     },
     {
       number: 3,
-      icon: <Brain className="w-8 h-8" />,
+      icon: <Home className="w-8 h-8" />,
       title: "AI Analizi",
       description: "Yapay zeka ajanlarımız odanızı analiz eder, uygun yerleştirme noktalarını belirler ve dekorasyon yerleşimini size sunar.",
       features: ["Oda boyutu hesaplama", "Stil analizi", "Renk uyumu kontrolü"],
-      color: "text-purple-500",
-      bgColor: "bg-purple-50 dark:bg-purple-950/20"
+      color: "text-ai-accent",
+      bgColor: "bg-ai-accent/10"
     },
     {
       number: 4,
@@ -55,19 +55,19 @@ const HowItWorksSection = () => {
 
   const benefits = [
     {
-      icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+      icon: <CheckCircle className="w-6 h-6 text-ai-secondary" />,
       text: "Saniyeler içinde sonuç alın"
     },
     {
-      icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+      icon: <CheckCircle className="w-6 h-6 text-ai-secondary" />,
       text: "Profesyonel dekoratör kalitesi"
     },
     {
-      icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+      icon: <CheckCircle className="w-6 h-6 text-ai-secondary" />,
       text: "Sınırsız deneme hakkı"
     },
     {
-      icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+      icon: <CheckCircle className="w-6 h-6 text-ai-secondary" />,
       text: "Kişiselleştirilmiş öneriler"
     }
   ];
@@ -80,11 +80,11 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-20 bg-gradient-to-b from-muted/20 to-background">
+    <section id="how-it-works" className="py-20 bg-gradient-to-b from-muted/10 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <Badge variant="outline" className="text-ai border-ai mb-4">
+          <Badge variant="outline" className="text-ai border-ai bg-ai/5 mb-4">
             Nasıl Çalışır
           </Badge>
           <h2 className="text-4xl font-bold text-foreground mb-6">
@@ -105,7 +105,7 @@ const HowItWorksSection = () => {
                 <div className="absolute left-6 top-20 w-0.5 h-12 bg-gradient-to-b from-ai to-ai-secondary hidden md:block"></div>
               )}
               
-              <Card className="p-8 glass-effect hover:shadow-lg transition-all duration-300">
+              <Card className="p-8 bg-white/80 backdrop-blur border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                   {/* Step Number & Icon */}
                   <div className="md:col-span-2">
@@ -115,7 +115,7 @@ const HowItWorksSection = () => {
                           {step.icon}
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-ai border-ai">
+                      <Badge variant="outline" className="text-ai border-ai bg-ai/5">
                         Adım {step.number}
                       </Badge>
                     </div>
@@ -131,7 +131,7 @@ const HowItWorksSection = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {step.features.map((feature, featureIndex) => (
-                        <Badge key={featureIndex} variant="secondary" className="text-xs">
+                        <Badge key={featureIndex} variant="secondary" className="text-xs bg-muted/50">
                           {feature}
                         </Badge>
                       ))}
@@ -140,11 +140,11 @@ const HowItWorksSection = () => {
 
                   {/* Visual Element */}
                   <div className="md:col-span-3">
-                    <div className={`w-full h-32 rounded-lg ${step.bgColor} flex items-center justify-center`}>
+                    <div className={`w-full h-32 rounded-xl ${step.bgColor} flex items-center justify-center border border-border/50`}>
                       <div className={`${step.color} opacity-20`}>
                         {step.number === 1 && <Camera className="w-16 h-16" />}
                         {step.number === 2 && <Palette className="w-16 h-16" />}
-                        {step.number === 3 && <Brain className="w-16 h-16" />}
+                        {step.number === 3 && <Home className="w-16 h-16" />}
                         {step.number === 4 && <Sparkles className="w-16 h-16" />}
                       </div>
                     </div>
@@ -157,7 +157,7 @@ const HowItWorksSection = () => {
 
         {/* Benefits & CTA Section */}
         <div className="mt-20">
-          <Card className="p-8 glass-effect bg-gradient-to-r from-ai/5 to-ai-secondary/5">
+          <Card className="p-8 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl bg-gradient-to-r from-ai/5 to-ai-secondary/5">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               {/* Benefits */}
               <div>
@@ -186,7 +186,7 @@ const HowItWorksSection = () => {
                 </p>
                 <Button 
                   onClick={scrollToHero}
-                  className="bg-gradient-ai hover:opacity-90 text-white font-semibold px-8 py-3"
+                  className="bg-gradient-to-r from-ai to-ai-secondary hover:opacity-90 text-white font-semibold px-8 py-3 rounded-xl shadow-lg"
                 >
                    Başla
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -200,17 +200,17 @@ const HowItWorksSection = () => {
         <div className="mt-16 text-center">
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Upload className="w-5 h-5 text-blue-500" />
+              <Upload className="w-5 h-5 text-ai" />
               <span>Yükle</span>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground" />
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Search className="w-5 h-5 text-green-500" />
+              <Search className="w-5 h-5 text-ai-secondary" />
               <span>Seç</span>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground" />
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Brain className="w-5 h-5 text-purple-500" />
+              <Home className="w-5 h-5 text-ai-accent" />
               <span>Analiz</span>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground" />

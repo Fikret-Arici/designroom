@@ -45,8 +45,11 @@ export const ImageUploader = ({
 
     try {
       if (uploadToBackend) {
-        // Backend'e yükle
-        const response = await apiService.uploadRoomImage(file);
+        // Backend'e yükle - FormData oluştur
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await apiService.uploadRoom(formData);
         setPreview(response.base64);
         onImageUpload(file, response.base64);
         toast({
@@ -101,7 +104,7 @@ export const ImageUploader = ({
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
@@ -115,25 +118,25 @@ export const ImageUploader = ({
                 <img 
                   src={preview} 
                   alt="Preview" 
-                  className="w-full h-64 object-cover rounded-lg border-2 border-border transition-transform duration-200 group-hover:scale-105"
+                  className="w-full h-64 object-cover rounded-xl border-2 border-border/50 transition-transform duration-200 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-lg">
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center rounded-xl">
                   <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 </div>
               </div>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-transparent border-none">
+            <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-white/95 backdrop-blur border border-border/50 rounded-2xl">
               <img 
                 src={preview} 
                 alt="Preview - Tam Boyut" 
-                className="w-full h-full object-contain rounded-lg"
+                className="w-full h-full object-contain rounded-xl"
               />
             </DialogContent>
           </Dialog>
           <Button
             variant="destructive"
             size="sm"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 rounded-lg"
             onClick={clearImage}
           >
             <X className="w-4 h-4" />
@@ -141,10 +144,10 @@ export const ImageUploader = ({
         </div>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
             isDragging 
               ? 'border-ai bg-ai/10' 
-              : 'border-border hover:border-ai/50'
+              : 'border-border/50 hover:border-ai/50'
           }`}
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -155,7 +158,7 @@ export const ImageUploader = ({
           <p className="text-muted-foreground mb-4">
             Dosyayı buraya sürükleyin veya seçin
           </p>
-          <Button variant="outline" className="relative" disabled={isUploading}>
+          <Button variant="outline" className="relative border-border/50 hover:bg-ai/5 hover:text-foreground rounded-xl" disabled={isUploading}>
             {isUploading ? (
               <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
             ) : (

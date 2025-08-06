@@ -1,11 +1,11 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Target, Users, Award, Sparkles, Zap } from 'lucide-react';
+import { Home, Target, Users, Award, Sparkles, Zap } from 'lucide-react';
 
 const AboutSection = () => {
   const features = [
     {
-      icon: <Brain className="w-8 h-8 text-ai" />,
+      icon: <Home className="w-8 h-8 text-ai" />,
       title: "Yapay Zeka Teknolojisi",
       description: "En gelişmiş AI algoritmaları ile odanızı analiz ediyor ve mükemmel yerleştirme önerileri sunuyoruz."
     },
@@ -29,11 +29,11 @@ const AboutSection = () => {
 
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-background to-muted/20">
+    <section id="about" className="py-20 bg-gradient-to-b from-background to-muted/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <Badge variant="outline" className="text-ai border-ai mb-4">
+          <Badge variant="outline" className="text-ai border-ai bg-ai/5 mb-4">
             Hakkımızda
           </Badge>
           <h2 className="text-4xl font-bold text-foreground mb-6">
@@ -50,7 +50,7 @@ const AboutSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Left Column - Story */}
           <div className="space-y-6">
-            <Card className="p-8 glass-effect">
+            <Card className="p-8 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-ai/10 rounded-full">
                   <Users className="w-8 h-8 text-ai" />
@@ -69,7 +69,7 @@ const AboutSection = () => {
               </p>
             </Card>
 
-            <Card className="p-8 glass-effect">
+            <Card className="p-8 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-ai-secondary/10 rounded-full">
                   <Award className="w-8 h-8 text-ai-secondary" />
@@ -91,7 +91,7 @@ const AboutSection = () => {
               Neden AI Dekor Dream?
             </h3>
             {features.map((feature, index) => (
-              <Card key={index} className="p-6 glass-effect hover:shadow-lg transition-all duration-300">
+              <Card key={index} className="p-6 bg-white/80 backdrop-blur border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-gradient-to-br from-ai/10 to-ai-secondary/10 rounded-full">
                     {feature.icon}
@@ -118,11 +118,11 @@ const AboutSection = () => {
             E-ticaret deneyiminizi AI teknolojisi ile dönüştürün
           </p>
           <div className="flex items-center justify-center gap-2">
-            <Sparkles className="w-5 h-5 text-ai-secondary animate-pulse" />
+            <Sparkles className="w-5 h-5 text-ai-secondary" />
             <span className="text-ai font-semibold">
               Güvenle alışveriş yapmanın yeni yolu
             </span>
-            <Sparkles className="w-5 h-5 text-ai-secondary animate-pulse" />
+            <Sparkles className="w-5 h-5 text-ai-secondary" />
           </div>
         </div>
       </div>

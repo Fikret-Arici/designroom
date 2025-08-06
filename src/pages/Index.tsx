@@ -13,7 +13,7 @@ import Header from '@/components/Header';
 import AboutSection from '@/components/AboutSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Sparkles, Target, ArrowRight } from 'lucide-react';
+import { Home, Sparkles, Target, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import aiHeroBg from '@/assets/ai-hero-bg.jpg';
 
@@ -124,17 +124,16 @@ const Index = () => {
       {/* Hero Section */}
       <div
         id="hero"
-        className="relative h-96 flex items-center justify-center text-center bg-cover bg-center pt-16"
-        style={{ backgroundImage: `url(${aiHeroBg})` }}
+        className="relative h-96 flex items-center justify-center text-center bg-gradient-to-br from-ai/10 via-ai-secondary/5 to-ai-accent/10 pt-16"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background/60"></div>
         <div className="relative z-10 max-w-4xl mx-auto px-2">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <Brain className="w-12 h-12 text-ai animate-float" />
-            <h1 className="text-5xl font-bold bg-gradient-ai bg-clip-text text-transparent">
+            
+            <h1 className="text-5xl font-bold text-foreground">
               AI Dekor Dream
             </h1>
-            <Sparkles className="w-8 h-8 text-ai-secondary animate-pulse" />
+            <Sparkles className="w-8 h-8 text-ai-secondary" />
           </div>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Odanızın fotoğrafını yükleyin,istediğiniz dekoratif ürünü tarif edin veya yükleyin.
@@ -147,24 +146,24 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Smooth Transition Section */}
-      <div className="relative -mt-20 h-20 bg-gradient-to-b from-transparent to-background"></div>
+      {/* Smooth Transition Section - Reduced height */}
+      <div className="relative -mt-20 h-10 bg-gradient-to-b from-transparent to-background"></div>
 
       {/* Main Content with Enhanced Background */}
       <div className="relative">
         {/* Dynamic Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-ai/5 rounded-full blur-3xl animate-pulse-glow"></div>
-          <div className="absolute top-20 right-1/4 w-64 h-64 bg-ai-secondary/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-ai-accent/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-ai/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-64 h-64 bg-ai-secondary/5 rounded-full blur-3xl" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-ai-accent/5 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-2 py-12">
+        <div className="relative max-w-7xl mx-auto px-2 py-8">
           {/* Progress Bar */}
-          <Card className="p-6 mb-8 glass-effect animate-fade-in">
+          <Card className="p-6 mb-8 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">İşlem Durumu</h2>
-              <Badge variant="outline" className="text-ai border-ai">
+              <Badge variant="outline" className="text-ai border-ai bg-ai/5">
                 {Math.round(progress)}% Tamamlandı
               </Badge>
             </div>
@@ -189,17 +188,17 @@ const Index = () => {
             </div>
           </Card>
 
-          {/* AI Agents Status */}
+          {/* AI Agents Status - Reordered */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <AIAgent
-              type="search"
-              isActive={getActiveAgent() === 'search'}
-              isCompleted={getCompletedAgents().includes('search')}
-            />
             <AIAgent
               type="analysis"
               isActive={getActiveAgent() === 'analysis'}
               isCompleted={getCompletedAgents().includes('analysis')}
+            />
+            <AIAgent
+              type="search"
+              isActive={getActiveAgent() === 'search'}
+              isCompleted={getCompletedAgents().includes('search')}
             />
             <AIAgent
               type="placement"
@@ -224,12 +223,12 @@ const Index = () => {
 
               {currentStep === 'product' && (
                 <div className="space-y-6 animate-fade-in">
-                  <Card className="p-6 glass-effect">
+                  <Card className="p-6 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl">
                     <h3 className="text-lg font-semibold text-foreground mb-4">
                       Dekoratif Ürün Seçim Yöntemi
                     </h3>
                     <Tabs value={productMethod} onValueChange={(value) => setProductMethod(value as 'upload' | 'describe')}>
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="grid w-full grid-cols-2 bg-muted/50">
                         <TabsTrigger value="describe">Metinle Tarif Et</TabsTrigger>
                         <TabsTrigger value="upload">Ürün Yükle</TabsTrigger>
                       </TabsList>
@@ -299,18 +298,18 @@ const Index = () => {
               )}
 
               {selectedProduct && (
-                <Card className="p-4 glass-effect animate-fade-in">
+                <Card className="p-4 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl animate-fade-in">
                   <h4 className="font-semibold text-foreground mb-3">Seçilen Ürün</h4>
                   <div className="flex items-center gap-3">
                     <img
                       src={selectedProduct.image}
                       alt={selectedProduct.name}
-                      className="w-16 h-16 object-cover rounded border"
+                      className="w-16 h-16 object-cover rounded-lg border border-border/50"
                     />
                     <div>
                       <p className="font-semibold text-sm">{selectedProduct.name}</p>
                       <p className="text-sm text-muted-foreground">{selectedProduct.price}</p>
-                      <Badge variant="outline" className="text-xs mt-1">
+                      <Badge variant="outline" className="text-xs mt-1 bg-ai/5 border-ai/20">
                         {selectedProduct.source}
                       </Badge>
                     </div>
@@ -318,23 +317,23 @@ const Index = () => {
                 </Card>
               )}
 
-              <Card className="p-4 glass-effect animate-fade-in">
+              <Card className="p-4 bg-white/80 backdrop-blur border border-border/50 shadow-lg rounded-2xl animate-fade-in">
                 <h4 className="font-semibold text-foreground mb-3">💡 Nasıl Çalışır?</h4>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p className="flex items-start gap-2">
-                    <span className="text-ai">1.</span>
+                    <span className="text-ai font-semibold">1.</span>
                     Oda fotoğrafınızı yükleyin
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="text-ai">2.</span>
+                    <span className="text-ai font-semibold">2.</span>
                     İstediğiniz dekoratif ürünü tarif edin veya yükleyin
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="text-ai">3.</span>
+                    <span className="text-ai font-semibold">3.</span>
                     AI ajanlar odanızı analiz eder
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="text-ai">4.</span>
+                    <span className="text-ai font-semibold">4.</span>
                     Mükemmel yerleştirme önerisi alın
                   </p>
                 </div>
